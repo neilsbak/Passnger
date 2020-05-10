@@ -7,15 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F7DEDB324687C850012041B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB224687C850012041B /* AppDelegate.swift */; };
+		4F7DEDB524687C850012041B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB424687C850012041B /* ContentView.swift */; };
+		4F7DEDB724687C870012041B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB624687C870012041B /* Assets.xcassets */; };
+		4F7DEDBA24687C870012041B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB924687C870012041B /* Preview Assets.xcassets */; };
+		4F7DEDBD24687C870012041B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F7DEDBB24687C870012041B /* Main.storyboard */; };
+		4F7DEDC424687EB30012041B /* PasswordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDC324687EB30012041B /* PasswordsView.swift */; };
 		4F870505244379C500769A9D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F870504244379C500769A9D /* AppDelegate.swift */; };
 		4F870507244379C500769A9D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F870506244379C500769A9D /* SceneDelegate.swift */; };
 		4F870509244379C500769A9D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F870508244379C500769A9D /* ContentView.swift */; };
 		4F87050B244379C800769A9D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F87050A244379C800769A9D /* Assets.xcassets */; };
 		4F87050E244379C800769A9D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F87050D244379C800769A9D /* Preview Assets.xcassets */; };
 		4F870511244379C800769A9D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F87050F244379C800769A9D /* LaunchScreen.storyboard */; };
+		4F87051924437C9C00769A9D /* PasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F87051824437C9B00769A9D /* PasswordItem.swift */; };
+		4F87051B244398C400769A9D /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F87051A244398C400769A9D /* Model.swift */; };
+		4FCF4D182454DC8400F98F3C /* CreatePasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCF4D172454DC8300F98F3C /* CreatePasswordView.swift */; };
+		4FCF4D1A24632D8700F98F3C /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCF4D1924632D8700F98F3C /* KeychainPasswordItem.swift */; };
+		4FCF4D1C24632F4000F98F3C /* PassengerKeychainItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCF4D1B24632F4000F98F3C /* PassengerKeychainItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4F7DEDB024687C850012041B /* MacPassenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacPassenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F7DEDB224687C850012041B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		4F7DEDB424687C850012041B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		4F7DEDB624687C870012041B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4F7DEDB924687C870012041B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		4F7DEDBC24687C870012041B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		4F7DEDBE24687C870012041B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4F7DEDBF24687C870012041B /* MacPassenger.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacPassenger.entitlements; sourceTree = "<group>"; };
+		4F7DEDC324687EB30012041B /* PasswordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsView.swift; sourceTree = "<group>"; };
 		4F870501244379C500769A9D /* Passenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Passenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F870504244379C500769A9D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4F870506244379C500769A9D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -24,9 +44,21 @@
 		4F87050D244379C800769A9D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		4F870510244379C800769A9D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4F870512244379C800769A9D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4F87051824437C9B00769A9D /* PasswordItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordItem.swift; sourceTree = "<group>"; };
+		4F87051A244398C400769A9D /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		4FCF4D172454DC8300F98F3C /* CreatePasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePasswordView.swift; sourceTree = "<group>"; };
+		4FCF4D1924632D8700F98F3C /* KeychainPasswordItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPasswordItem.swift; sourceTree = "<group>"; };
+		4FCF4D1B24632F4000F98F3C /* PassengerKeychainItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassengerKeychainItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4F7DEDAD24687C850012041B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4F8704FE244379C500769A9D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -37,10 +69,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4F7DEDB124687C850012041B /* MacPassenger */ = {
+			isa = PBXGroup;
+			children = (
+				4F7DEDB224687C850012041B /* AppDelegate.swift */,
+				4F7DEDB424687C850012041B /* ContentView.swift */,
+				4F7DEDB624687C870012041B /* Assets.xcassets */,
+				4F7DEDBB24687C870012041B /* Main.storyboard */,
+				4F7DEDBE24687C870012041B /* Info.plist */,
+				4F7DEDBF24687C870012041B /* MacPassenger.entitlements */,
+				4F7DEDB824687C870012041B /* Preview Content */,
+			);
+			path = MacPassenger;
+			sourceTree = "<group>";
+		};
+		4F7DEDB824687C870012041B /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				4F7DEDB924687C870012041B /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 		4F8704F8244379C500769A9D = {
 			isa = PBXGroup;
 			children = (
 				4F870503244379C500769A9D /* Passenger */,
+				4F7DEDB124687C850012041B /* MacPassenger */,
 				4F870502244379C500769A9D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -49,6 +104,7 @@
 			isa = PBXGroup;
 			children = (
 				4F870501244379C500769A9D /* Passenger.app */,
+				4F7DEDB024687C850012041B /* MacPassenger.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -63,6 +119,12 @@
 				4F87050F244379C800769A9D /* LaunchScreen.storyboard */,
 				4F870512244379C800769A9D /* Info.plist */,
 				4F87050C244379C800769A9D /* Preview Content */,
+				4F87051824437C9B00769A9D /* PasswordItem.swift */,
+				4F87051A244398C400769A9D /* Model.swift */,
+				4FCF4D172454DC8300F98F3C /* CreatePasswordView.swift */,
+				4FCF4D1924632D8700F98F3C /* KeychainPasswordItem.swift */,
+				4FCF4D1B24632F4000F98F3C /* PassengerKeychainItem.swift */,
+				4F7DEDC324687EB30012041B /* PasswordsView.swift */,
 			);
 			path = Passenger;
 			sourceTree = "<group>";
@@ -78,6 +140,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4F7DEDAF24687C850012041B /* MacPassenger */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F7DEDC224687C870012041B /* Build configuration list for PBXNativeTarget "MacPassenger" */;
+			buildPhases = (
+				4F7DEDAC24687C850012041B /* Sources */,
+				4F7DEDAD24687C850012041B /* Frameworks */,
+				4F7DEDAE24687C850012041B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MacPassenger;
+			productName = MacPassenger;
+			productReference = 4F7DEDB024687C850012041B /* MacPassenger.app */;
+			productType = "com.apple.product-type.application";
+		};
 		4F870500244379C500769A9D /* Passenger */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4F870515244379C800769A9D /* Build configuration list for PBXNativeTarget "Passenger" */;
@@ -101,10 +180,13 @@
 		4F8704F9244379C500769A9D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1130;
+				LastSwiftUpdateCheck = 1140;
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = Neil;
 				TargetAttributes = {
+					4F7DEDAF24687C850012041B = {
+						CreatedOnToolsVersion = 11.4.1;
+					};
 					4F870500244379C500769A9D = {
 						CreatedOnToolsVersion = 11.3.1;
 					};
@@ -124,11 +206,22 @@
 			projectRoot = "";
 			targets = (
 				4F870500244379C500769A9D /* Passenger */,
+				4F7DEDAF24687C850012041B /* MacPassenger */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		4F7DEDAE24687C850012041B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F7DEDBD24687C870012041B /* Main.storyboard in Resources */,
+				4F7DEDBA24687C870012041B /* Preview Assets.xcassets in Resources */,
+				4F7DEDB724687C870012041B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4F8704FF244379C500769A9D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -142,19 +235,42 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4F7DEDAC24687C850012041B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F7DEDB524687C850012041B /* ContentView.swift in Sources */,
+				4F7DEDB324687C850012041B /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4F8704FD244379C500769A9D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F87051B244398C400769A9D /* Model.swift in Sources */,
+				4FCF4D1C24632F4000F98F3C /* PassengerKeychainItem.swift in Sources */,
 				4F870505244379C500769A9D /* AppDelegate.swift in Sources */,
 				4F870507244379C500769A9D /* SceneDelegate.swift in Sources */,
+				4FCF4D1A24632D8700F98F3C /* KeychainPasswordItem.swift in Sources */,
+				4FCF4D182454DC8400F98F3C /* CreatePasswordView.swift in Sources */,
 				4F870509244379C500769A9D /* ContentView.swift in Sources */,
+				4F87051924437C9C00769A9D /* PasswordItem.swift in Sources */,
+				4F7DEDC424687EB30012041B /* PasswordsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		4F7DEDBB24687C870012041B /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4F7DEDBC24687C870012041B /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
 		4F87050F244379C800769A9D /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -166,6 +282,54 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		4F7DEDC024687C870012041B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MacPassenger/MacPassenger.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"MacPassenger/Preview Content\"";
+				DEVELOPMENT_TEAM = 54ZXBTM75W;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = MacPassenger/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.MacPassenger;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4F7DEDC124687C870012041B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MacPassenger/MacPassenger.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"MacPassenger/Preview Content\"";
+				DEVELOPMENT_TEAM = 54ZXBTM75W;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = MacPassenger/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.MacPassenger;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		4F870513244379C800769A9D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -323,6 +487,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4F7DEDC224687C870012041B /* Build configuration list for PBXNativeTarget "MacPassenger" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F7DEDC024687C870012041B /* Debug */,
+				4F7DEDC124687C870012041B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4F8704FC244379C500769A9D /* Build configuration list for PBXProject "Passenger" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

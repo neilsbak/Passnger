@@ -1,23 +1,23 @@
 //
 //  ContentView.swift
-//  Passenger
+//  MacPassenger
 //
-//  Created by Neil Bakhle on 2020-04-12.
+//  Created by Neil Bakhle on 2020-05-10.
 //  Copyright © 2020 Neil. All rights reserved.
 //
 
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var model: Model
-
     var body: some View {
-        PasswordsView(model: model)
+        Text("Hello, World!")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(model: Model.testModel())
+        ContentView()
     }
 }

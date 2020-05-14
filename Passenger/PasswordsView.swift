@@ -14,9 +14,10 @@ struct PasswordsView: View {
     @State private var showCreatePassword = false
 
     var body: some View {
-            NavigationView {
-                ZStack {
-                    List(model.passwordItems) { item in
+        NavigationView {
+            ZStack {
+                List {
+                    ForEach(model.passwordItems) { item in
                         Button(action: {
                             if (self.showCopied) {
                                 return
@@ -31,26 +32,29 @@ struct PasswordsView: View {
                         }) {
                             PasswordItemRow(passwordItem: item)
                         }
+                    }.onDelete() { indexSet in
+                        self.model.removePasswordItems(atOffsets: indexSet)
                     }
-                    if (self.showCopied) {
-                        Text("Copied to\nClipboard")
-                            .padding(.all, 30)
-                            .background(Color.black.opacity(0.3))
-                            .cornerRadius(8)
+                }
+                if (self.showCopied) {
+                    Text("Copied to\nClipboard")
+                        .padding(.all, 30)
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(8)
+                }
+            }.navigationBarTitle("Home")
+                .navigationBarItems(trailing: Button(action: {
+                    self.showCreatePassword = true;
+                }) {
+                    Image(systemName: "plus")
+                }.sheet(isPresented: $showCreatePassword) {
+                    CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
+                        self.model.addPasswordItem(passwordItem)
                     }
-                }.navigationBarTitle("Home")
-                    .navigationBarItems(trailing: Button(action: {
-                        self.showCreatePassword = true;
-                    }) {
-                        Image(systemName: "plus")
-                    }.sheet(isPresented: $showCreatePassword) {
-                        CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
-                            self.model.passwordItems.append(passwordItem)
-                        }
                     }
-                )
+            )
 
-            }
+        }
     }
 }
 
@@ -58,12 +62,18 @@ struct PasswordItemRow: View {
     let passwordItem: PasswordItem
 
     var body: some View {
-        Text(passwordItem.userName)
+        VStack {
+            Text(passwordItem.serviceName)
+                .fontWeight(.bold)
+            Text(passwordItem.userName)
+                .font(.caption)
+                .opacity(0.625)
+        }
     }
 }
 
 struct PasswordsView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsView()
+        PasswordsView(model: Model.testModel())
     }
 }

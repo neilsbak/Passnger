@@ -10,12 +10,43 @@ import Foundation
 
 class Model: ObservableObject {
 
-    @Published var passwordItems = [PasswordItem]()
+    @Published private(set) var passwordItems = [PasswordItem]()
 
-    @Published var masterPasswords = [MasterPassword]()
+    @Published private(set) var masterPasswords = [MasterPassword]()
+
 
     static let masterPasswordsKeychainAccountName = "MasterPasswords"
     static let passwordItemsKeychainAccountName = "PasswordItems"
+
+    func addPasswordItem(_ passwordItem: PasswordItem) {
+        passwordItems.append(passwordItem)
+        saveModel()
+    }
+
+    func addMasterPassword(_ masterPassword: MasterPassword) {
+        masterPasswords.append(masterPassword);
+        saveModel()
+    }
+
+    func removePasswordItem(_ passwordItem: PasswordItem) {
+        guard let index = passwordItems.firstIndex(of: passwordItem) else { return }
+        removePasswordItems(atOffsets: IndexSet(integer: index))
+    }
+
+    func removeMasterPassword(_ masterPassword: MasterPassword) {
+        guard let index = masterPasswords.firstIndex(of: masterPassword) else { return }
+        removeMasterPasswords(atOffsets: IndexSet(integer: index))
+    }
+
+    func removePasswordItems(atOffsets indexSet: IndexSet) {
+        passwordItems.remove(atOffsets: indexSet)
+        saveModel()
+    }
+
+    func removeMasterPasswords(atOffsets indexSet: IndexSet) {
+        masterPasswords.remove(atOffsets: indexSet)
+        saveModel()
+    }
 
     func saveModel() {
         let masterPasswordsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: Model.masterPasswordsKeychainAccountName)

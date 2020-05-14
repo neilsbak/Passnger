@@ -9,7 +9,7 @@
 import Foundation
 import CryptoKit
 
-struct PasswordItem: Identifiable {
+struct PasswordItem: Identifiable, Equatable {
 
     init(userName: String, url: String, serviceName: String) {
         self.userName = userName
@@ -42,7 +42,7 @@ extension PasswordItem: Codable {
     }
 }
 
-struct MasterPassword: Identifiable {
+struct MasterPassword: Identifiable, Equatable {
 
     init(name: String) {
         self.name = name

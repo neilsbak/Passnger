@@ -17,6 +17,47 @@ struct CreatePasswordView: View {
     @State private var username: String = ""
     @State private var selectedMasterPassword: MasterPassword?
     @State private var showCreateMasterPassword = false
+    @State private var hasSubmitted = false
+
+    var websiteNameError: String? {
+        if !hasSubmitted {
+            return nil
+        }
+        if websiteName == "" {
+            return "This field is required"
+        }
+        return nil
+    }
+
+    var websiteUrlError: String? {
+        if !hasSubmitted {
+            return nil
+        }
+        if websiteUrl == "" {
+            return "This field is required"
+        }
+        return nil
+    }
+
+    var usernameError: String? {
+        if !hasSubmitted {
+            return nil
+        }
+        if username == "" {
+            return "This field is required"
+        }
+        return nil
+    }
+
+    var masterPasswordError: String? {
+        if !hasSubmitted {
+            return nil;
+        }
+        if selectedMasterPassword == nil {
+            return "This field is required"
+        }
+        return nil
+    }
 
     var body: some View {
         NavigationView {
@@ -28,6 +69,7 @@ struct CreatePasswordView: View {
                             TextField("example.com", text: $websiteUrl)                                .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .validatedField(errorText: websiteUrlError)
                         }
                         HStack {
                             Text("Description:")
@@ -35,6 +77,7 @@ struct CreatePasswordView: View {
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .validatedField(errorText: websiteNameError)
                         }
                         HStack {
                             Text("Username:")
@@ -42,6 +85,7 @@ struct CreatePasswordView: View {
                                 .autocapitalization(.none)
                                 .disableAutocorrection(true)
                                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                                .validatedField(errorText: usernameError)
                         }
                         Spacer().frame(height: 8)
                         HStack {
@@ -53,7 +97,7 @@ struct CreatePasswordView: View {
                             }) {
                                 Image(systemName: "plus.circle")
                             }
-                        }
+                        }.validatedField(errorText: masterPasswordError)
                     }.padding([.leading, .top, .trailing])
                     List {
                         ForEach(model.masterPasswords) { masterPassword in
@@ -89,8 +133,11 @@ struct CreatePasswordView: View {
                     Text("Cancel")
                 },
                 trailing: Button(action: {
-                    self.presentedAsModal = false
-                    self.onSave(PasswordItem(userName: self.username, password: try! self.selectedMasterPassword!.passwordKeychainItem.readPassword(), url: self.websiteUrl, serviceName: self.websiteName))
+                    self.hasSubmitted = true
+                    if self.websiteUrlError == nil && self.websiteNameError == nil && self.usernameError == nil && self.masterPasswordError == nil  {
+                        self.presentedAsModal = false
+                        self.onSave(PasswordItem(userName: self.username, password: try! self.selectedMasterPassword!.passwordKeychainItem.readPassword(), url: self.websiteUrl, serviceName: self.websiteName))
+                    }
                 }) {
                     Text("Save")
                 }
@@ -102,54 +149,50 @@ struct CreatePasswordView: View {
 struct MasterPasswordAlertView: View {
     @Binding var presentedAsModal: Bool
     @State private var password: String = ""
-    @State private var submittedPassword: String?
     @State private var confirmPassword: String = ""
-    @State private var submittedConfirmedPassword: String?
     @State private var hint: String = ""
-    @State private var submittedHint: String?
+    @State private var hasSubmitted = false;
     let onSave: (_ masterPassword: MasterPassword) -> Void
 
     private func save() {
-        self.presentedAsModal = false
-        self.submittedPassword = password
-        self.submittedConfirmedPassword = confirmPassword
-        self.submittedHint = hint
+        hasSubmitted = true
         if (passwordError == nil && confirmedPasswordError == nil && hintError == nil) {
             self.onSave(MasterPassword(name: self.hint, password: self.password))
+            self.presentedAsModal = false
         }
     }
 
     private var passwordError: String? {
-        if (submittedPassword != password) {
+        if (!hasSubmitted) {
             return nil
         }
-        if (submittedPassword == "") {
+        if (password == "") {
             return "This field is required"
         }
-        if (submittedPassword != submittedConfirmedPassword) {
+        if (password != confirmPassword) {
             return "The passwords do not match"
         }
         return nil
     }
 
     private var confirmedPasswordError: String? {
-        if (submittedConfirmedPassword != confirmPassword) {
+        if (!hasSubmitted) {
             return nil
         }
-        if (submittedConfirmedPassword == "") {
+        if (confirmPassword == "") {
             return "This field is required"
         }
-        if (submittedConfirmedPassword != submittedPassword) {
+        if (confirmPassword != password) {
             return "The passwords do not match"
         }
         return nil
     }
 
     private var hintError: String? {
-        if (submittedHint != hint) {
+        if (!hasSubmitted) {
             return nil
         }
-        if (submittedHint == "") {
+        if (hint == "") {
             return "This field is required"
         }
         return nil
@@ -160,7 +203,7 @@ struct MasterPasswordAlertView: View {
             ZStack {
                 Color.black.opacity(0.3)
                 ScrollView {
-                    VStack {
+                    VStack(spacing: 0) {
                         VStack(alignment: .leading, spacing: 12.0) {
                             Text("Create Password")
                             SecureField("Password", text: self.$password)
@@ -214,20 +257,9 @@ struct MasterPasswordAlertView: View {
 
 }
 
-struct ValidatedField<Field: View>: View {
-    let field: Field
-    let errorText: String?
-    var body: some View {
-        VStack {
-            errorText.map { Text($0).foregroundColor(Color.red) }?.font(.caption)
-            field
-        }
-    }
-}
-
 extension View {
     func validatedField(errorText: String?) -> some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 2) {
             errorText.map { Text($0).foregroundColor(Color.red) }?.font(.caption)
             self
         }

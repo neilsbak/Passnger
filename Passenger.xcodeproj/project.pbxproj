@@ -13,6 +13,16 @@
 		4F7DEDBA24687C870012041B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB924687C870012041B /* Preview Assets.xcassets */; };
 		4F7DEDBD24687C870012041B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F7DEDBB24687C870012041B /* Main.storyboard */; };
 		4F7DEDC424687EB30012041B /* PasswordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDC324687EB30012041B /* PasswordsView.swift */; };
+		4F7DEDCB247384270012041B /* PasswordsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDC324687EB30012041B /* PasswordsView.swift */; };
+		4F7DEDCC2473845B0012041B /* PasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F87051824437C9B00769A9D /* PasswordItem.swift */; };
+		4F7DEDCD2473845B0012041B /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F87051A244398C400769A9D /* Model.swift */; };
+		4F7DEDCF2473845B0012041B /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCF4D1924632D8700F98F3C /* KeychainPasswordItem.swift */; };
+		4F7DEDD02473845B0012041B /* PassengerKeychainItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCF4D1B24632F4000F98F3C /* PassengerKeychainItem.swift */; };
+		4F7DEDD22478D9F20012041B /* CreatePasswordFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDD12478D9F20012041B /* CreatePasswordFormView.swift */; };
+		4F7DEDD4247B67310012041B /* CreatePasswordFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDD3247B67310012041B /* CreatePasswordFormModel.swift */; };
+		4F7DEDD5247B67310012041B /* CreatePasswordFormModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDD3247B67310012041B /* CreatePasswordFormModel.swift */; };
+		4F7DEDD72482170B0012041B /* CreatePasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDD62482170B0012041B /* CreatePasswordView.swift */; };
+		4F7DEDD8248218310012041B /* CreatePasswordFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDD12478D9F20012041B /* CreatePasswordFormView.swift */; };
 		4F870505244379C500769A9D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F870504244379C500769A9D /* AppDelegate.swift */; };
 		4F870507244379C500769A9D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F870506244379C500769A9D /* SceneDelegate.swift */; };
 		4F870509244379C500769A9D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F870508244379C500769A9D /* ContentView.swift */; };
@@ -36,6 +46,9 @@
 		4F7DEDBE24687C870012041B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4F7DEDBF24687C870012041B /* MacPassenger.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacPassenger.entitlements; sourceTree = "<group>"; };
 		4F7DEDC324687EB30012041B /* PasswordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsView.swift; sourceTree = "<group>"; };
+		4F7DEDD12478D9F20012041B /* CreatePasswordFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePasswordFormView.swift; sourceTree = "<group>"; };
+		4F7DEDD3247B67310012041B /* CreatePasswordFormModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePasswordFormModel.swift; sourceTree = "<group>"; };
+		4F7DEDD62482170B0012041B /* CreatePasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePasswordView.swift; sourceTree = "<group>"; };
 		4F870501244379C500769A9D /* Passenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Passenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F870504244379C500769A9D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4F870506244379C500769A9D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -79,6 +92,7 @@
 				4F7DEDBE24687C870012041B /* Info.plist */,
 				4F7DEDBF24687C870012041B /* MacPassenger.entitlements */,
 				4F7DEDB824687C870012041B /* Preview Content */,
+				4F7DEDD62482170B0012041B /* CreatePasswordView.swift */,
 			);
 			path = MacPassenger;
 			sourceTree = "<group>";
@@ -125,6 +139,8 @@
 				4FCF4D1924632D8700F98F3C /* KeychainPasswordItem.swift */,
 				4FCF4D1B24632F4000F98F3C /* PassengerKeychainItem.swift */,
 				4F7DEDC324687EB30012041B /* PasswordsView.swift */,
+				4F7DEDD12478D9F20012041B /* CreatePasswordFormView.swift */,
+				4F7DEDD3247B67310012041B /* CreatePasswordFormModel.swift */,
 			);
 			path = Passenger;
 			sourceTree = "<group>";
@@ -239,8 +255,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F7DEDCD2473845B0012041B /* Model.swift in Sources */,
+				4F7DEDD02473845B0012041B /* PassengerKeychainItem.swift in Sources */,
+				4F7DEDD5247B67310012041B /* CreatePasswordFormModel.swift in Sources */,
+				4F7DEDD72482170B0012041B /* CreatePasswordView.swift in Sources */,
 				4F7DEDB524687C850012041B /* ContentView.swift in Sources */,
+				4F7DEDD8248218310012041B /* CreatePasswordFormView.swift in Sources */,
 				4F7DEDB324687C850012041B /* AppDelegate.swift in Sources */,
+				4F7DEDCF2473845B0012041B /* KeychainPasswordItem.swift in Sources */,
+				4F7DEDCB247384270012041B /* PasswordsView.swift in Sources */,
+				4F7DEDCC2473845B0012041B /* PasswordItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,8 +274,10 @@
 			files = (
 				4F87051B244398C400769A9D /* Model.swift in Sources */,
 				4FCF4D1C24632F4000F98F3C /* PassengerKeychainItem.swift in Sources */,
+				4F7DEDD4247B67310012041B /* CreatePasswordFormModel.swift in Sources */,
 				4F870505244379C500769A9D /* AppDelegate.swift in Sources */,
 				4F870507244379C500769A9D /* SceneDelegate.swift in Sources */,
+				4F7DEDD22478D9F20012041B /* CreatePasswordFormView.swift in Sources */,
 				4FCF4D1A24632D8700F98F3C /* KeychainPasswordItem.swift in Sources */,
 				4FCF4D182454DC8400F98F3C /* CreatePasswordView.swift in Sources */,
 				4F870509244379C500769A9D /* ContentView.swift in Sources */,

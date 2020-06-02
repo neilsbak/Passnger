@@ -9,15 +9,25 @@
 import SwiftUI
 
 struct ContentView: View {
+    @ObservedObject var model: Model
+    @ObservedObject var showCreatePassword: ShowCreatePasswordObservable
+
     var body: some View {
-        Text("Hello, World!")
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        NavigationView {
+            VStack {
+                PasswordsView(model: model)
+            }.sheet(isPresented: $showCreatePassword.showCreatePassword) {
+                CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword.showCreatePassword) { passwordItem in
+                    self.model.addPasswordItem(passwordItem)
+                }.frame(width: 400, height: 360)
+            }
+        }
     }
 }
 
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(model: Model.testModel(), showCreatePassword: ShowCreatePasswordObservable())
     }
 }

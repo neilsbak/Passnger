@@ -11,49 +11,41 @@ import SwiftUI
 struct PasswordsView: View {
     @ObservedObject var model: Model
     @State private var showCopied = false
-    @State private var showCreatePassword = false
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                List {
-                    ForEach(model.passwordItems) { item in
-                        Button(action: {
-                            if (self.showCopied) {
-                                return
-                            }
-                            withAnimation {
-                                self.showCopied = true
-                                UIPasteboard.general.string = try! item.passwordKeychainItem.readPassword()
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                self.showCopied = false
-                            }
-                        }) {
-                            PasswordItemRow(passwordItem: item)
+        ZStack {
+            List {
+                ForEach(model.passwordItems) { item in
+                    Button(action: {
+                        if (self.showCopied) {
+                            return
                         }
-                    }.onDelete() { indexSet in
-                        self.model.removePasswordItems(atOffsets: indexSet)
+                        withAnimation {
+                            self.showCopied = true
+                            let password = try! item.passwordKeychainItem.readPassword()
+                            #if os(macOS)
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(password, forType: .string)
+                            #else
+                                UIPasteboard.general.string = password
+                            #endif
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            self.showCopied = false
+                        }
+                    }) {
+                        PasswordItemRow(passwordItem: item)
                     }
+                }.onDelete() { indexSet in
+                    self.model.removePasswordItems(atOffsets: indexSet)
                 }
-                if (self.showCopied) {
-                    Text("Copied to\nClipboard")
-                        .padding(.all, 30)
-                        .background(Color.black.opacity(0.3))
-                        .cornerRadius(8)
-                }
-            }.navigationBarTitle("Home")
-                .navigationBarItems(trailing: Button(action: {
-                    self.showCreatePassword = true;
-                }) {
-                    Image(systemName: "plus")
-                }.sheet(isPresented: $showCreatePassword) {
-                    CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
-                        self.model.addPasswordItem(passwordItem)
-                    }
-                    }
-            )
-
+            }
+            if (self.showCopied) {
+                Text("Copied to\nClipboard")
+                    .padding(.all, 30)
+                    .background(Color.black.opacity(0.3))
+                    .cornerRadius(8)
+            }
         }
     }
 }

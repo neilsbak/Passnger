@@ -10,14 +10,29 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var model: Model
+    @State private var showCreatePassword = false
 
     var body: some View {
-        PasswordsView(model: model)
+        NavigationView {
+            PasswordsView(model: model, showCreatePassword: $showCreatePassword).navigationBarTitle("Passwords")
+                .navigationBarItems(trailing: Button(action: {
+                    self.showCreatePassword = true;
+                }) {
+                    Image(systemName: "plus")
+                }.sheet(isPresented: $showCreatePassword) {
+                    CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
+                        self.model.addPasswordItem(passwordItem)
+                    }
+                }
+            )
+        }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(model: Model.testModel())
+        NavigationView {
+            ContentView(model: Model.testModel())
+        }
     }
 }

@@ -1,8 +1,8 @@
 //
 //  CreatePasswordView.swift
-//  Passenger
+//  MacPassenger
 //
-//  Created by Neil Bakhle on 2020-04-25.
+//  Created by Neil Bakhle on 2020-05-30.
 //  Copyright © 2020 Neil. All rights reserved.
 //
 
@@ -15,16 +15,16 @@ struct CreatePasswordView: View {
     let onSave: (_ passwordItem: PasswordItem) -> Void
 
     var body: some View {
-        NavigationView {
+        VStack {
             CreatePasswordFormView(model: model, formModel: $formModel)
-            .navigationBarTitle("Create Password", displayMode: .inline)
-            .navigationBarItems(
-                leading: Button(action: {
+            HStack {
+                Button(action: {
                     self.presentedAsModal = false
                 }) {
                     Text("Cancel")
-                },
-                trailing: Button(action: {
+                }
+                Spacer()
+                Button(action: {
                     self.formModel.hasSubmitted = true
                     if self.formModel.validate()  {
                         self.presentedAsModal = false
@@ -33,11 +33,10 @@ struct CreatePasswordView: View {
                 }) {
                     Text("Save")
                 }
-            )
+            }.padding()
         }
     }
 }
-
 
 struct CreatePasswordView_Previews: PreviewProvider {
     static var previews: some View {

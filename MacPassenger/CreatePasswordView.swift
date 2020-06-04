@@ -12,11 +12,16 @@ struct CreatePasswordView: View {
     @ObservedObject var model: Model
     @Binding var presentedAsModal: Bool
     @State var formModel = CreatePasswordFormModel()
+    @State private var masterPasswordFormModel =  MasterPasswordFormModel()
+    @State private var showCreateMasterPassword = false
     let onSave: (_ passwordItem: PasswordItem) -> Void
 
     var body: some View {
         VStack {
-            CreatePasswordFormView(model: model, formModel: $formModel)
+            CreatePasswordFormView(model: model, formModel: $formModel) {
+                self.masterPasswordFormModel = MasterPasswordFormModel()
+                self.showCreateMasterPassword = true
+            }
             HStack {
                 Button(action: {
                     self.presentedAsModal = false
@@ -33,7 +38,32 @@ struct CreatePasswordView: View {
                 }) {
                     Text("Save")
                 }
-            }.padding()
+            }
+            .padding()
+            .sheet(isPresented: $showCreateMasterPassword) {
+                VStack {
+                    MasterPasswordView(formModel: self.$masterPasswordFormModel)
+                    HStack {
+                        Button(action: {
+                            self.showCreateMasterPassword = false
+                        }) {
+                            Text("Cancel")
+                        }
+                        Spacer()
+                        Button(action: {
+                            self.masterPasswordFormModel.hasSubmitted = true
+                            if (self.masterPasswordFormModel.validate()) {
+                                let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password)
+                                self.model.addMasterPassword(masterPassword)
+                                self.formModel.selectedMasterPassword = masterPassword
+                                self.showCreateMasterPassword = false
+                            }
+                        }) {
+                            Text("Save")
+                        }
+                    }
+                }
+            }
         }
     }
 }

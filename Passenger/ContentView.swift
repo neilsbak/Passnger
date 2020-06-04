@@ -14,7 +14,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationView {
-            PasswordsView(model: model, showCreatePassword: $showCreatePassword).navigationBarTitle("Passwords")
+            PasswordsView(model: model).navigationBarTitle("Passwords")
                 .navigationBarItems(trailing: Button(action: {
                     self.showCreatePassword = true;
                 }) {

@@ -10,16 +10,16 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var model: Model
-    @ObservedObject var showCreatePassword: ShowCreatePasswordObservable
+    @ObservedObject var toolbar: ToolbarObservable
 
     var body: some View {
-        NavigationView {
-            VStack {
-                PasswordsView(model: model)
-            }.sheet(isPresented: $showCreatePassword.showCreatePassword) {
-                CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword.showCreatePassword) { passwordItem in
-                    self.model.addPasswordItem(passwordItem)
-                }.frame(width: 400, height: 360)
+        VStack {
+            PasswordsView(model: model, selectedPassword: toolbar.selectedPassword) { passwordItem in
+                self.toolbar.selectedPassword = passwordItem
+            }
+        }.sheet(isPresented: $toolbar.showCreatePassword) {
+            CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem in
+                self.model.addPasswordItem(passwordItem)
             }
         }
     }
@@ -28,6 +28,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(model: Model.testModel(), showCreatePassword: ShowCreatePasswordObservable())
+        ContentView(model: Model.testModel(), toolbar: ToolbarObservable())
     }
 }

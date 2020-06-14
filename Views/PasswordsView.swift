@@ -11,31 +11,41 @@ import SwiftUI
 struct PasswordsView: View {
     @ObservedObject var model: Model
     @State private var showCopied = false
+    let selectedPassword: PasswordItem?
+    let onSelected: ((PasswordItem) -> Void)?
+
+    init(model: Model, selectedPassword: PasswordItem? = nil, onSelected: ((PasswordItem) -> Void)? = nil) {
+        self.model = model
+        self.selectedPassword = selectedPassword
+        self.onSelected = onSelected
+    }
+
+    private let rowHeight: CGFloat = 32
 
     var body: some View {
         ZStack {
             List {
                 ForEach(model.passwordItems) { item in
-                    Button(action: {
-                        if (self.showCopied) {
-                            return
-                        }
-                        withAnimation {
-                            self.showCopied = true
+                    PasswordItemRow(passwordItem: item)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .frame(height: self.rowHeight)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            self.onSelected?(item)
+                        #if os(iOS)
+                            if (self.showCopied) {
+                                return
+                            }
                             let password = try! item.passwordKeychainItem.readPassword()
-                            #if os(macOS)
-                                NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString(password, forType: .string)
-                            #else
                                 UIPasteboard.general.string = password
-                            #endif
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            self.showCopied = false
-                        }
-                    }) {
-                        PasswordItemRow(passwordItem: item)
-                    }
+                            withAnimation {
+                                self.showCopied = true
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                self.showCopied = false
+                            }
+                        #endif
+                    }.listRowBackground((self.selectedPassword == nil ? Color.clear : Color.blue).frame(height: self.rowHeight))
                 }.onDelete() { indexSet in
                     self.model.removePasswordItems(atOffsets: indexSet)
                 }
@@ -54,7 +64,7 @@ struct PasswordItemRow: View {
     let passwordItem: PasswordItem
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text(passwordItem.serviceName)
                 .fontWeight(.bold)
             Text(passwordItem.userName)

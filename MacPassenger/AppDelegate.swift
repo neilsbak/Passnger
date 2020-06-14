@@ -14,13 +14,30 @@ import Combine
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     var window: NSWindow!
-    let showCreatePassword = ShowCreatePasswordObservable()
+    private let toolbarObservable = ToolbarObservable()
+    private lazy var deleteToolbarButton: NSButton = {
+        let button = NSButton(image: NSImage(imageLiteralResourceName: "trash").tint(color: NSColor.labelColor), target: self, action: #selector(deletePassword))
+        button.bezelStyle = .texturedRounded
+        return button
+    }()
+    private lazy var copyButton: NSButton = {
+        let button = NSButton(image: NSImage(imageLiteralResourceName: "doc.on.clipboard").tint(color: NSColor.labelColor), target: self, action: #selector(copyPassword))
+        button.bezelStyle = .texturedRounded
+        return button
+    }()
+    private var toolbarCancellable: AnyCancellable?
+
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Create the SwiftUI view that provides the window contents.
 
         let toolbar = NSToolbar(identifier: "MainToolbar")
         toolbar.delegate = self
+
+        toolbarCancellable = toolbarObservable.$selectedPassword.sink(receiveValue: { passwordItem in
+            self.deleteToolbarButton.isEnabled = (passwordItem != nil)
+            self.copyButton.isEnabled = (passwordItem != nil)
+        })
 
         // Create the window and set the content view. 
         window = NSWindow(
@@ -30,7 +47,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.titleVisibility = NSWindow.TitleVisibility.hidden
         window.center()
         window.setFrameAutosaveName("Main Window")
-        window.contentView = NSHostingView(rootView: ContentView(model: Model.loadModel(), showCreatePassword: showCreatePassword))
+        window.contentView = NSHostingView(rootView: ContentView(model: Model.loadModel(), toolbar: toolbarObservable))
         window.toolbar = toolbar
         window.makeKeyAndOrderFront(nil)
     }
@@ -45,16 +62,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 extension NSToolbarItem.Identifier {
     static let title = NSToolbarItem.Identifier(rawValue: "Title")
     static let createPassword = NSToolbarItem.Identifier(rawValue: "CreatePassword")
+    static let delete = NSToolbarItem.Identifier(rawValue: "Delete")
+    static let copy = NSToolbarItem.Identifier(rawValue: "Copy")
 }
 
 extension AppDelegate: NSToolbarDelegate {
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, .title, .flexibleSpace, .createPassword]
+        [.flexibleSpace, .title, .flexibleSpace, .copy, .delete, .createPassword]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, .title, .flexibleSpace, .createPassword]
+        [.flexibleSpace, .title, .flexibleSpace, .copy, .delete, .createPassword]
     }
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
@@ -63,11 +82,19 @@ extension AppDelegate: NSToolbarDelegate {
             let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.title)
             toolbarItem.title = "Passenger"
             return toolbarItem
+        case NSToolbarItem.Identifier.delete:
+            let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.delete)
+            toolbarItem.label = "Delete Password"
+            toolbarItem.view = deleteToolbarButton
+            return toolbarItem
+        case NSToolbarItem.Identifier.copy:
+            let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.copy)
+            toolbarItem.label = "Copy Password"
+            toolbarItem.view = copyButton
+            return toolbarItem
         case NSToolbarItem.Identifier.createPassword:
-            let button = NSButton(image: NSImage(named: NSImage.addTemplateName)!, target: nil, action: nil)
+            let button = NSButton(image: NSImage(named: NSImage.addTemplateName)!, target: self, action: #selector(createPassword))
             button.bezelStyle = .texturedRounded
-            button.target = self
-            button.action = #selector(createPassword)
             let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.createPassword)
             toolbarItem.label = "Create Password"
             toolbarItem.view = button
@@ -78,14 +105,24 @@ extension AppDelegate: NSToolbarDelegate {
     }
 
     @objc func createPassword() {
-        showCreatePassword.showCreatePassword = true
+        toolbarObservable.showCreatePassword = true
+    }
+
+    @objc func deletePassword() {
+    }
+
+    @objc func copyPassword() {
+        guard let item = toolbarObservable.selectedPassword else { return }
+        let password = try! item.passwordKeychainItem.readPassword()
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(password, forType: .string)
     }
 }
 
-class ShowCreatePasswordObservable: ObservableObject {
-
+class ToolbarObservable: ObservableObject {
     @Published
     var showCreatePassword = false
 
+    @Published
+    var selectedPassword: PasswordItem?
 }
-

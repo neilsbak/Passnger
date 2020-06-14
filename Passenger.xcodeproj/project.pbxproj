@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F589F282493F92E0099AB5A /* NSImageExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F589F272493F92E0099AB5A /* NSImageExtension.swift */; };
 		4F7DEDB324687C850012041B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB224687C850012041B /* AppDelegate.swift */; };
 		4F7DEDB524687C850012041B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB424687C850012041B /* ContentView.swift */; };
 		4F7DEDB724687C870012041B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F7DEDB624687C870012041B /* Assets.xcassets */; };
@@ -43,6 +44,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4F589F272493F92E0099AB5A /* NSImageExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSImageExtension.swift; sourceTree = "<group>"; };
 		4F7DEDB024687C850012041B /* MacPassenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacPassenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F7DEDB224687C850012041B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4F7DEDB424687C850012041B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				4F7DEDBF24687C870012041B /* MacPassenger.entitlements */,
 				4F7DEDB824687C870012041B /* Preview Content */,
 				4F7DEDD62482170B0012041B /* CreatePasswordView.swift */,
+				4F589F272493F92E0099AB5A /* NSImageExtension.swift */,
 			);
 			path = MacPassenger;
 			sourceTree = "<group>";
@@ -160,6 +163,7 @@
 			children = (
 				4F7DEDC324687EB30012041B /* PasswordsView.swift */,
 				4F7DEDD12478D9F20012041B /* CreatePasswordFormView.swift */,
+				4F7DEDD9248557040012041B /* MasterPasswordView.swift */,
 				4F7DEDDF2485FE120012041B /* ViewExtensions.swift */,
 			);
 			path = Views;
@@ -174,7 +178,6 @@
 				4FCF4D1B24632F4000F98F3C /* PassengerKeychainItem.swift */,
 				4F7DEDD3247B67310012041B /* CreatePasswordFormModel.swift */,
 				4F7DEDDB2485589A0012041B /* MasterPasswordFormModel.swift */,
-				4F7DEDD9248557040012041B /* MasterPasswordView.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -291,6 +294,7 @@
 				4F7DEDE12485FE120012041B /* ViewExtensions.swift in Sources */,
 				4F7DEDD8248218310012041B /* CreatePasswordFormView.swift in Sources */,
 				4F7DEDB324687C850012041B /* AppDelegate.swift in Sources */,
+				4F589F282493F92E0099AB5A /* NSImageExtension.swift in Sources */,
 				4F7DEDCF2473845B0012041B /* KeychainPasswordItem.swift in Sources */,
 				4F7DEDCB247384270012041B /* PasswordsView.swift in Sources */,
 				4F7DEDCC2473845B0012041B /* PasswordItem.swift in Sources */,

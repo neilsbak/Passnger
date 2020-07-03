@@ -14,6 +14,7 @@ struct CreatePasswordView: View {
     @State var formModel = CreatePasswordFormModel()
     @State private var masterPasswordFormModel =  MasterPasswordFormModel()
     @State private var showCreateMasterPassword = false
+    @State private var showGetMasterPassword = false
     let onSave: (_ passwordItem: PasswordItem) -> Void
 
     var body: some View {
@@ -33,38 +34,47 @@ struct CreatePasswordView: View {
                     self.formModel.hasSubmitted = true
                     if self.formModel.validate()  {
                         self.presentedAsModal = false
-                        self.onSave(PasswordItem(userName: self.formModel.username, password: try! self.formModel.selectedMasterPassword!.passwordKeychainItem.readPassword(), url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName))
+                        guard let hashedMasterPassword = try! self.formModel.selectedMasterPassword?.getHashedPassword() else {
+                            self.showGetMasterPassword = true
+                            return
+                        }
+                        let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, hashedMasterPassword: hashedMasterPassword, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                        self.onSave(passwordItem)
                     }
                 }) {
                     Text("Save")
                 }
             }
             .padding()
-            .sheet(isPresented: $showCreateMasterPassword) {
-                VStack {
-                    MasterPasswordView(formModel: self.$masterPasswordFormModel)
-                    HStack {
-                        Button(action: {
+        }.background(EmptyView().sheet(isPresented: $showCreateMasterPassword) {
+            VStack {
+                MasterPasswordView(formModel: self.$masterPasswordFormModel)
+                HStack {
+                    Button(action: {
+                        self.showCreateMasterPassword = false
+                    }) {
+                        Text("Cancel")
+                    }
+                    Spacer()
+                    Button(action: {
+                        self.masterPasswordFormModel.hasSubmitted = true
+                        if (self.masterPasswordFormModel.validate()) {
+                            let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
+                            self.model.addMasterPassword(masterPassword)
+                            self.formModel.selectedMasterPassword = masterPassword
                             self.showCreateMasterPassword = false
-                        }) {
-                            Text("Cancel")
                         }
-                        Spacer()
-                        Button(action: {
-                            self.masterPasswordFormModel.hasSubmitted = true
-                            if (self.masterPasswordFormModel.validate()) {
-                                let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password)
-                                self.model.addMasterPassword(masterPassword)
-                                self.formModel.selectedMasterPassword = masterPassword
-                                self.showCreateMasterPassword = false
-                            }
-                        }) {
-                            Text("Save")
-                        }
+                    }) {
+                        Text("Save")
                     }
                 }
             }
-        }
+        }.background(EmptyView().sheet(isPresented: $showGetMasterPassword) {
+            GetMasterPasswordView(masterPassword: self.formModel.selectedMasterPassword!, showGetMasterPassword: self.$showGetMasterPassword) { (hashedMasterPassword) in
+                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, hashedMasterPassword: hashedMasterPassword, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                self.onSave(passwordItem)
+            }
+        }))
     }
 }
 

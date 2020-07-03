@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  Model.swift
 //  Passenger
 //
 //  Created by Neil Bakhle on 2020-04-12.
@@ -49,12 +49,12 @@ class Model: ObservableObject {
     }
 
     func saveModel() {
-        let masterPasswordsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: Model.masterPasswordsKeychainAccountName)
+        let masterPasswordsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: Model.masterPasswordsKeychainAccountName, sync: true, passcodeProtected: false)
         let masterPasswordData = try! JSONEncoder().encode(masterPasswords)
         let masterPasswordJson = String(data: masterPasswordData, encoding: .utf8)!
         try! masterPasswordsKeychainItem.savePassword(masterPasswordJson)
 
-        let passwordItemsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: Model.passwordItemsKeychainAccountName)
+        let passwordItemsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: Model.passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
         let passwordItemData = try! JSONEncoder().encode(passwordItems)
         let passwordItemJson = String(data: passwordItemData, encoding: .utf8)!
         try! passwordItemsKeychainItem.savePassword(passwordItemJson)
@@ -63,13 +63,13 @@ class Model: ObservableObject {
     static func loadModel() -> Model {
         let model = Model()
 
-        let masterPasswordsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: masterPasswordsKeychainAccountName)
+        let masterPasswordsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: masterPasswordsKeychainAccountName, sync: true, passcodeProtected: false)
         guard let masterPasswordsJson = try? masterPasswordsKeychainItem.readPassword() else {
             return model
         }
         model.masterPasswords = (try? JSONDecoder().decode([MasterPassword].self, from: masterPasswordsJson.data(using: .utf8)!)) ?? []
 
-        let passwordItemsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: passwordItemsKeychainAccountName)
+        let passwordItemsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
         guard let passwordItemsJson = try? passwordItemsKeychainItem.readPassword() else {
             return model
         }
@@ -80,13 +80,13 @@ class Model: ObservableObject {
 
     static func testModel() -> Model {
         let model = Model()
-        model.passwordItems = [
-            PasswordItem(userName: "neil", password: "asdf", url: "apple.com", serviceName: "Apple"),
-            PasswordItem(userName: "neil123", password: "jklj", url: "google.com", serviceName: "Google")
-        ]
         model.masterPasswords = [
-            MasterPassword(name: "Test 1", password: "asdf"),
-            MasterPassword(name: "Test 2", password: "jklj")
+            MasterPassword(name: "Test 1", password: "asdf", securityLevel: .noSave),
+            MasterPassword(name: "Test 2", password: "jklj", securityLevel: .noSave)
+        ]
+        model.passwordItems = [
+            PasswordItem(userName: "neil", masterPassword: model.masterPasswords[0], url: "apple.com", serviceName: "Apple"),
+            PasswordItem(userName: "neil123", masterPassword: model.masterPasswords[1], url: "google.com", serviceName: "Google")
         ]
         return model
     }

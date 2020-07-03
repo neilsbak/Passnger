@@ -17,11 +17,15 @@ struct ContentView: View {
             PasswordsView(model: model, selectedPassword: toolbar.selectedPassword) { passwordItem in
                 self.toolbar.selectedPassword = passwordItem
             }
-        }.sheet(isPresented: $toolbar.showCreatePassword) {
+        }.background(EmptyView().sheet(isPresented: $toolbar.showCreatePassword) {
             CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem in
                 self.model.addPasswordItem(passwordItem)
             }
-        }
+        }.background(EmptyView().sheet(isPresented: self.$toolbar.showGetMasterPassword) {
+            GetMasterPasswordView(masterPassword: self.toolbar.selectedPassword!.masterPassword, showGetMasterPassword: self.$toolbar.showGetMasterPassword) { (hashedMasterPassword) in
+                self.toolbar.copyPassword(hashedMasterPassword: hashedMasterPassword)
+            }}
+        ))
     }
 }
 

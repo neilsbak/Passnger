@@ -26,11 +26,17 @@ struct KeychainPasswordItem {
 
     let accessGroup: String?
 
+    let sync: Bool
+
+    let passcodeProtected: Bool
+
     // MARK: Intialization
 
-    init(service: String, account: String, accessGroup: String? = nil) {
+    init(service: String, account: String, sync: Bool, passcodeProtected: Bool, accessGroup: String? = nil) {
         self.service = service
         self.account = account
+        self.sync = sync
+        self.passcodeProtected = passcodeProtected
         self.accessGroup = accessGroup
     }
 
@@ -41,7 +47,7 @@ struct KeychainPasswordItem {
             Build a query to find the item that matches the service, account and
             access group.
         */
-        var query = KeychainPasswordItem.keychainQuery(withService: service, account: account, accessGroup: accessGroup)
+        var query = KeychainPasswordItem.keychainQuery(withService: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
         query[kSecMatchLimit as String] = kSecMatchLimitOne
         query[kSecReturnAttributes as String] = kCFBooleanTrue
         query[kSecReturnData as String] = kCFBooleanTrue
@@ -79,7 +85,7 @@ struct KeychainPasswordItem {
             var attributesToUpdate = [String : AnyObject]()
             attributesToUpdate[kSecValueData as String] = encodedPassword as AnyObject?
 
-            let query = KeychainPasswordItem.keychainQuery(withService: service, account: account, accessGroup: accessGroup)
+            let query = KeychainPasswordItem.keychainQuery(withService: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
             let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
 
             // Throw an error if an unexpected status was returned.
@@ -90,7 +96,7 @@ struct KeychainPasswordItem {
                 No password was found in the keychain. Create a dictionary to save
                 as a new keychain item.
             */
-            var newItem = KeychainPasswordItem.keychainQuery(withService: service, account: account, accessGroup: accessGroup)
+            var newItem = KeychainPasswordItem.keychainQuery(withService: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
             newItem[kSecValueData as String] = encodedPassword as AnyObject?
 
             // Add a the new item to the keychain.
@@ -106,7 +112,7 @@ struct KeychainPasswordItem {
         var attributesToUpdate = [String : AnyObject]()
         attributesToUpdate[kSecAttrAccount as String] = newAccountName as AnyObject?
 
-        let query = KeychainPasswordItem.keychainQuery(withService: service, account: self.account, accessGroup: accessGroup)
+        let query = KeychainPasswordItem.keychainQuery(withService: service, account: self.account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
         let status = SecItemUpdate(query as CFDictionary, attributesToUpdate as CFDictionary)
 
         // Throw an error if an unexpected status was returned.
@@ -117,16 +123,16 @@ struct KeychainPasswordItem {
 
     func deleteItem() throws {
         // Delete the existing item from the keychain.
-        let query = KeychainPasswordItem.keychainQuery(withService: service, account: account, accessGroup: accessGroup)
+        let query = KeychainPasswordItem.keychainQuery(withService: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
         let status = SecItemDelete(query as CFDictionary)
 
         // Throw an error if an unexpected status was returned.
         guard status == noErr || status == errSecItemNotFound else { throw KeychainError.unhandledError(status: status) }
     }
 
-    static func passwordItems(forService service: String, accessGroup: String? = nil) throws -> [KeychainPasswordItem] {
+    static func passwordItems(forService service: String, sync: Bool, passcodeProtected: Bool, accessGroup: String? = nil) throws -> [KeychainPasswordItem] {
         // Build a query for all items that match the service and access group.
-        var query = KeychainPasswordItem.keychainQuery(withService: service, accessGroup: accessGroup)
+        var query = KeychainPasswordItem.keychainQuery(withService: service, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
         query[kSecMatchLimit as String] = kSecMatchLimitAll
         query[kSecReturnAttributes as String] = kCFBooleanTrue
         query[kSecReturnData as String] = kCFBooleanFalse
@@ -151,7 +157,7 @@ struct KeychainPasswordItem {
         for result in resultData {
             guard let account  = result[kSecAttrAccount as String] as? String else { throw KeychainError.unexpectedItemData }
 
-            let passwordItem = KeychainPasswordItem(service: service, account: account, accessGroup: accessGroup)
+            let passwordItem = KeychainPasswordItem(service: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
             passwordItems.append(passwordItem)
         }
 
@@ -160,10 +166,16 @@ struct KeychainPasswordItem {
 
     // MARK: Convenience
 
-    private static func keychainQuery(withService service: String, account: String? = nil, accessGroup: String? = nil) -> [String : AnyObject] {
+    private static func keychainQuery(withService service: String, account: String? = nil, sync: Bool, passcodeProtected: Bool, accessGroup: String? = nil) -> [String : AnyObject] {
         var query = [String : AnyObject]()
         query[kSecClass as String] = kSecClassGenericPassword
         query[kSecAttrService as String] = service as AnyObject?
+        query[kSecAttrSynchronizable as String] = sync as AnyObject
+
+        if passcodeProtected {
+            let access = SecAccessControlCreateWithFlags(nil, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, .userPresence, nil)
+            query[kSecAttrAccessControl as String] = access
+        }
 
         if let account = account {
             query[kSecAttrAccount as String] = account as AnyObject?

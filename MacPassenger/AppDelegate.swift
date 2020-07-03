@@ -16,12 +16,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var window: NSWindow!
     private let toolbarObservable = ToolbarObservable()
     private lazy var deleteToolbarButton: NSButton = {
-        let button = NSButton(image: NSImage(imageLiteralResourceName: "trash").tint(color: NSColor.labelColor), target: self, action: #selector(deletePassword))
+        let button = NSButton(image: NSImage(imageLiteralResourceName: "trash").tint(color: NSColor.textColor), target: self, action: #selector(deletePassword))
         button.bezelStyle = .texturedRounded
         return button
     }()
     private lazy var copyButton: NSButton = {
-        let button = NSButton(image: NSImage(imageLiteralResourceName: "doc.on.clipboard").tint(color: NSColor.labelColor), target: self, action: #selector(copyPassword))
+        let button = NSButton(image: NSImage(imageLiteralResourceName: "doc.on.clipboard").tint(color: NSColor.textColor), target: self, action: #selector(copyPassword))
         button.bezelStyle = .texturedRounded
         return button
     }()
@@ -113,7 +113,10 @@ extension AppDelegate: NSToolbarDelegate {
 
     @objc func copyPassword() {
         guard let item = toolbarObservable.selectedPassword else { return }
-        let password = try! item.passwordKeychainItem.readPassword()
+        guard let password = try! item.getPassword() else {
+            toolbarObservable.showGetMasterPassword = true
+            return
+        }
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(password, forType: .string)
     }
@@ -125,4 +128,15 @@ class ToolbarObservable: ObservableObject {
 
     @Published
     var selectedPassword: PasswordItem?
+
+    @Published
+    var showGetMasterPassword = false
+
+    func copyPassword(hashedMasterPassword: String) {
+        guard let item = selectedPassword else { return }
+        let password = try! item.getPassword(hashedMasterPassword: hashedMasterPassword)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(password, forType: .string)
+        showGetMasterPassword = false
+    }
 }

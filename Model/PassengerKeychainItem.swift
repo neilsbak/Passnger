@@ -12,26 +12,32 @@ struct PassengerKeychainItem {
 
     static let service = "com.nbakhle.passenger"
 
-    enum PasswordName {
-        case accountPassword(String)
-        case masterPasswrod(String)
-
-        var account: String {
-            switch self {
-            case .accountPassword(let name):
-                return "accountPassword:\(name)"
-            case .masterPasswrod(let name):
-                return "masterPasswrod:\(name)"
-            }
-        }
+    enum PasswordType {
+        case account
+        case master
     }
 
-    let passwordName: PasswordName
+    let name: String
+    let type: PasswordType
+    let passcodeProtected: Bool
     private let keychainPasswordItem: KeychainPasswordItem
 
-    init(passwordName: PasswordName) {
-        self.passwordName = passwordName
-        self.keychainPasswordItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: passwordName.account)
+    init(name: String, type: PasswordType, passcodeProtected: Bool) {
+        self.name = name
+        self.type = type
+        self.passcodeProtected = passcodeProtected
+        let accountName: String
+        let sync: Bool
+        switch type {
+        case .account:
+            accountName = "accountPassword:\(name)"
+            sync = true
+        case .master:
+            accountName = "masterPasswrod:\(name)"
+            sync = false
+        }
+
+        self.keychainPasswordItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: accountName, sync: sync, passcodeProtected: passcodeProtected)
     }
 
 

@@ -58,7 +58,7 @@ struct CreatePasswordFormView: View {
                         Text(masterPassword.name).frame(maxWidth: CGFloat.infinity, alignment: .leading)
                         Spacer()
                         if masterPassword.id == self.formModel.selectedMasterPassword?.id {
-                            Image("checkmark").renderingMode(.template).resizable().frame(width: 16, height: 16).foregroundColor(Color(.labelColor))
+                            Image("checkmark").renderingMode(.template).resizable().frame(width: 16, height: 16).foregroundColor(Color(.label))
                         }
                     }.onTapGesture {
                         withAnimation {

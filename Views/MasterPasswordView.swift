@@ -13,7 +13,6 @@ struct MasterPasswordView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12.0) {
-            Text("Create Password")
             SecureField("Password", text: $formModel.password)
                 .autoCapitalizationOff()
                 .disableAutocorrection(true)
@@ -29,7 +28,8 @@ struct MasterPasswordView: View {
                 .disableAutocorrection(true)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .validatedField(errorText: formModel.hintError)
-        }
+            Spacer()
+        }.padding()
     }
 
 }

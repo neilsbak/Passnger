@@ -36,8 +36,6 @@ struct PasswordsView: View {
                             if (self.showCopied) {
                                 return
                             }
-                            let password = try! item.passwordKeychainItem.readPassword()
-                                UIPasteboard.general.string = password
                             withAnimation {
                                 self.showCopied = true
                             }

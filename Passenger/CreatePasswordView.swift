@@ -14,80 +14,69 @@ struct CreatePasswordView: View {
     @State private var formModel = CreatePasswordFormModel()
     @State private var masterPasswordFormModel =  MasterPasswordFormModel()
     @State private var showCreateMasterPassword = false
+    @State private var showGetMasterPassword = false
     let onSave: (_ passwordItem: PasswordItem) -> Void
 
     var body: some View {
         NavigationView {
-            ZStack {
-                CreatePasswordFormView(model: model, formModel: $formModel) {
-                    self.masterPasswordFormModel = MasterPasswordFormModel()
-                    self.showCreateMasterPassword = true
-                }
-                if showCreateMasterPassword {
-                    GeometryReader { (gemoetry: GeometryProxy) in
-                        ZStack {
-                            Color.black.opacity(0.3)
-                            ScrollView {
-                                VStack {
-                                    MasterPasswordView(formModel: self.$masterPasswordFormModel)
-                                    Divider()
-                                    HStack {
-                                        Button(action: {
-                                            UIApplication.shared.windows.first?.endEditing(true)
-                                            withAnimation {
-                                                self.showCreateMasterPassword = false
-                                            }
-                                        }) {
-                                            Text("Cancel")
-                                        }
-                                        Spacer()
-                                        Button(action: {
-                                            UIApplication.shared.windows.first?.endEditing(true)
-                                            withAnimation {
-                                                self.masterPasswordFormModel.hasSubmitted = true
-                                                if (self.masterPasswordFormModel.validate()) {
-                                                    let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password)
-                                                    self.model.addMasterPassword(masterPassword)
-                                                    self.formModel.selectedMasterPassword = masterPassword
-                                                    self.showCreateMasterPassword = false
-                                                }
-                                            }
-                                        }) {
-                                            Text("Save")
-                                        }
-                                    }.padding()
-
+            CreatePasswordFormView(model: model, formModel: $formModel) {
+                self.masterPasswordFormModel = MasterPasswordFormModel()
+                self.showCreateMasterPassword = true
+            }.sheet(isPresented: $showCreateMasterPassword) {
+                NavigationView {
+                    MasterPasswordView(formModel: self.$masterPasswordFormModel)
+                        .navigationBarTitle("Create Master Password", displayMode: .inline)
+                        .navigationBarItems(
+                            leading: Button(action: {
+                                self.showCreateMasterPassword = false
+                            }) {
+                                Text("Cancel")
+                            },
+                            trailing: Button(action: {
+                                self.masterPasswordFormModel.hasSubmitted = true
+                                if (self.masterPasswordFormModel.validate()) {
+                                    let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
+                                    self.model.addMasterPassword(masterPassword)
+                                    self.formModel.selectedMasterPassword = masterPassword
+                                    self.showCreateMasterPassword = false
                                 }
-                                .padding()
-                                .background(Color.white)
-                                .cornerRadius(10)
-                                .frame(
-                                    width: gemoetry.size.width*0.7,
-                                    height: gemoetry.size.height*0.7
-                                )
-                                .shadow(radius: CGFloat(1))
-                            }
-                        }
-                    }
+                            }) {
+                                Text("Save")
+                        })
                 }
-            }
-            .navigationBarTitle("Create Password", displayMode: .inline)
-            .navigationBarItems(
-                leading: Button(action: {
-                    self.presentedAsModal = false
-                }) {
-                    Text("Cancel")
-                },
-                trailing: Button(action: {
-                    self.formModel.hasSubmitted = true
-                    if self.formModel.validate()  {
+            }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
+                let hashedPassword = MasterPassword.hashPassword(passwordText ?? "")
+                let doubleHashedPassword = MasterPassword.hashPassword(hashedPassword)
+                if doubleHashedPassword != self.formModel.selectedMasterPassword!.doubleHashedPassword {
+                    return false
+                }
+                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, hashedMasterPassword: hashedPassword, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                self.onSave(passwordItem)
+                return true
+            })
+                .navigationBarTitle("Create Password", displayMode: .inline)
+                .navigationBarItems(
+                    leading: Button(action: {
                         self.presentedAsModal = false
-                        self.onSave(PasswordItem(userName: self.formModel.username, password: try! self.formModel.selectedMasterPassword!.passwordKeychainItem.readPassword(), url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName))
+                    }) {
+                        Text("Cancel")
+                    },
+                    trailing: Button(action: {
+                        self.formModel.hasSubmitted = true
+                        if self.formModel.validate()  {
+                            self.presentedAsModal = false
+                            guard let hashedMasterPassword = try! self.formModel.selectedMasterPassword?.getHashedPassword() else {
+                                self.showGetMasterPassword = true
+                                return
+                            }
+                            let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, hashedMasterPassword: hashedMasterPassword, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                            self.onSave(passwordItem)
+                        }
+                    }) {
+                        Text("Save")
                     }
-                }) {
-                    Text("Save")
-                }
             )
+
         }
     }
 

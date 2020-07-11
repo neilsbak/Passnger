@@ -21,8 +21,8 @@ struct PasswordItem: Identifiable, Equatable {
     init(userName: String, masterPassword: MasterPassword, hashedMasterPassword: String, url: String, serviceName: String) {
         self.init(userName: userName, masterPassword: masterPassword, url: url, serviceName: serviceName)
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
-        let password = PasswordGenerator.genPassword(phrase: hashedMasterPassword)
-        let sealBox = try! AES.GCM.seal(Data((password + userName + url).utf8), using: key)
+        let password = PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url)
+        let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
         let combined = sealBox.combined!
         storePassword(combined.base64EncodedString())
     }
@@ -71,6 +71,7 @@ struct MasterPassword: Identifiable, Equatable {
     enum SecurityLevel: String, Codable {
         case save
         case protectedSave
+        case memorySave
         case noSave
     }
 
@@ -99,7 +100,7 @@ struct MasterPassword: Identifiable, Equatable {
     /// Master Passwords may not have the password saved in the keychain if was created on another device.
     /// If this function returns nil, then it is up to the UI to get the master password from the user.
     func getHashedPassword() throws -> String? {
-        if let inMemoryHashedPassword = inMemoryHashedPassword {
+        if let inMemoryHashedPassword = inMemoryHashedPassword, securityLevel != .noSave{
             return inMemoryHashedPassword
         }
         let hashedPassword: String?
@@ -113,7 +114,9 @@ struct MasterPassword: Identifiable, Equatable {
 
     mutating func savePassword(_ password: String, securityLevel: SecurityLevel) {
         let hashedPassword = MasterPassword.hashPassword(password)
-        inMemoryHashedPassword = hashedPassword
+        if securityLevel != .noSave {
+            inMemoryHashedPassword = hashedPassword
+        }
         if (securityLevel != .noSave) {
             try! passwordKeychainItem.savePassword(hashedPassword)
         }

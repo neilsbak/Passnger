@@ -45,11 +45,11 @@ struct CreatePasswordView: View {
                         })
                 }
             }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
-                let hashedPassword = MasterPassword.hashPassword(passwordText ?? "")
-                let doubleHashedPassword = MasterPassword.hashPassword(hashedPassword)
+                let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText ?? "")
                 if doubleHashedPassword != self.formModel.selectedMasterPassword!.doubleHashedPassword {
                     return false
                 }
+                let hashedPassword = MasterPassword.hashPassword(passwordText!)
                 let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, hashedMasterPassword: hashedPassword, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
                 self.onSave(passwordItem)
                 return true

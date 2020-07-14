@@ -31,12 +31,12 @@ struct GetMasterPasswordView: View {
                 }
                 Spacer()
                 Button(action: {
-                    let hashedPassword = MasterPassword.hashPassword(self.passwordText)
-                    let doubleHashedPassword = MasterPassword.hashPassword(hashedPassword)
+                    let doubleHashedPassword = MasterPassword.doubleHashPassword(self.passwordText)
                     if doubleHashedPassword != self.masterPassword.doubleHashedPassword {
                         self.passwordError = "Incorrect Password"
                         return
                     }
+                    let hashedPassword = MasterPassword.hashPassword(self.passwordText)
                     self.onGotHashedPassword(hashedPassword)
                     self.showGetMasterPassword = false
                 }) {

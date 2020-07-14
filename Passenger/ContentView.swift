@@ -12,29 +12,25 @@ struct ContentView: View {
     @ObservedObject var model: Model
     @State private var showCreatePassword = false
     @State private var passwordItemWithoutMasterPassword: PasswordItem?
-    var showGetMasterPassword: Binding<Bool> {
-        Binding<Bool>(get: { self.passwordItemWithoutMasterPassword != nil }, set: { showFlag in
-            if !showFlag {
-                self.passwordItemWithoutMasterPassword = nil
-            }
-        })
-    }
+    @State private var showGetMasterPassword = false
 
     var body: some View {
         NavigationView {
             PasswordsView(model: model) { selectedPasswordItem in
                 guard let password = try! selectedPasswordItem.getPassword() else {
                     self.passwordItemWithoutMasterPassword = selectedPasswordItem
+                    self.showGetMasterPassword = true
                     return
                 }
                 UIPasteboard.general.string = password
-            }.alert(isPresented: showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
-                let hashedPassword = MasterPassword.hashPassword(passwordText ?? "")
-                let doubleHashedPassword = MasterPassword.hashPassword(hashedPassword)
+            }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
+                let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText ?? "")
                 if doubleHashedPassword != self.passwordItemWithoutMasterPassword!.masterPassword.doubleHashedPassword {
                     return false
                 }
+                let hashedPassword = MasterPassword.hashPassword(passwordText!)
                 UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
+                self.passwordItemWithoutMasterPassword = nil
                 return true
             })
             .navigationBarTitle("Passwords")

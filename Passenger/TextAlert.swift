@@ -47,12 +47,17 @@ struct AlertWrapper<Content: View>: UIViewControllerRepresentable {
         uiViewController.rootView = content
         if isPresented && uiViewController.presentedViewController == nil {
             var alert = self.alert
-            alert.action = {
-                let isValid = self.alert.action($0)
-                if isValid {
+            alert.action = { text in
+                guard let text = text else {
                     self.isPresented = false
-                } else {
-                    context.coordinator.alertController?.textFields?.first?.text = nil
+                    return false
+                }
+                let isValid = self.alert.action(text)
+                self.isPresented = false
+                if !isValid {
+                    //The alert has been dismissed from the action button,
+                    //So show a new one
+                    self.isPresented = true
                 }
                 return isValid
             }

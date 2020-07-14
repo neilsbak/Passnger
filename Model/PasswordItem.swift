@@ -82,8 +82,7 @@ struct MasterPassword: Identifiable, Equatable {
     }
 
     init(name: String, password: String, securityLevel: SecurityLevel) {
-        let hashed = MasterPassword.hashPasswordToData(password: password)
-        let doubleHashed = Data(SHA256.hash(data: hashed)).base64EncodedString()
+        let doubleHashed = MasterPassword.doubleHashPassword(password)
         self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed)
         savePassword(password, securityLevel: securityLevel)
     }
@@ -128,6 +127,11 @@ struct MasterPassword: Identifiable, Equatable {
 
     static func hashPassword(_ password: String) -> String {
         return hashPasswordToData(password: password).base64EncodedString()
+    }
+
+    static func doubleHashPassword(_ password: String) -> String {
+        let hashed = MasterPassword.hashPasswordToData(password: password)
+        return Data(SHA256.hash(data: hashed)).base64EncodedString()
     }
 }
 

@@ -19,6 +19,7 @@ struct PasswordItem: Identifiable, Equatable {
     }
 
     init(userName: String, masterPassword: MasterPassword, hashedMasterPassword: String, url: String, serviceName: String) {
+        assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
         self.init(userName: userName, masterPassword: masterPassword, url: url, serviceName: serviceName)
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
         let password = PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url)
@@ -121,8 +122,16 @@ struct MasterPassword: Identifiable, Equatable {
         }
     }
 
+    static func hashPasswordDataToData(passwordData: Data) -> Data {
+        return Data(SHA256.hash(data: passwordData))
+    }
+
     static func hashPasswordToData(password: String) -> Data {
-        return Data(SHA256.hash(data: Data(password.utf8)))
+        return hashPasswordDataToData(passwordData: Data(password.utf8))
+    }
+
+    static func hashPasswordData(_ passwordData: Data) -> String {
+        return hashPasswordDataToData(passwordData: passwordData).base64EncodedString()
     }
 
     static func hashPassword(_ password: String) -> String {
@@ -131,7 +140,7 @@ struct MasterPassword: Identifiable, Equatable {
 
     static func doubleHashPassword(_ password: String) -> String {
         let hashed = MasterPassword.hashPasswordToData(password: password)
-        return Data(SHA256.hash(data: hashed)).base64EncodedString()
+        return hashPasswordData(hashed)
     }
 }
 

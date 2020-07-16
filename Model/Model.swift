@@ -8,7 +8,23 @@
 
 import Foundation
 
-class Model: ObservableObject {
+public class Model: ObservableObject {
+
+    private static func passwordKeychainItem(keychainService: String) -> KeychainPasswordItem {
+        return KeychainPasswordItem(service: keychainService, account: Model.masterPasswordsKeychainAccountName, sync: true, passcodeProtected: false)
+    }
+
+    private static func masterKeychainItem(keychainService: String) -> KeychainPasswordItem {
+        return KeychainPasswordItem(service: keychainService, account: Model.passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
+    }
+
+    let passwordKeychainItem: KeychainPasswordItem
+    let masterKeychainItem: KeychainPasswordItem
+
+    init(keychainService: String = PassengerKeychainItem.service) {
+        passwordKeychainItem = Model.passwordKeychainItem(keychainService: keychainService)
+        masterKeychainItem = Model.masterKeychainItem(keychainService: keychainService)
+    }
 
     @Published private(set) var passwordItems = [PasswordItem]()
 
@@ -49,27 +65,25 @@ class Model: ObservableObject {
     }
 
     func saveModel() {
-        let masterPasswordsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: Model.masterPasswordsKeychainAccountName, sync: true, passcodeProtected: false)
         let masterPasswordData = try! JSONEncoder().encode(masterPasswords)
         let masterPasswordJson = String(data: masterPasswordData, encoding: .utf8)!
-        try! masterPasswordsKeychainItem.savePassword(masterPasswordJson)
+        try! masterKeychainItem.savePassword(masterPasswordJson)
 
-        let passwordItemsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: Model.passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
         let passwordItemData = try! JSONEncoder().encode(passwordItems)
         let passwordItemJson = String(data: passwordItemData, encoding: .utf8)!
-        try! passwordItemsKeychainItem.savePassword(passwordItemJson)
+        try! passwordKeychainItem.savePassword(passwordItemJson)
     }
 
-    static func loadModel() -> Model {
-        let model = Model()
+    static func loadModel(keychainService: String = PassengerKeychainItem.service) -> Model {
+        let model = Model(keychainService: keychainService)
 
-        let masterPasswordsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: masterPasswordsKeychainAccountName, sync: true, passcodeProtected: false)
+        let masterPasswordsKeychainItem = Model.masterKeychainItem(keychainService: keychainService)
         guard let masterPasswordsJson = try? masterPasswordsKeychainItem.readPassword() else {
             return model
         }
         model.masterPasswords = (try? JSONDecoder().decode([MasterPassword].self, from: masterPasswordsJson.data(using: .utf8)!)) ?? []
 
-        let passwordItemsKeychainItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
+        let passwordItemsKeychainItem = Model.passwordKeychainItem(keychainService: keychainService)
         guard let passwordItemsJson = try? passwordItemsKeychainItem.readPassword() else {
             return model
         }

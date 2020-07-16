@@ -27,8 +27,8 @@ extension View {
     }
 }
 
+#if os(macOS)
 extension NSColor {
-    #if os(macOS)
     static var label: NSColor { .labelColor }
-    #endif
 }
+#endif

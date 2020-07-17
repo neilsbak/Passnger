@@ -25,12 +25,9 @@ class PassengerTests: XCTestCase {
     override func tearDownWithError() throws {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         let items = try! KeychainPasswordItem.passwordItems(forService: PassengerTests.keychainService)
-        print("ITEMS: \(items)")
         for item in items {
             try! item.deleteItem()
         }
-        let items2 = try! KeychainPasswordItem.passwordItems(forService: PassengerTests.keychainService)
-        print("ITEMS: \(items2)")
     }
 
     func getPasswordItem(securityLevel: MasterPassword.SecurityLevel) -> PasswordItem {

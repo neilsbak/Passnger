@@ -11,11 +11,11 @@ import Foundation
 public class Model: ObservableObject {
 
     private static func passwordKeychainItem(keychainService: String) -> KeychainPasswordItem {
-        return KeychainPasswordItem(service: keychainService, account: Model.masterPasswordsKeychainAccountName, sync: true, passcodeProtected: false)
+        return KeychainPasswordItem(service: keychainService, account: Model.passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
     }
 
     private static func masterKeychainItem(keychainService: String) -> KeychainPasswordItem {
-        return KeychainPasswordItem(service: keychainService, account: Model.passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
+        return KeychainPasswordItem(service: keychainService, account: Model.masterPasswordsKeychainAccountName, sync: true, passcodeProtected: false)
     }
 
     let passwordKeychainItem: KeychainPasswordItem

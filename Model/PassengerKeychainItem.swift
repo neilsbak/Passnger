@@ -22,7 +22,7 @@ struct PassengerKeychainItem {
     let passcodeProtected: Bool
     private let keychainPasswordItem: KeychainPasswordItem
 
-    init(name: String, type: PasswordType, passcodeProtected: Bool) {
+    init(name: String, type: PasswordType, passcodeProtected: Bool, keychainService: String = PassengerKeychainItem.service) {
         self.name = name
         self.type = type
         self.passcodeProtected = passcodeProtected
@@ -37,7 +37,7 @@ struct PassengerKeychainItem {
             sync = false
         }
 
-        self.keychainPasswordItem = KeychainPasswordItem(service: PassengerKeychainItem.service, account: accountName, sync: sync, passcodeProtected: passcodeProtected)
+        self.keychainPasswordItem = KeychainPasswordItem(service: keychainService, account: accountName, sync: sync, passcodeProtected: passcodeProtected)
     }
 
 

@@ -20,7 +20,7 @@ struct KeychainPasswordItem {
 
     // MARK: Properties
 
-    let service: String
+    let service: String?
 
     private(set) var account: String
 
@@ -32,7 +32,7 @@ struct KeychainPasswordItem {
 
     // MARK: Intialization
 
-    init(service: String, account: String, sync: Bool, passcodeProtected: Bool, accessGroup: String? = nil) {
+    init(service: String?, account: String, sync: Bool, passcodeProtected: Bool, accessGroup: String? = nil) {
         self.service = service
         self.account = account
         self.sync = sync
@@ -130,9 +130,9 @@ struct KeychainPasswordItem {
         guard status == noErr || status == errSecItemNotFound else { throw KeychainError.unhandledError(status: status) }
     }
 
-    static func passwordItems(forService service: String, sync: Bool, passcodeProtected: Bool, accessGroup: String? = nil) throws -> [KeychainPasswordItem] {
-        // Build a query for all items that match the service and access group.
-        var query = KeychainPasswordItem.keychainQuery(withService: service, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
+    static func passwordItems(forService service: String?, account: String? = nil, sync: Bool? = nil, passcodeProtected: Bool = false, accessGroup: String? = nil) throws -> [KeychainPasswordItem] {        // Build a query for all items that match the service and access group.
+
+        var query = keychainQuery(withService: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
         query[kSecMatchLimit as String] = kSecMatchLimitAll
         query[kSecReturnAttributes as String] = kCFBooleanTrue
         query[kSecReturnData as String] = kCFBooleanFalse
@@ -156,7 +156,9 @@ struct KeychainPasswordItem {
         var passwordItems = [KeychainPasswordItem]()
         for result in resultData {
             guard let account  = result[kSecAttrAccount as String] as? String else { throw KeychainError.unexpectedItemData }
-
+            let sync = result[kSecAttrSynchronizable as String] as? Bool ?? false
+            let passcodeProtected = query[kSecAttrAccessControl as String] != nil
+            let service = query[kSecAttrService as String] as? String
             let passwordItem = KeychainPasswordItem(service: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
             passwordItems.append(passwordItem)
         }
@@ -166,11 +168,17 @@ struct KeychainPasswordItem {
 
     // MARK: Convenience
 
-    private static func keychainQuery(withService service: String, account: String? = nil, sync: Bool, passcodeProtected: Bool, accessGroup: String? = nil) -> [String : AnyObject] {
+    private static func keychainQuery(withService service: String?, account: String? = nil, sync: Bool?, passcodeProtected: Bool, accessGroup: String? = nil) -> [String : AnyObject] {
         var query = [String : AnyObject]()
         query[kSecClass as String] = kSecClassGenericPassword
-        query[kSecAttrService as String] = service as AnyObject?
-        query[kSecAttrSynchronizable as String] = sync as AnyObject
+        if let service = service {
+            query[kSecAttrService as String] = service as AnyObject?
+        }
+        if let sync = sync {
+            query[kSecAttrSynchronizable as String] = sync as AnyObject
+        } else {
+            query[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
+        }
 
         if passcodeProtected {
             let access = SecAccessControlCreateWithFlags(nil, kSecAttrAccessibleWhenUnlockedThisDeviceOnly, .userPresence, nil)

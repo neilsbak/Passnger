@@ -11,21 +11,12 @@ import CryptoKit
 
 struct PasswordItem: Identifiable, Equatable {
 
-    init(userName: String, masterPassword: MasterPassword, url: String, serviceName: String) {
+    init(userName: String, masterPassword: MasterPassword, url: String, serviceName: String, keychainService: String = PassengerKeychainItem.service) {
         self.userName = userName
         self.masterPassword = masterPassword
         self.url = url
         self.serviceName = serviceName
-    }
-
-    init(userName: String, masterPassword: MasterPassword, hashedMasterPassword: String, url: String, serviceName: String) {
-        assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
-        self.init(userName: userName, masterPassword: masterPassword, url: url, serviceName: serviceName)
-        let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
-        let password = PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url)
-        let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
-        let combined = sealBox.combined!
-        storePassword(combined.base64EncodedString())
+        self.keychainService = keychainService
     }
 
     var id: String { userName + url }
@@ -33,11 +24,17 @@ struct PasswordItem: Identifiable, Equatable {
     let url: String
     let serviceName: String
     let masterPassword: MasterPassword
+    var keychainService: String = PassengerKeychainItem.service
 
-    private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: url + "::" + serviceName, type: .account, passcodeProtected: false) }
+    private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: url + "::" + userName, type: .account, passcodeProtected: false, keychainService: keychainService) }
 
-    private func storePassword(_ password: String) {
-        try! passwordKeychainItem.savePassword(password)
+    func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String) {
+        assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
+        let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
+        let password = PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url)
+        let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
+        let combined = sealBox.combined!
+        try! passwordKeychainItem.savePassword(combined.base64EncodedString())
     }
 
     /// Assumes the masterPassword is obtainable in from memory or disk
@@ -76,15 +73,15 @@ struct MasterPassword: Identifiable, Equatable {
         case noSave
     }
 
-    init(name: String, securityLevel: SecurityLevel, doubleHashedPassword: String) {
+    init(name: String, securityLevel: SecurityLevel, doubleHashedPassword: String, keychainService: String = PassengerKeychainItem.service) {
         self.name = name
         self.securityLevel = securityLevel
         self.doubleHashedPassword = doubleHashedPassword
     }
 
-    init(name: String, password: String, securityLevel: SecurityLevel) {
+    init(name: String, password: String, securityLevel: SecurityLevel, keychainService: String = PassengerKeychainItem.service) {
         let doubleHashed = MasterPassword.doubleHashPassword(password)
-        self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed)
+        self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed, keychainService: keychainService)
         savePassword(password, securityLevel: securityLevel)
     }
 
@@ -92,8 +89,9 @@ struct MasterPassword: Identifiable, Equatable {
     let name: String
     let securityLevel: SecurityLevel
     let doubleHashedPassword: String
+    let keychainService: String = PassengerKeychainItem.service
 
-    private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: name, type: .master, passcodeProtected: securityLevel == .protectedSave) }
+    private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: name, type: .master, passcodeProtected: securityLevel == .protectedSave, keychainService: keychainService) }
 
     private var inMemoryHashedPassword: String?
 

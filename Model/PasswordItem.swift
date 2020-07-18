@@ -31,7 +31,7 @@ struct PasswordItem: Identifiable, Equatable {
     func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String) {
         assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
-        let password = PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url)
+        let password = try! PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url)
         let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
         let combined = sealBox.combined!
         try! passwordKeychainItem.savePassword(combined.base64EncodedString())
@@ -64,6 +64,8 @@ extension PasswordItem: Codable {
         case masterPassword
     }
 }
+
+
 struct MasterPassword: Identifiable, Equatable {
 
     enum SecurityLevel: String, Codable {
@@ -77,19 +79,20 @@ struct MasterPassword: Identifiable, Equatable {
         self.name = name
         self.securityLevel = securityLevel
         self.doubleHashedPassword = doubleHashedPassword
+        self.keychainService = keychainService
     }
 
     init(name: String, password: String, securityLevel: SecurityLevel, keychainService: String = PassengerKeychainItem.service) {
         let doubleHashed = MasterPassword.doubleHashPassword(password)
         self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed, keychainService: keychainService)
-        savePassword(password, securityLevel: securityLevel)
+        savePassword(password)
     }
 
     var id: String { name }
     let name: String
     let securityLevel: SecurityLevel
     let doubleHashedPassword: String
-    let keychainService: String = PassengerKeychainItem.service
+    var keychainService: String = PassengerKeychainItem.service
 
     private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: name, type: .master, passcodeProtected: securityLevel == .protectedSave, keychainService: keychainService) }
 
@@ -110,7 +113,7 @@ struct MasterPassword: Identifiable, Equatable {
         return hashedPassword
     }
 
-    mutating func savePassword(_ password: String, securityLevel: SecurityLevel) {
+    mutating func savePassword(_ password: String) {
         let hashedPassword = MasterPassword.hashPassword(password)
         if securityLevel != .noSave {
             inMemoryHashedPassword = hashedPassword
@@ -147,85 +150,5 @@ extension MasterPassword: Codable {
         case name
         case securityLevel
         case doubleHashedPassword
-    }
-}
-
-enum CharacterType: CaseIterable {
-    case lowerCase
-    case upperCase
-    case symbol
-    case number
-
-    static private let lowerCaseCharacterSet = CharacterSet.lowercaseLetters
-    static private let upperCaseCharacterSet = CharacterSet.uppercaseLetters
-    static private let symbolCharacterSet = CharacterSet(charactersIn: "/@$?#%!^+:-_=")
-    static private let numberCharacterSet = CharacterSet(charactersIn: "0123456789")
-
-    var characterSet: CharacterSet {
-        switch self {
-        case .lowerCase:
-            return CharacterType.lowerCaseCharacterSet
-        case .upperCase:
-            return CharacterType.upperCaseCharacterSet
-        case .symbol:
-            return CharacterType.symbolCharacterSet
-        case .number:
-            return CharacterType.numberCharacterSet
-        }
-    }
-
-    static func characterTypeForCharacter(_ char: Character) -> CharacterType? {
-        for characterType in CharacterType.allCases {
-            if char.unicodeScalars.contains(where: {characterType.characterSet.contains($0)}) {
-                return characterType
-            }
-        }
-        return nil
-    }
-}
-
-class PasswordGenerator {
-    static private let symbolMap: [Character: Character] = [
-        "A": "@",
-        "B": "$",
-        "C": "?",
-        "D": "#",
-        "E": "%",
-        "F": "!",
-        "G": "^",
-        "H": "+",
-        "I": ":",
-        "K": "-"
-    ]
-
-    static func genPassword(phrase: String, characterCounts: [CharacterType: Int]? = nil) -> String {
-        var charCounts = characterCounts ?? [
-            .lowerCase: 2,
-            .upperCase: 2,
-            .symbol: 2,
-            .number: 2
-        ]
-        var password: String?
-        outer: for i in 0...200 {
-            let hashed = SHA256.hash(data: Data((phrase + String(i)).utf8))
-            let hashString = Data(hashed).base64EncodedString().prefix(16)
-            print("str: " + hashString)
-            var symbolizedHashString = ""
-            for c in hashString {
-                let char = symbolMap[c] ?? c
-                symbolizedHashString.append(char)
-                print(char)
-                let characterType = CharacterType.characterTypeForCharacter(char)!
-                charCounts[characterType] = charCounts[characterType]! - 1
-            }
-            for count in charCounts.values {
-                if count > 0 {
-                    continue outer
-                }
-            }
-            password = symbolizedHashString
-            break
-        }
-        return password!
     }
 }

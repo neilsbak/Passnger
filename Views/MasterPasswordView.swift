@@ -28,8 +28,7 @@ struct MasterPasswordView: View {
                 .disableAutocorrection(true)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .validatedField(errorText: formModel.hintError)
-            Spacer()
-        }.padding()
+        }
     }
 
 }

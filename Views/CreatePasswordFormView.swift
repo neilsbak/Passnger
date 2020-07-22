@@ -55,6 +55,7 @@ struct CreatePasswordFormView: View {
             List {
                 ForEach(model.masterPasswords) { masterPassword in
                     HStack {
+                        //TODO: make the tap area larger
                         Text(masterPassword.name).frame(maxWidth: CGFloat.infinity, alignment: .leading)
                         Spacer()
                         if masterPassword.id == self.formModel.selectedMasterPassword?.id {

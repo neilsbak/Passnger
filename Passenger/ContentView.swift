@@ -9,20 +9,48 @@
 import SwiftUI
 
 struct ContentView: View {
+    // but is swiftUi? Add nav button not clickable after dismiss unless we have this
+    // see https://stackoverflow.com/questions/58512344
+    @Environment(\.presentationMode) var presentation
+
     @ObservedObject var model: Model
     @State private var showCreatePassword = false
     @State private var passwordItemWithoutMasterPassword: PasswordItem?
     @State private var showGetMasterPassword = false
+    @State private var masterPasswordFormModel = MasterPasswordFormModel()
+
+    lazy var blah = model.$passwordItems
 
     var body: some View {
         NavigationView {
-            PasswordsView(model: model) { selectedPasswordItem in
-                guard let password = try! selectedPasswordItem.getPassword() else {
-                    self.passwordItemWithoutMasterPassword = selectedPasswordItem
-                    self.showGetMasterPassword = true
-                    return
+            Group {
+                if self.model.masterPasswords.count == 0 {
+                    VStack {
+                        Text("Enter you master password to get started. This will be the only password you need to remember, but should only be known by you and not written down anywhere.")
+                        MasterPasswordView(formModel: self.$masterPasswordFormModel)
+                        Button(action: {
+                            if self.masterPasswordFormModel.validate() {
+                                let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
+                                self.model.addMasterPassword(masterPassword)
+                                self.masterPasswordFormModel = MasterPasswordFormModel()
+                            }
+                        }) {
+                            Text("Submit")
+                        }
+                        Spacer()
+                    }.padding()
+                } else if model.passwordItems.count == 0 {
+                    Text("You have no saved passwords.")
+                } else {
+                    PasswordsView(model: model) { selectedPasswordItem in
+                        guard let password = try! selectedPasswordItem.getPassword() else {
+                            self.passwordItemWithoutMasterPassword = selectedPasswordItem
+                            self.showGetMasterPassword = true
+                            return
+                        }
+                        UIPasteboard.general.string = password
+                    }
                 }
-                UIPasteboard.general.string = password
             }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
                 let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText ?? "")
                 if doubleHashedPassword != self.passwordItemWithoutMasterPassword!.masterPassword.doubleHashedPassword {
@@ -33,11 +61,13 @@ struct ContentView: View {
                 self.passwordItemWithoutMasterPassword = nil
                 return true
             })
-            .navigationBarTitle("Passwords")
+                .navigationBarTitle(model.masterPasswords.count == 0 ? "Master Password" : "Passwords")
                 .navigationBarItems(trailing: Button(action: {
                     self.showCreatePassword = true;
                 }) {
-                    Image(systemName: "plus")
+                    if model.masterPasswords.count > 0 {
+                        Image(systemName: "plus")
+                    }
                 }.sheet(isPresented: $showCreatePassword) {
                     CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
                         self.model.addPasswordItem(passwordItem)

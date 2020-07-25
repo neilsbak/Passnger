@@ -36,7 +36,11 @@ struct ContentView: View {
             GetMasterPasswordView(masterPassword: self.toolbar.selectedPassword!.masterPassword, showGetMasterPassword: self.$toolbar.showGetMasterPassword) { (hashedMasterPassword) in
                 self.toolbar.copyPassword(hashedMasterPassword: hashedMasterPassword)
             }}
-        ))
+        )).alert(isPresented: self.$toolbar.confirmDelete) { () -> Alert in
+            Alert(title: Text("Delete Password?"), primaryButton: Alert.Button.destructive(Text("Delete")) {
+                self.toolbar.deleteSelectedPassword(fromModel: self.model)
+            }, secondaryButton: Alert.Button.cancel())
+        }
     }
 }
 

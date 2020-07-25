@@ -32,6 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create the SwiftUI view that provides the window contents.
 
         let toolbar = NSToolbar(identifier: "MainToolbar")
+        toolbar.displayMode = .iconOnly
         toolbar.delegate = self
 
         toolbarCancellable = toolbarObservable.$selectedPassword.sink(receiveValue: { passwordItem in
@@ -44,7 +45,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered, defer: false)
-        window.titleVisibility = NSWindow.TitleVisibility.hidden
+        window.title = "Passenger"
+        //window.titleVisibility = NSWindow.TitleVisibility.hidden
         window.center()
         window.setFrameAutosaveName("Main Window")
         window.contentView = NSHostingView(rootView: ContentView(model: Model.loadModel(), toolbar: toolbarObservable))
@@ -60,7 +62,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension NSToolbarItem.Identifier {
-    static let title = NSToolbarItem.Identifier(rawValue: "Title")
     static let createPassword = NSToolbarItem.Identifier(rawValue: "CreatePassword")
     static let delete = NSToolbarItem.Identifier(rawValue: "Delete")
     static let copy = NSToolbarItem.Identifier(rawValue: "Copy")
@@ -69,22 +70,18 @@ extension NSToolbarItem.Identifier {
 extension AppDelegate: NSToolbarDelegate {
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, .title, .flexibleSpace, .copy, .delete, .createPassword]
+        [.flexibleSpace, .copy, .delete, .createPassword]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, .title, .flexibleSpace, .copy, .delete, .createPassword]
+        [.flexibleSpace, .copy, .delete, .createPassword]
     }
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         switch itemIdentifier {
-        case NSToolbarItem.Identifier.title:
-            let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.title)
-            toolbarItem.title = "Passenger"
-            return toolbarItem
         case NSToolbarItem.Identifier.delete:
             let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.delete)
-            toolbarItem.label = "Delete Password"
+            toolbarItem.toolTip = "Delete Password"
             toolbarItem.view = deleteToolbarButton
             return toolbarItem
         case NSToolbarItem.Identifier.copy:
@@ -109,6 +106,7 @@ extension AppDelegate: NSToolbarDelegate {
     }
 
     @objc func deletePassword() {
+        toolbarObservable.confirmDelete = true
     }
 
     @objc func copyPassword() {
@@ -132,11 +130,23 @@ class ToolbarObservable: ObservableObject {
     @Published
     var showGetMasterPassword = false
 
+    @Published
+    var confirmDelete = false
+
     func copyPassword(hashedMasterPassword: String) {
         guard let item = selectedPassword else { return }
         let password = try! item.getPassword(hashedMasterPassword: hashedMasterPassword)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(password, forType: .string)
         showGetMasterPassword = false
+    }
+
+    func deleteSelectedPassword(fromModel model: Model) {
+        guard let deletedPassword = selectedPassword else {
+            return
+        }
+        model.removePasswordItem(deletedPassword)
+        selectedPassword = nil
+        confirmDelete = false
     }
 }

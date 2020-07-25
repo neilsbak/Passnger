@@ -13,11 +13,22 @@ struct ContentView: View {
     @ObservedObject var toolbar: ToolbarObservable
 
     var body: some View {
-        VStack {
-            PasswordsView(model: model, selectedPassword: toolbar.selectedPassword) { passwordItem in
-                self.toolbar.selectedPassword = passwordItem
+        Group {
+            if self.model.masterPasswords.count == 0 && !toolbar.showCreatePassword {
+                IntroSetupView() { masterPasswordFormModel in
+                    let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
+                    self.model.addMasterPassword(masterPassword)
+                }
+            } else if model.passwordItems.count == 0 {
+                Text("You have no saved passwords.")
+            } else {
+                PasswordsView(model: model, selectedPassword: toolbar.selectedPassword) { passwordItem in
+                    self.toolbar.selectedPassword = passwordItem
+                }
             }
-        }.background(EmptyView().sheet(isPresented: $toolbar.showCreatePassword) {
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(EmptyView().sheet(isPresented: $toolbar.showCreatePassword) {
             CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem in
                 self.model.addPasswordItem(passwordItem)
             }

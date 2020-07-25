@@ -38,7 +38,8 @@ struct CreatePasswordView: View {
                             self.showGetMasterPassword = true
                             return
                         }
-                        let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, hashedMasterPassword: hashedMasterPassword, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                        let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                        passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword)
                         self.onSave(passwordItem)
                     }
                 }) {
@@ -71,7 +72,8 @@ struct CreatePasswordView: View {
             }
         }.background(EmptyView().sheet(isPresented: $showGetMasterPassword) {
             GetMasterPasswordView(masterPassword: self.formModel.selectedMasterPassword!, showGetMasterPassword: self.$showGetMasterPassword) { (hashedMasterPassword) in
-                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, hashedMasterPassword: hashedMasterPassword, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, serviceName: self.formModel.websiteName)
+                passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword)
                 self.onSave(passwordItem)
             }
         }))

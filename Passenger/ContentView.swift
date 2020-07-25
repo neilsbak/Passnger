@@ -17,7 +17,6 @@ struct ContentView: View {
     @State private var showCreatePassword = false
     @State private var passwordItemWithoutMasterPassword: PasswordItem?
     @State private var showGetMasterPassword = false
-    @State private var masterPasswordFormModel = MasterPasswordFormModel()
 
     lazy var blah = model.$passwordItems
 
@@ -25,20 +24,10 @@ struct ContentView: View {
         NavigationView {
             Group {
                 if self.model.masterPasswords.count == 0 {
-                    VStack {
-                        Text("Enter you master password to get started. This will be the only password you need to remember, but should only be known by you and not written down anywhere.")
-                        MasterPasswordView(formModel: self.$masterPasswordFormModel)
-                        Button(action: {
-                            if self.masterPasswordFormModel.validate() {
-                                let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
-                                self.model.addMasterPassword(masterPassword)
-                                self.masterPasswordFormModel = MasterPasswordFormModel()
-                            }
-                        }) {
-                            Text("Submit")
-                        }
-                        Spacer()
-                    }.padding()
+                    IntroSetupView() { masterPasswordFormModel in
+                        let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
+                        self.model.addMasterPassword(masterPassword)
+                    }
                 } else if model.passwordItems.count == 0 {
                     Text("You have no saved passwords.")
                 } else {

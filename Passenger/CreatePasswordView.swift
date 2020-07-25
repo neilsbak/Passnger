@@ -35,7 +35,7 @@ struct CreatePasswordView: View {
                 self.showCreateMasterPassword = true
             }.sheet(isPresented: $showCreateMasterPassword) {
                 NavigationView {
-                    MasterPasswordView(formModel: self.$masterPasswordFormModel)
+                    PageLayout(content: MasterPasswordView(formModel: self.$masterPasswordFormModel))
                         .navigationBarTitle("Create Master Password", displayMode: .inline)
                         .navigationBarItems(
                             leading: Button(action: {

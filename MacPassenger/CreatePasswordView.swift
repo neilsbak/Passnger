@@ -17,6 +17,18 @@ struct CreatePasswordView: View {
     @State private var showGetMasterPassword = false
     let onSave: (_ passwordItem: PasswordItem) -> Void
 
+    init(model: Model, presentedAsModal: Binding<Bool>, onSave: @escaping (_ passwordItem: PasswordItem) -> Void) {
+        self.model = model
+        self._presentedAsModal = presentedAsModal
+        self.onSave = onSave
+        var formModel = CreatePasswordFormModel()
+        if model.masterPasswords.count == 1 {
+            formModel.selectedMasterPassword = model.masterPasswords[0]
+        }
+        self._formModel = State(initialValue: formModel)
+    }
+
+
     var body: some View {
         VStack {
             CreatePasswordFormView(model: model, formModel: $formModel) {

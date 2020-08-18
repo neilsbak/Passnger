@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var showCreatePassword = false
     @State private var passwordItemWithoutMasterPassword: PasswordItem?
     @State private var showGetMasterPassword = false
+    @State private var showCopied = false
 
     lazy var blah = model.$passwordItems
 
@@ -31,14 +32,26 @@ struct ContentView: View {
                 } else if model.passwordItems.count == 0 {
                     Text("You have no saved passwords.")
                 } else {
-                    PasswordsView(model: model) { selectedPasswordItem in
+                    PasswordsView(model: model, detailView: { passwordItem in
+                        // the compiler won't use closure's content to infer its type if it's not a single-statement closure.
+                        // Hence the long expression.
+                        PasswordInfoView(passwordItem: self.model.passwordItems[self.model.passwordItems.firstIndex(of: passwordItem)!], onSave: {updatedPasswordItem in
+                            self.model.addPasswordItem(updatedPasswordItem)
+                        }).navigationBarTitle("Password Info")
+                    }) { selectedPasswordItem in
                         guard let password = try! selectedPasswordItem.getPassword() else {
                             self.passwordItemWithoutMasterPassword = selectedPasswordItem
                             self.showGetMasterPassword = true
                             return
                         }
+                        withAnimation {
+                            self.showCopied = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                            self.showCopied = false
+                        }
                         UIPasteboard.general.string = password
-                    }
+                    }.squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
                 }
             }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
                 let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText ?? "")
@@ -55,7 +68,7 @@ struct ContentView: View {
                     self.showCreatePassword = true;
                 }) {
                     if model.masterPasswords.count > 0 {
-                        Image(systemName: "plus")
+                        Image(systemName: "plus").padding()
                     }
                 }.sheet(isPresented: $showCreatePassword) {
                     CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in

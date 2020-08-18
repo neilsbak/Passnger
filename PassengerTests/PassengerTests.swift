@@ -36,7 +36,7 @@ class PassengerTests: XCTestCase {
 
     func getPasswordItem(securityLevel: MasterPassword.SecurityLevel) -> PasswordItem {
         let masterPassword = getMasterPassword(securityLevel: securityLevel)
-        let passwordItem = PasswordItem(userName: "tester", masterPassword: masterPassword, url: "test.com", serviceName: "Test Service", keychainService: PassengerTests.keychainService)
+        let passwordItem = PasswordItem(userName: "tester", masterPassword: masterPassword, url: "test.com", resourceDescription: "Test Service", keychainService: PassengerTests.keychainService)
         return passwordItem
     }
 
@@ -46,7 +46,7 @@ class PassengerTests: XCTestCase {
 
     func getPasswordItem2(securityLevel: MasterPassword.SecurityLevel) -> PasswordItem {
         let masterPassword = getMasterPassword(securityLevel: securityLevel)
-        let passwordItem = PasswordItem(userName: "tester2", masterPassword: masterPassword, url: "test.com", serviceName: "Test Service", keychainService: PassengerTests.keychainService)
+        let passwordItem = PasswordItem(userName: "tester2", masterPassword: masterPassword, url: "test.com", resourceDescription: "Test Service", keychainService: PassengerTests.keychainService)
         return passwordItem
     }
 
@@ -62,6 +62,17 @@ class PassengerTests: XCTestCase {
         XCTAssert(model.passwordItems[0].userName == "tester" && model.passwordItems.count == 2)
         let loadedModel = Model.loadModel(keychainService: PassengerTests.keychainService)
         XCTAssert(loadedModel.passwordItems[0].userName == "tester")
+    }
+
+    func testUpdatePassword() throws {
+        model.addPasswordItem(getPasswordItem(securityLevel: .noSave))
+        var passwordItem = getPasswordItem2(securityLevel: .noSave)
+        XCTAssert(passwordItem.numRenewals == 0)
+        model.addPasswordItem(passwordItem)
+        passwordItem.numRenewals = 1
+        model.addPasswordItem(passwordItem)
+        XCTAssert(model.passwordItems.count == 2)
+        XCTAssert(model.passwordItems[1].numRenewals == 1)
     }
 
     func testRemovePassword() throws {

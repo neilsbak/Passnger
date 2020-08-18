@@ -11,18 +11,22 @@ import CryptoKit
 
 struct PasswordItem: Identifiable, Equatable {
 
-    init(userName: String, masterPassword: MasterPassword, url: String, serviceName: String, keychainService: String = PassengerKeychainItem.service) {
+    init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, keychainService: String = PassengerKeychainItem.service, created: Date = Date(), numRenewals: Int = 0) {
         self.userName = userName
         self.masterPassword = masterPassword
         self.url = url
-        self.serviceName = serviceName
+        self.resourceDescription = resourceDescription
         self.keychainService = keychainService
+        self.created = created
+        self.numRenewals = numRenewals
     }
 
-    var id: String { userName + url }
+    var id: String { userName + url + String(numRenewals) }
     let userName: String
     let url: String
-    let serviceName: String
+    let resourceDescription: String
+    let created: Date
+    var numRenewals: Int
     let masterPassword: MasterPassword
     var keychainService: String = PassengerKeychainItem.service
 
@@ -31,7 +35,7 @@ struct PasswordItem: Identifiable, Equatable {
     func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String) {
         assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
-        let password = try! PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url)
+        let password = try! PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url + String(numRenewals))
         let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
         let combined = sealBox.combined!
         try! passwordKeychainItem.savePassword(combined.base64EncodedString())
@@ -54,14 +58,20 @@ struct PasswordItem: Identifiable, Equatable {
         return String(data: textData, encoding: .utf8)!
     }
 
+    static func ==(lhs: PasswordItem, rhs: PasswordItem) -> Bool {
+        return lhs.userName == rhs.userName && lhs.url == rhs.url
+    }
+
 }
 
 extension PasswordItem: Codable {
     enum CodingKeys: CodingKey {
         case userName
         case url
-        case serviceName
+        case resourceDescription
         case masterPassword
+        case created
+        case numRenewals
     }
 }
 

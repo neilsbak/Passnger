@@ -25,6 +25,15 @@ extension View {
             return self
         #endif
     }
+
+    func keyboardNumeric() -> some View {
+        #if os(iOS)
+            return keyboardType(.numberPad)
+        #else
+            return self
+        #endif
+    }
+
 }
 
 #if os(macOS)
@@ -32,3 +41,9 @@ extension NSColor {
     static var label: NSColor { .labelColor }
 }
 #endif
+
+struct ViewExtensions_Previews: PreviewProvider {
+    static var previews: some View {
+        /*@START_MENU_TOKEN@*/Text("Hello, World!")/*@END_MENU_TOKEN@*/
+    }
+}

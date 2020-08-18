@@ -26,7 +26,7 @@ public class Model: ObservableObject {
         masterKeychainItem = Model.masterKeychainItem(keychainService: keychainService)
     }
 
-    @Published private(set) var passwordItems = [PasswordItem]()
+    @Published var passwordItems = [PasswordItem]()
 
     @Published private(set) var masterPasswords = [MasterPassword]()
 
@@ -35,12 +35,20 @@ public class Model: ObservableObject {
     static let passwordItemsKeychainAccountName = "PasswordItems"
 
     func addPasswordItem(_ passwordItem: PasswordItem) {
-        passwordItems.append(passwordItem)
+        if let index = passwordItems.firstIndex(of: passwordItem) {
+            passwordItems[index] = passwordItem
+        } else {
+            passwordItems.append(passwordItem)
+        }
         saveModel()
     }
 
     func addMasterPassword(_ masterPassword: MasterPassword) {
-        masterPasswords.append(masterPassword);
+        if let index = masterPasswords.firstIndex(of: masterPassword) {
+            masterPasswords[index] = masterPassword
+        } else {
+            masterPasswords.append(masterPassword);
+        }
         saveModel()
     }
 
@@ -99,8 +107,8 @@ public class Model: ObservableObject {
             MasterPassword(name: "Test 2", password: "jklj", securityLevel: .noSave)
         ]
         model.passwordItems = [
-            PasswordItem(userName: "neil", masterPassword: model.masterPasswords[0], url: "apple.com", serviceName: "Apple"),
-            PasswordItem(userName: "neil123", masterPassword: model.masterPasswords[1], url: "google.com", serviceName: "Google")
+            PasswordItem(userName: "neil", masterPassword: model.masterPasswords[0], url: "apple.com", resourceDescription: "Apple"),
+            PasswordItem(userName: "neil123", masterPassword: model.masterPasswords[1], url: "google.com", resourceDescription: "Google")
         ]
         return model
     }

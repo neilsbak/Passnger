@@ -85,9 +85,6 @@ extension View {
     }
 
     func masterPasswordAlert(masterPassword: MasterPassword?, isPresented: Binding<Bool>, enteredPassword: @escaping (String) -> Void) -> some View {
-            if masterPassword == nil || isPresented.wrappedValue == false {
-                return AnyView(self)
-            }
             return AnyView(self.alert(isPresented: isPresented, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
                 guard let passwordText = passwordText else {
                     return false

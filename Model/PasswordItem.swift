@@ -78,6 +78,10 @@ extension PasswordItem: Codable {
 
 struct MasterPassword: Identifiable, Equatable {
 
+    enum MasterPasswordError: Error {
+        case PassowordDoesNotMatch
+    }
+
     enum SecurityLevel: String, Codable {
         case save
         case protectedSave
@@ -95,7 +99,7 @@ struct MasterPassword: Identifiable, Equatable {
     init(name: String, password: String, securityLevel: SecurityLevel, keychainService: String = PassengerKeychainItem.service) {
         let doubleHashed = MasterPassword.doubleHashPassword(password)
         self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed, keychainService: keychainService)
-        savePassword(password)
+        try! savePassword(password)
     }
 
     var id: String { name }
@@ -111,6 +115,7 @@ struct MasterPassword: Identifiable, Equatable {
     /// Master Passwords may not have the password saved in the keychain if was created on another device.
     /// If this function returns nil, then it is up to the UI to get the master password from the user.
     func getHashedPassword() throws -> String? {
+        return nil
         if let inMemoryHashedPassword = inMemoryHashedPassword, securityLevel != .noSave{
             return inMemoryHashedPassword
         }
@@ -123,7 +128,11 @@ struct MasterPassword: Identifiable, Equatable {
         return hashedPassword
     }
 
-    mutating func savePassword(_ password: String) {
+    mutating func savePassword(_ password: String) throws {
+        let doubleHashedPassword = MasterPassword.doubleHashPassword(password)
+        if doubleHashedPassword != self.doubleHashedPassword {
+            throw MasterPasswordError.PassowordDoesNotMatch
+        }
         let hashedPassword = MasterPassword.hashPassword(password)
         if securityLevel != .noSave {
             inMemoryHashedPassword = hashedPassword

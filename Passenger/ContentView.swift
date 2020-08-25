@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    // but is swiftUi? Add nav button not clickable after dismiss unless we have this
+    // Add nav button not clickable after dismiss unless we have this
     // see https://stackoverflow.com/questions/58512344
     @Environment(\.presentationMode) var presentation
 
@@ -32,13 +32,7 @@ struct ContentView: View {
                 } else if model.passwordItems.count == 0 {
                     Text("You have no saved passwords.")
                 } else {
-                    PasswordsView(model: model, detailView: { passwordItem in
-                        // the compiler won't use closure's content to infer its type if it's not a single-statement closure.
-                        // Hence the long expression.
-                        PasswordInfoView(passwordItem: self.model.passwordItems[self.model.passwordItems.firstIndex(of: passwordItem)!], onSave: {updatedPasswordItem in
-                            self.model.addPasswordItem(updatedPasswordItem)
-                        }).navigationBarTitle("Password Info")
-                    }) { selectedPasswordItem in
+                    PasswordsView(model: model) { selectedPasswordItem in
                         guard let password = try! selectedPasswordItem.getPassword() else {
                             self.passwordItemWithoutMasterPassword = selectedPasswordItem
                             self.showGetMasterPassword = true
@@ -51,31 +45,28 @@ struct ContentView: View {
                             self.showCopied = false
                         }
                         UIPasteboard.general.string = password
-                    }.squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
+                    }
+                    .squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
                 }
-            }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
-                let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText ?? "")
-                if doubleHashedPassword != self.passwordItemWithoutMasterPassword!.masterPassword.doubleHashedPassword {
-                    return false
+            }
+            .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { passwordText in
+                    let hashedPassword = MasterPassword.hashPassword(passwordText)
+                    UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
+                    self.model.savePassword(passwordText, forMasterPassword: self.passwordItemWithoutMasterPassword!.masterPassword)
+                    self.passwordItemWithoutMasterPassword = nil
+            }
+            .navigationBarTitle(model.masterPasswords.count == 0 ? "Master Password" : "Passwords")
+            .navigationBarItems(trailing: Button(action: {
+                self.showCreatePassword = true;
+            }) {
+                if model.masterPasswords.count > 0 {
+                    Image(systemName: "plus").padding()
                 }
-                let hashedPassword = MasterPassword.hashPassword(passwordText!)
-                UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
-                self.passwordItemWithoutMasterPassword = nil
-                return true
+            }.sheet(isPresented: $showCreatePassword) {
+                CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
+                    self.model.addPasswordItem(passwordItem)
+                }
             })
-                .navigationBarTitle(model.masterPasswords.count == 0 ? "Master Password" : "Passwords")
-                .navigationBarItems(trailing: Button(action: {
-                    self.showCreatePassword = true;
-                }) {
-                    if model.masterPasswords.count > 0 {
-                        Image(systemName: "plus").padding()
-                    }
-                }.sheet(isPresented: $showCreatePassword) {
-                    CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
-                        self.model.addPasswordItem(passwordItem)
-                    }
-                }
-            )
         }
     }
 }

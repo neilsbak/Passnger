@@ -8,23 +8,21 @@
 
 import SwiftUI
 
-struct PasswordsView<DetailView: View>: View {
+struct PasswordsView: View {
     @ObservedObject var model: Model
     let selectedPassword: PasswordItem?
-    let detailView: ((PasswordItem) -> DetailView)?
     let onSelected: ((PasswordItem) -> Void)?
 
-    init(model: Model, selectedPassword: PasswordItem? = nil, detailView: ((PasswordItem) -> DetailView)? = nil, onSelected: ((PasswordItem) -> Void)? = nil) {
+    init(model: Model, selectedPassword: PasswordItem? = nil, onSelected: ((PasswordItem) -> Void)? = nil) {
         self.model = model
         self.selectedPassword = selectedPassword
-        self.detailView = detailView
         self.onSelected = onSelected
     }
 
     private let rowHeight: CGFloat = 32
 
     private func rowBody(passwordItem: PasswordItem) -> some View {
-        PasswordItemRow(passwordItem: passwordItem, detailView: self.detailView?(passwordItem))
+        PasswordItemRow(passwordItem: passwordItem, model: self.model)
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: self.rowHeight)
             .contentShape(Rectangle())
@@ -44,18 +42,13 @@ struct PasswordsView<DetailView: View>: View {
     }
 }
 
-extension PasswordsView where DetailView == EmptyView {
 
-    init(model: Model, selectedPassword: PasswordItem? = nil, onSelected: ((PasswordItem) -> Void)? = nil) {
-        self.init(model: model, selectedPassword: selectedPassword, detailView: nil, onSelected: onSelected)
-    }
-
-}
-
-struct PasswordItemRow<DetailView: View>: View {
+struct PasswordItemRow: View {
+    @State private var hashedMasterPassword: String?
+    @State private var showGetMasterPassword = false
     @State private var linkIsActive = false
     let passwordItem: PasswordItem
-    let detailView: DetailView?
+    let model: Model
 
     var body: some View {
         HStack {
@@ -67,16 +60,34 @@ struct PasswordItemRow<DetailView: View>: View {
                     .opacity(0.625)
             }
             Spacer()
-            detailView.map { dv in
-                Button(action: { self.linkIsActive = true }) {
-                    ZStack {
-                        NavigationLink(destination: dv, isActive: self.$linkIsActive) {
+            #if os(iOS)
+            Button(action: {
+                self.hashedMasterPassword = try? self.passwordItem.masterPassword.getHashedPassword()
+                self.showGetMasterPassword = (self.hashedMasterPassword == nil)
+                self.linkIsActive = !self.showGetMasterPassword
+            }) {
+                ZStack {
+                    if linkIsActive {
+                        NavigationLink(
+                            destination: PasswordInfoView(passwordItem: passwordItem) {updatedPasswordItem in
+                                self.model.addPasswordItem(updatedPasswordItem)
+                            },
+                            isActive: self.$linkIsActive
+                        ) {
                             EmptyView()
-                            }.frame(width: 24, height: 24).padding()
-                        Image("info").resizable().frame(width: 24, height: 24).padding()
+                        }
                     }
-                }.buttonStyle(BorderlessButtonStyle())
+                    Image("info").resizable().frame(width: 24, height: 24).padding()
+                }
             }
+            .buttonStyle(BorderlessButtonStyle())
+            .frame(width: 24, height: 24).padding()
+            #endif
+        }.masterPasswordAlert(masterPassword: self.passwordItem.masterPassword, isPresented: $showGetMasterPassword) { (passwordText) in
+                self.model.savePassword(passwordText, forMasterPassword: self.passwordItem.masterPassword)
+                self.hashedMasterPassword = MasterPassword.hashPassword(passwordText)
+                self.showGetMasterPassword = false
+                self.linkIsActive = true
         }
     }
 

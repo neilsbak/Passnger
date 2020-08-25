@@ -79,7 +79,25 @@ public struct TextAlert {
 }
 
 extension View {
-    public func alert(isPresented: Binding<Bool>, _ alert: TextAlert) -> some View {
+
+    func alert(isPresented: Binding<Bool>, _ alert: TextAlert) -> some View {
         AlertWrapper(isPresented: isPresented, alert: alert, content: self)
+    }
+
+    func masterPasswordAlert(masterPassword: MasterPassword?, isPresented: Binding<Bool>, enteredPassword: @escaping (String) -> Void) -> some View {
+            if masterPassword == nil || isPresented.wrappedValue == false {
+                return AnyView(self)
+            }
+            return AnyView(self.alert(isPresented: isPresented, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
+                guard let passwordText = passwordText else {
+                    return false
+                }
+                let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText)
+                if doubleHashedPassword != masterPassword!.doubleHashedPassword {
+                    return false
+                }
+                enteredPassword(passwordText)
+                return true
+            }))
     }
 }

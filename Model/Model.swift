@@ -72,6 +72,12 @@ public class Model: ObservableObject {
         saveModel()
     }
 
+    func savePassword(_ password: String, forMasterPassword masterPassword: MasterPassword) {
+        if let index = masterPasswords.firstIndex(of: masterPassword) {
+            try! masterPasswords[index].savePassword(password)
+        }
+    }
+
     func saveModel() {
         let masterPasswordData = try! JSONEncoder().encode(masterPasswords)
         let masterPasswordJson = String(data: masterPasswordData, encoding: .utf8)!

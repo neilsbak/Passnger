@@ -27,32 +27,37 @@ struct ContentView: View {
                 if self.model.masterPasswords.count == 0 {
                     IntroSetupView() { masterPasswordFormModel in
                         let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
-                        self.model.addMasterPassword(masterPassword)
+                        self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
                     }
                 } else if model.passwordItems.count == 0 {
                     Text("You have no saved passwords.")
                 } else {
                     PasswordsView(model: model) { selectedPasswordItem in
-                        guard let password = try! selectedPasswordItem.getPassword() else {
-                            self.passwordItemWithoutMasterPassword = selectedPasswordItem
-                            self.showGetMasterPassword = true
+                        switch try! selectedPasswordItem.getPassword() {
+                        case .cancelled:
                             return
+                        case .value(let password):
+                            guard let password = password else {
+                                self.passwordItemWithoutMasterPassword = selectedPasswordItem
+                                self.showGetMasterPassword = true
+                                return
+                            }
+                            withAnimation {
+                                self.showCopied = true
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                self.showCopied = false
+                            }
+                            UIPasteboard.general.string = password
                         }
-                        withAnimation {
-                            self.showCopied = true
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            self.showCopied = false
-                        }
-                        UIPasteboard.general.string = password
                     }
                     .squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
                 }
             }
             .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { passwordText in
                     let hashedPassword = MasterPassword.hashPassword(passwordText)
+                    self.model.addMasterPassword(self.passwordItemWithoutMasterPassword!.masterPassword, passwordText: passwordText)
                     UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
-                    self.model.savePassword(passwordText, forMasterPassword: self.passwordItemWithoutMasterPassword!.masterPassword)
                     self.passwordItemWithoutMasterPassword = nil
             }
             .navigationBarTitle(model.masterPasswords.count == 0 ? "Master Password" : "Passwords")
@@ -63,8 +68,8 @@ struct ContentView: View {
                     Image(systemName: "plus").padding()
                 }
             }.sheet(isPresented: $showCreatePassword) {
-                CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem in
-                    self.model.addPasswordItem(passwordItem)
+                CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { (passwordItem, hashedPassword) in
+                    self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedPassword)
                 }
             })
         }

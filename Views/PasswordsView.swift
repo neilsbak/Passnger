@@ -62,15 +62,26 @@ struct PasswordItemRow: View {
             Spacer()
             #if os(iOS)
             Button(action: {
-                self.hashedMasterPassword = try? self.passwordItem.masterPassword.getHashedPassword()
-                self.showGetMasterPassword = (self.hashedMasterPassword == nil)
-                self.linkIsActive = !self.showGetMasterPassword
+                switch try! self.passwordItem.masterPassword.getHashedPassword() {
+                case .cancelled:
+                    return
+                case .value(let hashedMasterPassword):
+                    self.hashedMasterPassword = hashedMasterPassword
+                    self.showGetMasterPassword = (self.hashedMasterPassword == nil)
+                    self.linkIsActive = !self.showGetMasterPassword
+                }
             }) {
                 ZStack {
+                    EmptyView().masterPasswordAlert(masterPassword: self.passwordItem.masterPassword, isPresented: $showGetMasterPassword) { (passwordText) in
+                        self.model.addMasterPassword(self.passwordItem.masterPassword, passwordText: passwordText)
+                        self.hashedMasterPassword = MasterPassword.hashPassword(passwordText)
+                        self.showGetMasterPassword = false
+                        self.linkIsActive = true
+                    }
                     if linkIsActive {
                         NavigationLink(
                             destination: PasswordInfoView(passwordItem: passwordItem) {updatedPasswordItem in
-                                self.model.addPasswordItem(updatedPasswordItem)
+                                self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
                             },
                             isActive: self.$linkIsActive
                         ) {
@@ -83,11 +94,6 @@ struct PasswordItemRow: View {
             .buttonStyle(BorderlessButtonStyle())
             .frame(width: 24, height: 24).padding()
             #endif
-        }.masterPasswordAlert(masterPassword: self.passwordItem.masterPassword, isPresented: $showGetMasterPassword) { (passwordText) in
-                self.model.savePassword(passwordText, forMasterPassword: self.passwordItem.masterPassword)
-                self.hashedMasterPassword = MasterPassword.hashPassword(passwordText)
-                self.showGetMasterPassword = false
-                self.linkIsActive = true
         }
     }
 

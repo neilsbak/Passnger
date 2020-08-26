@@ -9,6 +9,11 @@
 import Foundation
 import CryptoKit
 
+enum CancellablePasswordText: Equatable {
+    case cancelled
+    case value(String?)
+}
+
 struct PasswordItem: Identifiable, Equatable {
 
     init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, keychainService: String = PassengerKeychainItem.service, created: Date = Date(), numRenewals: Int = 0) {
@@ -43,11 +48,15 @@ struct PasswordItem: Identifiable, Equatable {
 
     /// Assumes the masterPassword is obtainable in from memory or disk
     /// or returns nil otherwise
-    func getPassword() throws -> String? {
-        guard let mPassword = try! masterPassword.getHashedPassword() else {
-            return nil
+    func getPassword() throws -> CancellablePasswordText {
+        let mPassword = try masterPassword.getHashedPassword()
+        switch mPassword {
+        case .cancelled:
+            return .cancelled
+        case .value(let val):
+            guard let val = val else { return .value(nil) }
+            return .value(try getPassword(hashedMasterPassword: val))
         }
-        return try getPassword(hashedMasterPassword: mPassword)
     }
 
     func getPassword(hashedMasterPassword: String) throws -> String {
@@ -99,7 +108,6 @@ struct MasterPassword: Identifiable, Equatable {
     init(name: String, password: String, securityLevel: SecurityLevel, keychainService: String = PassengerKeychainItem.service) {
         let doubleHashed = MasterPassword.doubleHashPassword(password)
         self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed, keychainService: keychainService)
-        try! savePassword(password)
     }
 
     var id: String { name }
@@ -114,15 +122,17 @@ struct MasterPassword: Identifiable, Equatable {
 
     /// Master Passwords may not have the password saved in the keychain if was created on another device.
     /// If this function returns nil, then it is up to the UI to get the master password from the user.
-    func getHashedPassword() throws -> String? {
+    func getHashedPassword() throws -> CancellablePasswordText {
         if let inMemoryHashedPassword = inMemoryHashedPassword, securityLevel != .noSave{
-            return inMemoryHashedPassword
+            return .value(inMemoryHashedPassword)
         }
-        let hashedPassword: String?
+        let hashedPassword: CancellablePasswordText
         do {
-            hashedPassword = try passwordKeychainItem.readPassword()
+            hashedPassword = .value(try passwordKeychainItem.readPassword())
         } catch KeychainPasswordItem.KeychainError.noPassword {
-            hashedPassword = nil
+            hashedPassword = .value(nil)
+        } catch KeychainPasswordItem.KeychainError.cancelled {
+            hashedPassword = .cancelled
         }
         return hashedPassword
     }

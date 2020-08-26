@@ -15,9 +15,9 @@ struct CreatePasswordView: View {
     @State private var masterPasswordFormModel =  MasterPasswordFormModel()
     @State private var showCreateMasterPassword = false
     @State private var showGetMasterPassword = false
-    let onSave: (_ passwordItem: PasswordItem) -> Void
+    let onSave: (_ passwordItem: PasswordItem, _ hashedMasterPassword: String) -> Void
 
-    init(model: Model, presentedAsModal: Binding<Bool>, onSave: @escaping (_ passwordItem: PasswordItem) -> Void) {
+    init(model: Model, presentedAsModal: Binding<Bool>, onSave: @escaping (_ passwordItem: PasswordItem, _ hashedPassword: String) -> Void) {
         self.model = model
         self._presentedAsModal = presentedAsModal
         self.onSave = onSave
@@ -47,7 +47,7 @@ struct CreatePasswordView: View {
                                 self.masterPasswordFormModel.hasSubmitted = true
                                 if (self.masterPasswordFormModel.validate()) {
                                     let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
-                                    self.model.addMasterPassword(masterPassword)
+                                    self.model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
                                     self.formModel.selectedMasterPassword = masterPassword
                                     self.showCreateMasterPassword = false
                                 }
@@ -62,8 +62,7 @@ struct CreatePasswordView: View {
                 }
                 let hashedPassword = MasterPassword.hashPassword(passwordText!)
                 let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName)
-                passwordItem.storePasswordFromHashedMasterPassword(hashedPassword)
-                self.onSave(passwordItem)
+                self.onSave(passwordItem, hashedPassword)
                 return true
             })
                 .navigationBarTitle("Create Password", displayMode: .inline)
@@ -77,13 +76,19 @@ struct CreatePasswordView: View {
                         self.formModel.hasSubmitted = true
                         if self.formModel.validate()  {
                             self.presentedAsModal = false
-                            guard let hashedMasterPassword = try! self.formModel.selectedMasterPassword?.getHashedPassword() else {
-                                self.showGetMasterPassword = true
+                            guard let selectedMasterPassword = self.formModel.selectedMasterPassword else { return }
+                            let fetched = try! selectedMasterPassword.getHashedPassword()
+                            switch fetched {
+                            case .cancelled:
                                 return
+                            case .value(let hashedMasterPassword):
+                                guard let hashedMasterPassword = hashedMasterPassword else {
+                                    self.showGetMasterPassword = true
+                                    return
+                                }
+                                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName)
+                                self.onSave(passwordItem, hashedMasterPassword)
                             }
-                            let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName)
-                            passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword)
-                            self.onSave(passwordItem)
                         }
                     }) {
                         Text("Save")
@@ -98,6 +103,6 @@ struct CreatePasswordView: View {
 
 struct CreatePasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding<Bool>(get: { true }, set: {_ in })) { _ in }
+        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding<Bool>(get: { true }, set: {_ in })) { _, _ in }
     }
 }

@@ -34,21 +34,23 @@ public class Model: ObservableObject {
     static let masterPasswordsKeychainAccountName = "MasterPasswords"
     static let passwordItemsKeychainAccountName = "PasswordItems"
 
-    func addPasswordItem(_ passwordItem: PasswordItem) {
+    func addPasswordItem(_ passwordItem: PasswordItem, hashedMasterPassword: String) {
         if let index = passwordItems.firstIndex(of: passwordItem) {
             passwordItems[index] = passwordItem
         } else {
             passwordItems.append(passwordItem)
         }
+        passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword)
         saveModel()
     }
 
-    func addMasterPassword(_ masterPassword: MasterPassword) {
+    func addMasterPassword(_ masterPassword: MasterPassword, passwordText: String) {
         if let index = masterPasswords.firstIndex(of: masterPassword) {
             masterPasswords[index] = masterPassword
         } else {
             masterPasswords.append(masterPassword);
         }
+        try! masterPasswords[masterPasswords.firstIndex(of: masterPassword)!].savePassword(passwordText)
         saveModel()
     }
 
@@ -70,12 +72,6 @@ public class Model: ObservableObject {
     func removeMasterPasswords(atOffsets indexSet: IndexSet) {
         masterPasswords.remove(atOffsets: indexSet)
         saveModel()
-    }
-
-    func savePassword(_ password: String, forMasterPassword masterPassword: MasterPassword) {
-        if let index = masterPasswords.firstIndex(of: masterPassword) {
-            try! masterPasswords[index].savePassword(password)
-        }
     }
 
     func saveModel() {

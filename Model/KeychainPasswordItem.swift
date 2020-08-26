@@ -15,6 +15,7 @@ struct KeychainPasswordItem {
         case noPassword
         case unexpectedPasswordData
         case unexpectedItemData
+        case cancelled
         case unhandledError(status: OSStatus)
     }
 
@@ -60,6 +61,7 @@ struct KeychainPasswordItem {
 
         // Check the return status and throw an error if appropriate.
         guard status != errSecItemNotFound else { throw KeychainError.noPassword }
+        guard status != errSecUserCanceled else { throw KeychainError.cancelled }
         guard status == noErr else { throw KeychainError.unhandledError(status: status) }
 
         // Parse the password string from the query result.

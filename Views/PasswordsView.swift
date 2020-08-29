@@ -28,7 +28,7 @@ struct PasswordsView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 self.onSelected?(passwordItem)
-        }.listRowBackground((self.selectedPassword == nil ? Color.clear : Color.blue).frame(height: self.rowHeight))
+        }.listRowBackground((self.selectedPassword == passwordItem ? Color.blue : Color.clear).frame(height: self.rowHeight))
     }
 
     var body: some View {

@@ -11,6 +11,9 @@ import Combine
 
 public class Model: ObservableObject {
 
+    static let masterPasswordsKeychainAccountName = "MasterPasswords"
+    static let passwordItemsKeychainAccountName = "PasswordItems"
+
     private static func passwordKeychainItem(keychainService: String) -> KeychainPasswordItem {
         return KeychainPasswordItem(service: keychainService, account: Model.passwordItemsKeychainAccountName, sync: true, passcodeProtected: false)
     }
@@ -25,24 +28,25 @@ public class Model: ObservableObject {
     @Published private(set) var masterPasswords = [MasterPassword]()
     @Published var searchText: String = ""
     @Published private(set) var shownPasswordItems = [PasswordItem]()
-    private var searchPublisher: Cancellable? = nil
+    private var shownPasswordItemsCancellable: Cancellable? = nil
+    private var shownSelectedPasswordCancellable: Cancellable? = nil
+
+    private var shownPasswordItemsPublisher: AnyPublisher<[PasswordItem], Never> {
+        Publishers.CombineLatest($passwordItems, $searchText)
+        .debounce(for: 0.2, scheduler: RunLoop.main)
+        .map { items, text in
+            if text == "" {
+                return items
+            }
+            return items.filter { ($0.userName + $0.resourceDescription + $0.url).range(of: text, options: .caseInsensitive) != nil }
+        }.eraseToAnyPublisher()
+    }
 
     init(keychainService: String = PassengerKeychainItem.service) {
         passwordKeychainItem = Model.passwordKeychainItem(keychainService: keychainService)
         masterKeychainItem = Model.masterKeychainItem(keychainService: keychainService)
-        searchPublisher = Publishers.CombineLatest($passwordItems, $searchText)
-            .debounce(for: 0.2, scheduler: RunLoop.main)
-            .map { items, text in
-                if text == "" {
-                    return items
-                }
-                return items.filter { ($0.userName + $0.resourceDescription + $0.url).range(of: text, options: .caseInsensitive) != nil }
-            }
-            .assign(to: \.shownPasswordItems, on: self)
+        shownPasswordItemsCancellable = shownPasswordItemsPublisher.assign(to: \.shownPasswordItems, on: self)
     }
-
-    static let masterPasswordsKeychainAccountName = "MasterPasswords"
-    static let passwordItemsKeychainAccountName = "PasswordItems"
 
     func addPasswordItem(_ passwordItem: PasswordItem, hashedMasterPassword: String) {
         if let index = passwordItems.firstIndex(where: { $0.id == passwordItem.id }) {

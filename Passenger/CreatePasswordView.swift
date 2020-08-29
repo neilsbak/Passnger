@@ -9,15 +9,17 @@
 import SwiftUI
 
 struct CreatePasswordView: View {
+    typealias OnSave = (_ passwordItem: PasswordItem, _ hashedMasterPassword: String) -> Void
+
     @ObservedObject var model: Model
     @Binding var presentedAsModal: Bool
     @State private var formModel: CreatePasswordFormModel
     @State private var masterPasswordFormModel =  MasterPasswordFormModel()
     @State private var showCreateMasterPassword = false
     @State private var showGetMasterPassword = false
-    let onSave: (_ passwordItem: PasswordItem, _ hashedMasterPassword: String) -> Void
+    let onSave: OnSave
 
-    init(model: Model, presentedAsModal: Binding<Bool>, onSave: @escaping (_ passwordItem: PasswordItem, _ hashedPassword: String) -> Void) {
+    init(model: Model, presentedAsModal: Binding<Bool>, onSave: @escaping OnSave) {
         self.model = model
         self._presentedAsModal = presentedAsModal
         self.onSave = onSave

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 public class Model: ObservableObject {
 
@@ -20,22 +21,31 @@ public class Model: ObservableObject {
 
     let passwordKeychainItem: KeychainPasswordItem
     let masterKeychainItem: KeychainPasswordItem
+    @Published private(set) var passwordItems = [PasswordItem]()
+    @Published private(set) var masterPasswords = [MasterPassword]()
+    @Published var searchText: String = ""
+    @Published private(set) var shownPasswordItems = [PasswordItem]()
+    private var searchPublisher: Cancellable? = nil
 
     init(keychainService: String = PassengerKeychainItem.service) {
         passwordKeychainItem = Model.passwordKeychainItem(keychainService: keychainService)
         masterKeychainItem = Model.masterKeychainItem(keychainService: keychainService)
+        searchPublisher = Publishers.CombineLatest($passwordItems, $searchText)
+            .debounce(for: 0.2, scheduler: RunLoop.main)
+            .map { items, text in
+                if text == "" {
+                    return items
+                }
+                return items.filter { ($0.userName + $0.resourceDescription + $0.url).range(of: text, options: .caseInsensitive) != nil }
+            }
+            .assign(to: \.shownPasswordItems, on: self)
     }
-
-    @Published var passwordItems = [PasswordItem]()
-
-    @Published private(set) var masterPasswords = [MasterPassword]()
-
 
     static let masterPasswordsKeychainAccountName = "MasterPasswords"
     static let passwordItemsKeychainAccountName = "PasswordItems"
 
     func addPasswordItem(_ passwordItem: PasswordItem, hashedMasterPassword: String) {
-        if let index = passwordItems.firstIndex(of: passwordItem) {
+        if let index = passwordItems.firstIndex(where: { $0.id == passwordItem.id }) {
             passwordItems[index] = passwordItem
         } else {
             passwordItems.append(passwordItem)
@@ -45,22 +55,22 @@ public class Model: ObservableObject {
     }
 
     func addMasterPassword(_ masterPassword: MasterPassword, passwordText: String) {
-        if let index = masterPasswords.firstIndex(of: masterPassword) {
+        if let index = masterPasswords.firstIndex(where: { $0.id == masterPassword.id }) {
             masterPasswords[index] = masterPassword
         } else {
-            masterPasswords.append(masterPassword);
+            masterPasswords.append(masterPassword)
         }
         try! masterPasswords[masterPasswords.firstIndex(of: masterPassword)!].savePassword(passwordText)
         saveModel()
     }
 
     func removePasswordItem(_ passwordItem: PasswordItem) {
-        guard let index = passwordItems.firstIndex(of: passwordItem) else { return }
+        guard let index = passwordItems.firstIndex(where: { $0.id == passwordItem.id }) else { return }
         removePasswordItems(atOffsets: IndexSet(integer: index))
     }
 
     func removeMasterPassword(_ masterPassword: MasterPassword) {
-        guard let index = masterPasswords.firstIndex(of: masterPassword) else { return }
+        guard let index = masterPasswords.firstIndex(where: { $0.id == masterPassword.id }) else { return }
         removeMasterPasswords(atOffsets: IndexSet(integer: index))
     }
 

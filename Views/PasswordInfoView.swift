@@ -10,45 +10,43 @@ import SwiftUI
 
 struct PasswordInfoView: View {
 
-    let passwordItem: PasswordItem
-    @State var numRenewals: String
-    let onSave: (PasswordItem) -> Void
+    @Binding var passwordItem: PasswordItem
 
-    init(passwordItem: PasswordItem, onSave: @escaping (PasswordItem) -> Void) {
-        self.passwordItem = passwordItem
-        self.onSave = onSave
-        self._numRenewals = State(initialValue: String(passwordItem.numRenewals))
+    var textFieldBinding: Binding<String> {
+        Binding<String>(
+            get: { String(self.passwordItem.numRenewals) },
+            set: { text in
+                self.passwordItem.numRenewals = Int(text) ?? self.passwordItem.numRenewals
+            }
+        )
     }
 
     var body: some View {
         return GeometryReader { metrics in
-            List {
-                PasswordInfoViewCell(width: metrics.size.width, title: "Website URL") {
-                    Text(self.passwordItem.url)
-                }
-                PasswordInfoViewCell(width: metrics.size.width, title: "Description") {
-                    Text(self.passwordItem.resourceDescription)
-                }
-                PasswordInfoViewCell(width: metrics.size.width, title: "Username") {
-                    Text(self.passwordItem.userName)
-                }
-                PasswordInfoViewCell(width: metrics.size.width, title: "Date Created") {
-                    Text(DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
-                }
-                PasswordInfoViewCell(width: metrics.size.width, title: "Renewal Number") {
-                    TextField("0", text: self.$numRenewals)
-                        .keyboardNumeric()
-                        .frame(width: 100)
-                        .multilineTextAlignment(.trailing)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    PasswordInfoViewCell(width: metrics.size.width, title: "Website URL") {
+                        Text(self.passwordItem.url)
+                    }
+                    PasswordInfoViewCell(width: metrics.size.width, title: "Description") {
+                        Text(self.passwordItem.resourceDescription)
+                    }
+                    PasswordInfoViewCell(width: metrics.size.width, title: "Username") {
+                        Text(self.passwordItem.userName)
+                    }
+                    PasswordInfoViewCell(width: metrics.size.width, title: "Date Created") {
+                        Text(DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
+                    }
+                    PasswordInfoViewCell(width: metrics.size.width, title: "Renewal Number") {
+                        TextField("0", text: self.textFieldBinding)
+                            .keyboardNumeric()
+                            .frame(width: 100)
+                            .multilineTextAlignment(.trailing)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
 
+                    }
                 }
             }
-        }.onDisappear {
-            print("disappear");
-            var updatedPasswordItem = self.passwordItem;
-            updatedPasswordItem.numRenewals = Int(self.numRenewals) ?? self.passwordItem.numRenewals;
-            self.onSave(updatedPasswordItem)
         }
     }
 }
@@ -68,6 +66,6 @@ struct PasswordInfoViewCell<Content: View>: View {
 
 struct PasswordInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordInfoView(passwordItem: Model.testModel().passwordItems[0], onSave: {_ in })
+        PasswordInfoView(passwordItem: Binding.constant(Model.testModel().passwordItems[0]))
     }
 }

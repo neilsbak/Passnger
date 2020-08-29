@@ -51,7 +51,7 @@ struct CreatePasswordFormView: View {
                         Image("plus.circle").resizable().frame(width: 24, height: 24)
                     }.buttonStyle(BorderlessButtonStyle())
                 }.validatedField(errorText: formModel.masterPasswordError)
-            }.padding([.leading, .top, .trailing])
+            }
             List {
                 ForEach(model.masterPasswords) { masterPassword in
                     HStack {
@@ -69,8 +69,8 @@ struct CreatePasswordFormView: View {
                 }
                 .onDelete() { indexSet in
                     self.model.removeMasterPasswords(atOffsets: indexSet)
-                }.padding([.leading, .trailing])
-            }.frame(minHeight: 160)
+                }
+            }
         }
     }
 }

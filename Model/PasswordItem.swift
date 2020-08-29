@@ -26,7 +26,7 @@ struct PasswordItem: Identifiable, Equatable {
         self.numRenewals = numRenewals
     }
 
-    var id: String { userName + url + String(numRenewals) }
+    var id: String { userName + url }
     let userName: String
     let url: String
     let resourceDescription: String
@@ -65,10 +65,6 @@ struct PasswordItem: Identifiable, Equatable {
         let sealBox = try! AES.GCM.SealedBox(combined: Data(base64Encoded: encryptedPassword)!)
         let textData = try AES.GCM.open(sealBox, using: key)
         return String(data: textData, encoding: .utf8)!
-    }
-
-    static func ==(lhs: PasswordItem, rhs: PasswordItem) -> Bool {
-        return lhs.userName == rhs.userName && lhs.url == rhs.url
     }
 
 }

@@ -15,16 +15,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var window: NSWindow!
     private let toolbarObservable = ToolbarObservable()
+
+    private lazy var model: Model = {
+        return Model.loadModel()
+    }()
+
     private lazy var deleteToolbarButton: NSButton = {
         let button = NSButton(image: NSImage(imageLiteralResourceName: "trash").tint(color: NSColor.textColor), target: self, action: #selector(deletePassword))
         button.bezelStyle = .texturedRounded
         return button
     }()
+
     private lazy var copyButton: NSButton = {
         let button = NSButton(image: NSImage(imageLiteralResourceName: "doc.on.clipboard").tint(color: NSColor.textColor), target: self, action: #selector(copyPassword))
         button.bezelStyle = .texturedRounded
         return button
     }()
+
+    private lazy var createButton: NSButton = {
+        let button = NSButton(image: NSImage(named: NSImage.addTemplateName)!, target: self, action: #selector(createPassword))
+        button.bezelStyle = .texturedRounded
+        return button
+    }()
+
+    private lazy var infoButton: NSButton = {
+        let button = NSButton(image: NSImage(imageLiteralResourceName: "info").tint(color: NSColor.textColor), target: self, action: #selector(showInfo))
+        button.bezelStyle = .texturedRounded
+        return button
+    }()
+
+    private lazy var searchField: NSSearchField = {
+        let searchField = NSSearchField()
+        searchField.delegate = self
+        return searchField
+    }()
+
     private var toolbarCancellable: AnyCancellable?
 
 
@@ -38,6 +63,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         toolbarCancellable = toolbarObservable.$selectedPassword.sink(receiveValue: { passwordItem in
             self.deleteToolbarButton.isEnabled = (passwordItem != nil)
             self.copyButton.isEnabled = (passwordItem != nil)
+            self.infoButton.isEnabled = (passwordItem != nil)
+            self.copyMenuItem?.isEnabled = (passwordItem != nil)
+            self.deleteMenuItem?.isEnabled = (passwordItem != nil)
+            self.infoMenuItem?.isEnabled = (passwordItem != nil)
+
         })
 
         // Create the window and set the content view. 
@@ -49,7 +79,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         //window.titleVisibility = NSWindow.TitleVisibility.hidden
         window.center()
         window.setFrameAutosaveName("Main Window")
-        window.contentView = NSHostingView(rootView: ContentView(model: Model.loadModel(), toolbar: toolbarObservable))
+        window.contentView = NSHostingView(rootView: ContentView(model: model, toolbar: toolbarObservable))
         window.toolbar = toolbar
         window.makeKeyAndOrderFront(nil)
     }
@@ -57,24 +87,68 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
     }
+}
 
+extension AppDelegate {
 
+    private func menuItem(widthTitle title: String) -> NSMenuItem? {
+        return NSApplication.shared.mainMenu?.item(withTitle: title)
+    }
+
+    var copyMenuItem: NSMenuItem? { menuItem(widthTitle: "Copy") }
+    var deleteMenuItem: NSMenuItem? { menuItem(widthTitle: "Delete") }
+    var infoMenuItem: NSMenuItem? { menuItem(widthTitle: "Info") }
+
+    private func disableMenuItems() {
+        copyMenuItem?.isEnabled = false
+        deleteMenuItem?.isEnabled = false
+        infoMenuItem?.isEnabled = false
+    }
+
+    @IBAction func newDocument(_ sender: Any) {
+        createPassword()
+    }
+
+    @IBAction func copy(_ sender: Any) {
+        copyPassword()
+    }
+
+    @IBAction func delete(_ sender: Any) {
+        deletePassword()
+    }
+
+    @IBAction func info(_ sender: Any) {
+        showInfo()
+    }
+
+    @IBAction func find(_ sender: Any) {
+        searchField.becomeFirstResponder()
+    }
+
+}
+
+extension AppDelegate: NSSearchFieldDelegate {
+    func controlTextDidChange(_ obj: Notification) {
+        model.searchText = (obj.object as? NSSearchField)?.stringValue ?? ""
+    }
 }
 
 extension NSToolbarItem.Identifier {
     static let createPassword = NSToolbarItem.Identifier(rawValue: "CreatePassword")
     static let delete = NSToolbarItem.Identifier(rawValue: "Delete")
     static let copy = NSToolbarItem.Identifier(rawValue: "Copy")
+    static let info = NSToolbarItem.Identifier(rawValue: "Info")
+    static let search = NSToolbarItem.Identifier(rawValue: "Search")
 }
 
 extension AppDelegate: NSToolbarDelegate {
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, .copy, .delete, .createPassword]
+        [.createPassword, .flexibleSpace, .copy, .delete, .info, .flexibleSpace, .search]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [.flexibleSpace, .copy, .delete, .createPassword]
+        [.createPassword, .flexibleSpace, .copy, .delete, .info, .flexibleSpace, .search]
     }
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
@@ -90,11 +164,19 @@ extension AppDelegate: NSToolbarDelegate {
             toolbarItem.view = copyButton
             return toolbarItem
         case NSToolbarItem.Identifier.createPassword:
-            let button = NSButton(image: NSImage(named: NSImage.addTemplateName)!, target: self, action: #selector(createPassword))
-            button.bezelStyle = .texturedRounded
             let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.createPassword)
             toolbarItem.label = "Create Password"
-            toolbarItem.view = button
+            toolbarItem.view = createButton
+            return toolbarItem
+        case NSToolbarItem.Identifier.info:
+            let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.info)
+            toolbarItem.label = "Info"
+            toolbarItem.view = infoButton
+            return toolbarItem
+        case NSToolbarItem.Identifier.search:
+            let toolbarItem = NSToolbarItem(itemIdentifier: NSToolbarItem.Identifier.search)
+            toolbarItem.label = "Search"
+            toolbarItem.view = searchField
             return toolbarItem
         default:
             return nil
@@ -111,16 +193,45 @@ extension AppDelegate: NSToolbarDelegate {
 
     @objc func copyPassword() {
         guard let item = toolbarObservable.selectedPassword else { return }
-        guard let password = try! item.getPassword() else {
-            toolbarObservable.showGetMasterPassword = true
+        switch try! item.getPassword() {
+        case .cancelled:
             return
+        case .value(let password):
+            if let password = password {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(password, forType: .string)
+            } else {
+                toolbarObservable.getMasterPasswordReason = .copy
+            }
         }
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(password, forType: .string)
+    }
+
+    @objc func showInfo() {
+        guard let item = toolbarObservable.selectedPassword else { return }
+        switch try! item.masterPassword.getHashedPassword() {
+        case .cancelled:
+            return
+        case .value(let password):
+            if let password = password {
+                toolbarObservable.showInfoHashedMasterPassword = password
+            } else {
+                toolbarObservable.getMasterPasswordReason = .info
+            }
+        }
     }
 }
 
 class ToolbarObservable: ObservableObject {
+
+    enum GetMasterPasswordReason {
+        case copy
+        case info
+        case none
+    }
+
+    @Published
+    var getMasterPasswordReason = GetMasterPasswordReason.none
+
     @Published
     var showCreatePassword = false
 
@@ -128,17 +239,37 @@ class ToolbarObservable: ObservableObject {
     var selectedPassword: PasswordItem?
 
     @Published
-    var showGetMasterPassword = false
-
-    @Published
     var confirmDelete = false
 
-    func copyPassword(hashedMasterPassword: String) {
+    @Published fileprivate var showInfoHashedMasterPassword: String? = nil
+
+    var showInfo: Binding<Bool> {
+        Binding<Bool>(
+            get: { self.showInfoHashedMasterPassword != nil },
+            set: { showFlag in
+                if (!showFlag) {
+                    self.showInfoHashedMasterPassword = nil
+                }
+            }
+        )
+    }
+
+    func gotHashedMasterPassword(_ hashedMasterPassword: String) {
+        switch getMasterPasswordReason {
+        case .copy:
+            copyPassword(hashedMasterPassword: hashedMasterPassword)
+        case .info:
+            showInfoHashedMasterPassword = hashedMasterPassword
+        default:
+            break
+        }
+    }
+
+    private func copyPassword(hashedMasterPassword: String) {
         guard let item = selectedPassword else { return }
         let password = try! item.getPassword(hashedMasterPassword: hashedMasterPassword)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(password, forType: .string)
-        showGetMasterPassword = false
     }
 
     func deleteSelectedPassword(fromModel model: Model) {
@@ -146,7 +277,11 @@ class ToolbarObservable: ObservableObject {
             return
         }
         model.removePasswordItem(deletedPassword)
-        selectedPassword = nil
         confirmDelete = false
+    }
+
+    func changeInfoForPasswordItem(_ passwordItem: PasswordItem, toModel model: Model) {
+        guard let hashedMasterPassword = showInfoHashedMasterPassword else { return }
+        model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
     }
 }

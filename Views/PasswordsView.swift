@@ -33,7 +33,7 @@ struct PasswordsView: View {
 
     var body: some View {
         List {
-            ForEach(model.passwordItems) { item in
+            ForEach(model.shownPasswordItems) { item in
                 self.rowBody(passwordItem: item)
             }.onDelete() { indexSet in
                 self.model.removePasswordItems(atOffsets: indexSet)
@@ -80,7 +80,7 @@ struct PasswordItemRow: View {
                     }
                     if linkIsActive {
                         NavigationLink(
-                            destination: PasswordInfoView(passwordItem: passwordItem) {updatedPasswordItem in
+                            destination: PasswordInfoModifier(passwordItem: passwordItem) {updatedPasswordItem in
                                 self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
                             },
                             isActive: self.$linkIsActive
@@ -96,7 +96,18 @@ struct PasswordItemRow: View {
             #endif
         }
     }
+}
 
+// This only saves the passwordItem when the page is dismissed
+private struct PasswordInfoModifier: View {
+    @State var passwordItem: PasswordItem
+    let onSave: (PasswordItem) -> Void
+
+    var body: some View {
+        return PasswordInfoView(passwordItem: $passwordItem).onDisappear {
+            self.onSave(self.passwordItem)
+        }
+    }
 }
 
 struct PasswordsView_Previews: PreviewProvider {

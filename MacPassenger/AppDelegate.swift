@@ -22,12 +22,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var deleteToolbarButton: NSButton = {
         let button = NSButton(image: NSImage(imageLiteralResourceName: "trash").tint(color: NSColor.textColor), target: self, action: #selector(deletePassword))
+        button.image?.isTemplate = true
         button.bezelStyle = .texturedRounded
         return button
     }()
 
     private lazy var copyButton: NSButton = {
         let button = NSButton(image: NSImage(imageLiteralResourceName: "doc.on.clipboard").tint(color: NSColor.textColor), target: self, action: #selector(copyPassword))
+        button.image?.isTemplate = true
         button.bezelStyle = .texturedRounded
         return button
     }()
@@ -40,6 +42,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var infoButton: NSButton = {
         let button = NSButton(image: NSImage(imageLiteralResourceName: "info").tint(color: NSColor.textColor), target: self, action: #selector(showInfo))
+        button.image?.isTemplate = true
         button.bezelStyle = .texturedRounded
         return button
     }()

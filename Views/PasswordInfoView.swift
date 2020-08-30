@@ -23,18 +23,10 @@ struct PasswordInfoView: View {
 
     @ViewBuilder
     private func contentRows(width: CGFloat) -> some View {
-        PasswordInfoViewCell(width:width, title: "Website URL") {
-            Text(self.passwordItem.url)
-        }
-        PasswordInfoViewCell(width: width, title: "Description") {
-            Text(self.passwordItem.resourceDescription)
-        }
-        PasswordInfoViewCell(width: width, title: "Username") {
-            Text(self.passwordItem.userName)
-        }
-        PasswordInfoViewCell(width: width, title: "Date Created") {
-            Text(DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
-        }
+        PasswordInfoViewCell(width:width, title: "Website URL", valueText: self.passwordItem.url)
+        PasswordInfoViewCell(width: width, title: "Description", valueText: self.passwordItem.resourceDescription)
+        PasswordInfoViewCell(width: width, title: "Username", valueText: self.passwordItem.userName)
+        PasswordInfoViewCell(width: width, title: "Date Created", valueText: DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
         PasswordInfoViewCell(width: width, title: "Renewal Number") {
             TextField("0", text: self.textFieldBinding)
                 .keyboardNumeric()
@@ -73,6 +65,13 @@ struct PasswordInfoViewCell<Content: View>: View {
             self.valueView().padding(.zero).frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
+}
+
+extension PasswordInfoViewCell where Content == Text {
+    init(width: CGFloat, title: String, valueText: String) {
+        self.init(width: width, title: title, valueView: { Text(valueText).foregroundColor(.secondary) })
+    }
+
 }
 
 struct PasswordInfoView_Previews: PreviewProvider {

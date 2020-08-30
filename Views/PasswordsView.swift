@@ -55,9 +55,10 @@ struct PasswordItemRow: View {
             VStack(alignment: .leading) {
                 Text(passwordItem.resourceDescription)
                     .fontWeight(.bold)
+                    .foregroundColor(.primary)
                 Text(passwordItem.userName)
                     .font(.caption)
-                    .opacity(0.625)
+                    .foregroundColor(.secondary)
             }
             Spacer()
             #if os(iOS)

@@ -32,26 +32,28 @@ struct ContentView: View {
                 } else if model.passwordItems.count == 0 {
                     Text("You have no saved passwords.")
                 } else {
-                    PasswordsView(model: model) { selectedPasswordItem in
-                        switch try! selectedPasswordItem.getPassword() {
-                        case .cancelled:
-                            return
-                        case .value(let password):
-                            guard let password = password else {
-                                self.passwordItemWithoutMasterPassword = selectedPasswordItem
-                                self.showGetMasterPassword = true
+                    VStack(spacing: 0) {
+                        SearchBar(text: $model.searchText)
+                        PasswordsView(model: model) { selectedPasswordItem in
+                            switch try! selectedPasswordItem.getPassword() {
+                            case .cancelled:
                                 return
+                            case .value(let password):
+                                guard let password = password else {
+                                    self.passwordItemWithoutMasterPassword = selectedPasswordItem
+                                    self.showGetMasterPassword = true
+                                    return
+                                }
+                                withAnimation {
+                                    self.showCopied = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    self.showCopied = false
+                                }
+                                UIPasteboard.general.string = password
                             }
-                            withAnimation {
-                                self.showCopied = true
-                            }
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                self.showCopied = false
-                            }
-                            UIPasteboard.general.string = password
                         }
-                    }
-                    .squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
+                    }.squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
                 }
             }
             .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { passwordText in

@@ -11,6 +11,7 @@ import SwiftUI
 struct CreatePasswordFormView: View {
     @ObservedObject var model: Model
     @Binding var formModel: CreatePasswordFormModel
+    let includePadding: Bool
     let createMasterPassword: () -> Void
 
     var body: some View {
@@ -51,7 +52,7 @@ struct CreatePasswordFormView: View {
                         Image("plus.circle").resizable().frame(width: 24, height: 24)
                     }.buttonStyle(BorderlessButtonStyle())
                 }.validatedField(errorText: formModel.masterPasswordError)
-            }
+            }.padding(includePadding ? [.leading, .top, .trailing] : [])
             List {
                 ForEach(model.masterPasswords) { masterPassword in
                     HStack {
@@ -69,7 +70,7 @@ struct CreatePasswordFormView: View {
                 }
                 .onDelete() { indexSet in
                     self.model.removeMasterPasswords(atOffsets: indexSet)
-                }
+                }.padding(includePadding ? [.leading, .trailing] : [])
             }
         }
     }
@@ -77,6 +78,6 @@ struct CreatePasswordFormView: View {
 
 struct CreatePasswordForm_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordFormView(model: Model.testModel(), formModel: Binding<CreatePasswordFormModel>(get: { CreatePasswordFormModel() }, set: {_ in }), createMasterPassword: {})
+        CreatePasswordFormView(model: Model.testModel(), formModel: Binding<CreatePasswordFormModel>(get: { CreatePasswordFormModel() }, set: {_ in }), includePadding: true, createMasterPassword: {})
     }
 }

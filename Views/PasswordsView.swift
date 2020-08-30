@@ -19,7 +19,7 @@ struct PasswordsView: View {
         self.onSelected = onSelected
     }
 
-    private let rowHeight: CGFloat = 32
+    private let rowHeight: CGFloat = 44
 
     private func rowBody(passwordItem: PasswordItem) -> some View {
         PasswordItemRow(passwordItem: passwordItem, model: self.model)
@@ -80,9 +80,11 @@ struct PasswordItemRow: View {
                     }
                     if linkIsActive {
                         NavigationLink(
-                            destination: PasswordInfoModifier(passwordItem: passwordItem) {updatedPasswordItem in
-                                self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
-                            },
+                            destination: PasswordInfoModifier(
+                                passwordItem: passwordItem) {updatedPasswordItem in
+                                    self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
+                                }
+                            .navigationBarTitle("Password Info", displayMode: .inline),
                             isActive: self.$linkIsActive
                         ) {
                             EmptyView()

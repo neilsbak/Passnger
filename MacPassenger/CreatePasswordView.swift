@@ -54,7 +54,7 @@ struct CreatePasswordView: View {
         }, onCancel: {
             self.presentedAsModal = false
         }) {
-            CreatePasswordFormView(model: model, formModel: $formModel) {
+            CreatePasswordFormView(model: model, formModel: $formModel, includePadding: false) {
                 self.masterPasswordFormModel = MasterPasswordFormModel()
                 self.showCreateMasterPassword = true
             }

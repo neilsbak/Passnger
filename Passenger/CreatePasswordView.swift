@@ -32,30 +32,34 @@ struct CreatePasswordView: View {
 
     var body: some View {
         NavigationView {
-            CreatePasswordFormView(model: model, formModel: $formModel) {
+            CreatePasswordFormView(model: model, formModel: $formModel, includePadding: true) {
                 self.masterPasswordFormModel = MasterPasswordFormModel()
                 self.showCreateMasterPassword = true
             }.sheet(isPresented: $showCreateMasterPassword) {
                 NavigationView {
-                    PageLayout(content: MasterPasswordView(formModel: self.$masterPasswordFormModel))
-                        .navigationBarTitle("Create Master Password", displayMode: .inline)
-                        .navigationBarItems(
-                            leading: Button(action: {
+                    VStack {
+                        MasterPasswordView(formModel: self.$masterPasswordFormModel)
+                        Spacer()
+                    }
+                    .padding()
+                    .navigationBarTitle("Create Master Password", displayMode: .inline)
+                    .navigationBarItems(
+                        leading: Button(action: {
+                            self.showCreateMasterPassword = false
+                        }) {
+                            Text("Cancel")
+                        },
+                        trailing: Button(action: {
+                            self.masterPasswordFormModel.hasSubmitted = true
+                            if (self.masterPasswordFormModel.validate()) {
+                                let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
+                                self.model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
+                                self.formModel.selectedMasterPassword = masterPassword
                                 self.showCreateMasterPassword = false
-                            }) {
-                                Text("Cancel")
-                            },
-                            trailing: Button(action: {
-                                self.masterPasswordFormModel.hasSubmitted = true
-                                if (self.masterPasswordFormModel.validate()) {
-                                    let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
-                                    self.model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
-                                    self.formModel.selectedMasterPassword = masterPassword
-                                    self.showCreateMasterPassword = false
-                                }
-                            }) {
-                                Text("Save")
-                        })
+                            }
+                        }) {
+                            Text("Save")
+                    })
                 }
             }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
                 let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText ?? "")

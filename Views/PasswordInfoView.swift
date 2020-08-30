@@ -21,32 +21,43 @@ struct PasswordInfoView: View {
         )
     }
 
-    var body: some View {
-        return GeometryReader { metrics in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    PasswordInfoViewCell(width: metrics.size.width, title: "Website URL") {
-                        Text(self.passwordItem.url)
-                    }
-                    PasswordInfoViewCell(width: metrics.size.width, title: "Description") {
-                        Text(self.passwordItem.resourceDescription)
-                    }
-                    PasswordInfoViewCell(width: metrics.size.width, title: "Username") {
-                        Text(self.passwordItem.userName)
-                    }
-                    PasswordInfoViewCell(width: metrics.size.width, title: "Date Created") {
-                        Text(DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
-                    }
-                    PasswordInfoViewCell(width: metrics.size.width, title: "Renewal Number") {
-                        TextField("0", text: self.textFieldBinding)
-                            .keyboardNumeric()
-                            .frame(width: 100)
-                            .multilineTextAlignment(.trailing)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
+    @ViewBuilder
+    private func contentRows(width: CGFloat) -> some View {
+        PasswordInfoViewCell(width:width, title: "Website URL") {
+            Text(self.passwordItem.url)
+        }
+        PasswordInfoViewCell(width: width, title: "Description") {
+            Text(self.passwordItem.resourceDescription)
+        }
+        PasswordInfoViewCell(width: width, title: "Username") {
+            Text(self.passwordItem.userName)
+        }
+        PasswordInfoViewCell(width: width, title: "Date Created") {
+            Text(DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
+        }
+        PasswordInfoViewCell(width: width, title: "Renewal Number") {
+            TextField("0", text: self.textFieldBinding)
+                .keyboardNumeric()
+                .frame(width: 100)
+                .multilineTextAlignment(.trailing)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
 
-                    }
-                }
+        }
+    }
+
+    var body: some View {
+        GeometryReader { metrics in
+        #if os(iOS)
+            List {
+                self.contentRows(width: metrics.size.width)
             }
+        #else
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                self.contentRows(width: metrics.size.width)
+            }
+        }
+        #endif
         }
     }
 }

@@ -11,7 +11,10 @@ import UIKit
 extension UIAlertController {
     convenience init(alert: TextAlert) {
         self.init(title: alert.title, message: nil, preferredStyle: .alert)
-        addTextField { $0.placeholder = alert.placeholder }
+        addTextField {
+            $0.placeholder = alert.placeholder
+            $0.isSecureTextEntry = alert.isSecure
+        }
         addAction(UIAlertAction(title: alert.cancel, style: .cancel) { _ in
             _ = alert.action(nil)
         })
@@ -45,9 +48,10 @@ struct AlertWrapper<Content: View>: UIViewControllerRepresentable {
 
     func updateUIViewController(_ uiViewController: UIHostingController<Content>, context: UIViewControllerRepresentableContext<AlertWrapper>) {
         uiViewController.rootView = content
-        if isPresented && uiViewController.presentedViewController == nil {
+        if isPresented && context.coordinator.alertController == nil {
             var alert = self.alert
             alert.action = { text in
+                context.coordinator.alertController = nil
                 guard let text = text else {
                     self.isPresented = false
                     return false
@@ -62,20 +66,26 @@ struct AlertWrapper<Content: View>: UIViewControllerRepresentable {
                 return isValid
             }
             context.coordinator.alertController = UIAlertController(alert: alert)
-            uiViewController.present(context.coordinator.alertController!, animated: true)
+            DispatchQueue.main.async {
+                uiViewController.present(context.coordinator.alertController!, animated: true)
+            }
         }
         if !isPresented && context.coordinator.alertController != nil && uiViewController.presentedViewController == context.coordinator.alertController {
-            uiViewController.dismiss(animated: true)
+            context.coordinator.alertController = nil
+            DispatchQueue.main.async {
+                uiViewController.dismiss(animated: true)
+            }
         }
     }
 }
 
-public struct TextAlert {
-    public var title: String
-    public var placeholder: String = ""
-    public var accept: String = "OK"
-    public var cancel: String = "Cancel"
-    public var action: (String?) -> Bool
+struct TextAlert {
+    var title: String
+    var placeholder: String = ""
+    var isSecure: Bool = false
+    var accept: String = "OK"
+    var cancel: String = "Cancel"
+    var action: (String?) -> Bool
 }
 
 extension View {
@@ -85,7 +95,7 @@ extension View {
     }
 
     func masterPasswordAlert(masterPassword: MasterPassword?, isPresented: Binding<Bool>, enteredPassword: @escaping (String) -> Void) -> some View {
-            return self.alert(isPresented: isPresented, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
+            return self.alert(isPresented: isPresented, TextAlert(title: "Enter Master Password", placeholder: "Master Password", isSecure: true) { passwordText in
                 guard let passwordText = passwordText else {
                     return false
                 }

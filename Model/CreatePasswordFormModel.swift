@@ -13,11 +13,12 @@ struct CreatePasswordFormModel {
     var websiteName: String = "";
     var websiteUrl: String = ""
     var username: String = ""
+    var passwordLength: Int = 16
     var selectedMasterPassword: MasterPassword?
     var hasSubmitted = false
 
     func validate() -> Bool {
-        return self.websiteUrlError == nil && self.websiteNameError == nil && self.usernameError == nil && self.masterPasswordError == nil;
+        return self.websiteUrlError == nil && self.websiteNameError == nil && self.usernameError == nil && self.masterPasswordError == nil && self.passwordLengthError == nil;
     }
 
     var websiteNameError: String? {
@@ -56,6 +57,16 @@ struct CreatePasswordFormModel {
         }
         if selectedMasterPassword == nil {
             return "This field is required"
+        }
+        return nil
+    }
+
+    var passwordLengthError: String? {
+        if !hasSubmitted {
+            return nil;
+        }
+        if passwordLength <= 0  {
+            return "Please set the password length"
         }
         return nil
     }

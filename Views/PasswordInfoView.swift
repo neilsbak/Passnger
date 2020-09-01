@@ -27,6 +27,8 @@ struct PasswordInfoView: View {
         PasswordInfoViewCell(width: width, title: "Description", valueText: self.passwordItem.resourceDescription)
         PasswordInfoViewCell(width: width, title: "Username", valueText: self.passwordItem.userName)
         PasswordInfoViewCell(width: width, title: "Date Created", valueText: DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
+        PasswordInfoViewCell(width: width, title: "Password Length", valueText: String(self.passwordItem.passwordLength))
+        PasswordInfoViewCell(width: width, title: "Master Password", valueText: String(self.passwordItem.masterPassword.name))
         PasswordInfoViewCell(width: width, title: "Renewal Number") {
             TextField("0", text: self.textFieldBinding)
                 .keyboardNumeric()

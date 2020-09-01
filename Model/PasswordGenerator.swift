@@ -63,11 +63,12 @@ class PasswordGenerator {
     static func genPassword(phrase: String, length: Int = 16, characterCounts: [CharacterType: Int]? = nil) throws -> String {
         var password: String?
         outer: for i in 0...500 {
+            let minSpecialCharChount = max(2, length % 6)
             var charCounts = characterCounts ?? [
-                .lowerCase: 2,
-                .upperCase: 2,
-                .symbol: 2,
-                .number: 2
+                .lowerCase: minSpecialCharChount,
+                .upperCase: minSpecialCharChount,
+                .symbol: minSpecialCharChount,
+                .number: minSpecialCharChount
             ]
             let hashed = SHA256.hash(data: Data((phrase + String(i)).utf8))
             let hashString = Data(hashed).base64EncodedString().prefix(length)

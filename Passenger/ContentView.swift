@@ -24,7 +24,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             Group {
-                if self.model.masterPasswords.count == 0 {
+                if model.passwordItems.count == 0 && self.model.masterPasswords.count == 0 {
                     IntroSetupView() { masterPasswordFormModel in
                         let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
                         self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
@@ -72,6 +72,7 @@ struct ContentView: View {
             }.sheet(isPresented: $showCreatePassword) {
                 CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { (passwordItem, hashedPassword) in
                     self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedPassword)
+                    self.showCreatePassword = false
                 }
             })
         }

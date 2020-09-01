@@ -32,9 +32,17 @@ struct CreatePasswordView: View {
 
     var body: some View {
         NavigationView {
-            CreatePasswordFormView(model: model, formModel: $formModel, includePadding: true) {
-                self.masterPasswordFormModel = MasterPasswordFormModel()
-                self.showCreateMasterPassword = true
+            ZStack {
+                EmptyView().masterPasswordAlert(masterPassword: self.formModel.selectedMasterPassword, isPresented: $showGetMasterPassword, enteredPassword: { passwordText in
+                    let hashedPassword = MasterPassword.hashPassword(passwordText)
+                    let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordLength: self.formModel.passwordLength)
+                    self.model.addMasterPassword(passwordItem.masterPassword, passwordText: passwordText)
+                    self.onSave(passwordItem, hashedPassword)
+                })
+                CreatePasswordFormView(model: model, formModel: $formModel, includePadding: true) {
+                    self.masterPasswordFormModel = MasterPasswordFormModel()
+                    self.showCreateMasterPassword = true
+                }
             }.sheet(isPresented: $showCreateMasterPassword) {
                 NavigationView {
                     VStack {
@@ -55,50 +63,39 @@ struct CreatePasswordView: View {
                                 let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
                                 self.model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
                                 self.formModel.selectedMasterPassword = masterPassword
-                                self.showCreateMasterPassword = false
                             }
                         }) {
                             Text("Save")
                     })
                 }
-            }.alert(isPresented: $showGetMasterPassword, TextAlert(title: "Enter Master Password", placeholder: "Master Password") { passwordText in
-                let doubleHashedPassword = MasterPassword.doubleHashPassword(passwordText ?? "")
-                if doubleHashedPassword != self.formModel.selectedMasterPassword!.doubleHashedPassword {
-                    return false
-                }
-                let hashedPassword = MasterPassword.hashPassword(passwordText!)
-                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName)
-                self.onSave(passwordItem, hashedPassword)
-                return true
-            })
-                .navigationBarTitle("Create Password", displayMode: .inline)
-                .navigationBarItems(
-                    leading: Button(action: {
-                        self.presentedAsModal = false
-                    }) {
-                        Text("Cancel")
-                    },
-                    trailing: Button(action: {
-                        self.formModel.hasSubmitted = true
-                        if self.formModel.validate()  {
-                            self.presentedAsModal = false
-                            guard let selectedMasterPassword = self.formModel.selectedMasterPassword else { return }
-                            let fetched = try! selectedMasterPassword.getHashedPassword()
-                            switch fetched {
-                            case .cancelled:
+            }
+            .navigationBarTitle("Create Password", displayMode: .inline)
+            .navigationBarItems(
+                leading: Button(action: {
+                    self.presentedAsModal = false
+                }) {
+                    Text("Cancel").padding([.top, .trailing, .bottom])
+                },
+                trailing: Button(action: {
+                    self.formModel.hasSubmitted = true
+                    if self.formModel.validate()  {
+                        guard let selectedMasterPassword = self.formModel.selectedMasterPassword else { return }
+                        let fetched = try! selectedMasterPassword.getHashedPassword()
+                        switch fetched {
+                        case .cancelled:
+                            return
+                        case .value(let hashedMasterPassword):
+                            guard let hashedMasterPassword = hashedMasterPassword else {
+                                self.showGetMasterPassword = true
                                 return
-                            case .value(let hashedMasterPassword):
-                                guard let hashedMasterPassword = hashedMasterPassword else {
-                                    self.showGetMasterPassword = true
-                                    return
-                                }
-                                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName)
-                                self.onSave(passwordItem, hashedMasterPassword)
                             }
+                            let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordLength: self.formModel.passwordLength)
+                            self.onSave(passwordItem, hashedMasterPassword)
                         }
-                    }) {
-                        Text("Save")
                     }
+                }) {
+                    Text("Save").padding([.leading, .top, .bottom])
+                }
             )
 
         }

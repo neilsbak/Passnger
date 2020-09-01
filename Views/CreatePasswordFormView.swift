@@ -9,13 +9,15 @@
 import SwiftUI
 
 struct CreatePasswordFormView: View {
+    static private let numberFormatter = NumberFormatter()
+
     @ObservedObject var model: Model
     @Binding var formModel: CreatePasswordFormModel
     let includePadding: Bool
     let createMasterPassword: () -> Void
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Website URL:")
@@ -41,7 +43,17 @@ struct CreatePasswordFormView: View {
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .validatedField(errorText: formModel.usernameError)
                 }
-                Spacer().frame(height: 8)
+                HStack {
+                    Text("Password Length:")
+                    TextField("16", text: Binding<String>(get: { String(self.formModel.passwordLength) }, set: { self.formModel.passwordLength = Int($0) ?? 0}))
+                        .keyboardNumeric()
+                        .frame(width: 60)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .disableAutocorrection(true)
+                        .validatedField(errorText: formModel.passwordLengthError)
+                        .multilineTextAlignment(.center)
+                }
+                Spacer().frame(height: 5)
                 HStack {
                     Text("Choose Master Password")
                     Button(action: {
@@ -49,7 +61,7 @@ struct CreatePasswordFormView: View {
                             self.createMasterPassword()
                         }
                     }) {
-                        Image("plus.circle").resizable().frame(width: 24, height: 24)
+                        Image("plus.circle").resizable().frame(width: 24, height: 24).padding(EdgeInsets(top: 8, leading: 5, bottom: 8, trailing: 12))
                     }.buttonStyle(BorderlessButtonStyle())
                 }.validatedField(errorText: formModel.masterPasswordError)
             }.padding(includePadding ? [.leading, .top, .trailing] : [])

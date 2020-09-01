@@ -16,7 +16,7 @@ enum CancellablePasswordText: Equatable {
 
 struct PasswordItem: Identifiable, Equatable {
 
-    init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, keychainService: String = PassengerKeychainItem.service, created: Date = Date(), numRenewals: Int = 0) {
+    init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, keychainService: String = PassengerKeychainItem.service, created: Date = Date(), numRenewals: Int = 0, passwordLength: Int) {
         self.userName = userName
         self.masterPassword = masterPassword
         self.url = url
@@ -24,6 +24,7 @@ struct PasswordItem: Identifiable, Equatable {
         self.keychainService = keychainService
         self.created = created
         self.numRenewals = numRenewals
+        self.passwordLength = passwordLength
     }
 
     var id: String { userName + url }
@@ -32,6 +33,7 @@ struct PasswordItem: Identifiable, Equatable {
     let resourceDescription: String
     let created: Date
     var numRenewals: Int
+    let passwordLength: Int
     let masterPassword: MasterPassword
     var keychainService: String = PassengerKeychainItem.service
 
@@ -40,7 +42,7 @@ struct PasswordItem: Identifiable, Equatable {
     func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String) {
         assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
-        let password = try! PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url + String(numRenewals))
+        let password = try! PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url + String(numRenewals), length: passwordLength)
         let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
         let combined = sealBox.combined!
         try! passwordKeychainItem.savePassword(combined.base64EncodedString())
@@ -77,6 +79,7 @@ extension PasswordItem: Codable {
         case masterPassword
         case created
         case numRenewals
+        case passwordLength
     }
 }
 

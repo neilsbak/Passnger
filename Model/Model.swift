@@ -123,8 +123,8 @@ public class Model: ObservableObject {
             MasterPassword(name: "Test 2", password: "jklj", securityLevel: .noSave)
         ]
         model.passwordItems = [
-            PasswordItem(userName: "neil", masterPassword: model.masterPasswords[0], url: "apple.com", resourceDescription: "Apple", passwordLength: 16),
-            PasswordItem(userName: "neil123", masterPassword: model.masterPasswords[1], url: "google.com", resourceDescription: "Google", passwordLength: 16)
+            PasswordItem(userName: "neil", masterPassword: model.masterPasswords[0], url: "apple.com", resourceDescription: "Apple", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "neil123", masterPassword: model.masterPasswords[1], url: "google.com", resourceDescription: "Google", passwordScheme: PasswordScheme())
         ]
         return model
     }

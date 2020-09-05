@@ -10,15 +10,44 @@ import Foundation
 
 struct CreatePasswordFormModel {
 
-    var websiteName: String = "";
-    var websiteUrl: String = ""
-    var username: String = ""
-    var passwordLength: Int = 16
+    var websiteName: String
+    var websiteUrl: String
+    var username: String
+    var passwordLength: Int
     var selectedMasterPassword: MasterPassword?
-    var hasSubmitted = false
+    var symbols: String
+    var hasSubmitted: Bool
+    var minSymbols: Int
+    var minUpperCase: Int
+    var minNumeric: Int
+    var minLowerCase: Int
+
+    init(websiteName: String, websiteUrl: String, username: String, passwordLength: Int, selectedMasterPassword: MasterPassword?, symbols: String, hasSubmitted: Bool) {
+        let scheme = try! PasswordScheme(passwordLength: passwordLength)
+        self.websiteName = websiteName
+        self.websiteUrl = websiteUrl
+        self.username = username
+        self.passwordLength = passwordLength
+        self.selectedMasterPassword = selectedMasterPassword
+        self.symbols = symbols
+        self.hasSubmitted = hasSubmitted
+
+        self.minSymbols = scheme.minSymbols
+        self.minNumeric = scheme.minNumeric
+        self.minUpperCase = scheme.minUpperCase
+        self.minLowerCase = scheme.minLowerCase
+    }
+
+    init() {
+        self.init(websiteName: "", websiteUrl: "", username: "", passwordLength: PasswordScheme.defaultPasswordLength, selectedMasterPassword: nil, symbols: PasswordScheme.defaultSymbols, hasSubmitted: false)
+    }
+
+    func passwordScheme() throws -> PasswordScheme {
+        return try PasswordScheme(passwordLength: passwordLength, symbols: symbols, minSymbols: minSymbols, minLowerCase: minLowerCase, minUpperCase: minUpperCase, minNumeric: minNumeric)
+    }
 
     func validate() -> Bool {
-        return self.websiteUrlError == nil && self.websiteNameError == nil && self.usernameError == nil && self.masterPasswordError == nil && self.passwordLengthError == nil;
+        return self.websiteUrlError == nil && self.websiteNameError == nil && self.usernameError == nil && self.masterPasswordError == nil && self.passwordLengthError == nil && self.symbolsError == nil;
     }
 
     var websiteNameError: String? {
@@ -65,8 +94,26 @@ struct CreatePasswordFormModel {
         if !hasSubmitted {
             return nil;
         }
-        if passwordLength <= 0  {
-            return "Please set the password length"
+        do {
+            _ = try passwordScheme()
+        } catch PasswordScheme.SchemeError.passwordLengthError(let errorMessage) {
+            return errorMessage
+        } catch {
+            return nil
+        }
+        return nil
+    }
+
+    var symbolsError: String? {
+        if !hasSubmitted {
+            return nil;
+        }
+        do {
+            _ = try passwordScheme()
+        } catch PasswordScheme.SchemeError.symbolsError(let errorMessage) {
+            return errorMessage
+        } catch {
+            return nil
         }
         return nil
     }

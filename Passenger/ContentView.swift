@@ -53,7 +53,9 @@ struct ContentView: View {
                                 UIPasteboard.general.string = password
                             }
                         }
-                    }.squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
+                    }
+                    .squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
+                    .keyboardObserving()
                 }
             }
             .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { passwordText in

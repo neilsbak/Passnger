@@ -11,85 +11,45 @@ import SwiftUI
 struct CreatePasswordFormView: View {
     static private let numberFormatter = NumberFormatter()
 
-    @ObservedObject var model: Model
     @Binding var formModel: CreatePasswordFormModel
+    let masterPasswords: [MasterPassword]
     let includePadding: Bool
+    let removeMasterPasswords: (IndexSet) -> Void
     let createMasterPassword: () -> Void
 
+    @State var passwordLength = 16
     var body: some View {
-        VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Website URL:")
-                    TextField("example.com", text: $formModel.websiteUrl)
-                        .autoCapitalizationOff()
-                        .disableAutocorrection(true)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .validatedField(errorText: formModel.websiteUrlError)
-                }
-                HStack {
-                    Text("Description:")
-                    TextField("Example", text: $formModel.websiteName)
-                        .autoCapitalizationOff()
-                        .disableAutocorrection(true)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .validatedField(errorText: formModel.websiteNameError)
-                }
-                HStack {
-                    Text("Username:")
-                    TextField("username", text: $formModel.username)
-                        .autoCapitalizationOff()
-                        .disableAutocorrection(true)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .validatedField(errorText: formModel.usernameError)
-                }
-                HStack {
-                    Text("Password Length:")
-                    TextField("16", text: Binding<String>(get: { String(self.formModel.passwordLength) }, set: { self.formModel.passwordLength = Int($0) ?? 0}))
-                        .keyboardNumeric()
-                        .frame(width: 60)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .disableAutocorrection(true)
-                        .validatedField(errorText: formModel.passwordLengthError)
-                        .multilineTextAlignment(.center)
-                }
-                Spacer().frame(height: 5)
-                HStack {
-                    Text("Choose Master Password")
-                    Button(action: {
-                        withAnimation {
-                            self.createMasterPassword()
-                        }
-                    }) {
-                        Image("plus.circle").resizable().frame(width: 24, height: 24).padding(EdgeInsets(top: 8, leading: 5, bottom: 8, trailing: 12))
-                    }.buttonStyle(BorderlessButtonStyle())
-                }.validatedField(errorText: formModel.masterPasswordError)
-            }.padding(includePadding ? [.leading, .top, .trailing] : [])
-            List {
-                ForEach(model.masterPasswords) { masterPassword in
-                    HStack {
-                        //TODO: make the tap area larger
-                        Text(masterPassword.name).frame(maxWidth: CGFloat.infinity, alignment: .leading)
-                        Spacer()
-                        if masterPassword.id == self.formModel.selectedMasterPassword?.id {
-                            Image("checkmark").renderingMode(.template).resizable().frame(width: 16, height: 16).foregroundColor(Color(.label))
-                        }
-                    }.onTapGesture {
-                        withAnimation {
-                            self.formModel.selectedMasterPassword = masterPassword
-                        }
+            AlignedForm {
+                TextField("Website URL", text: $formModel.websiteUrl)
+                    .autoCapitalizationOff()
+                    .disableAutocorrection(true)
+                    .validatedField(errorText: formModel.websiteUrlError)
+                TextField("Description", text: $formModel.websiteName)
+                    .autoCapitalizationOff()
+                    .disableAutocorrection(true)
+                    .validatedField(errorText: formModel.websiteNameError)
+                TextField("Username", text: $formModel.username)
+                    .autoCapitalizationOff()
+                    .disableAutocorrection(true)
+                    .validatedField(errorText: formModel.usernameError)
+                Picker(selection: self.$formModel.passwordLength, label: Text("Password Length")) {
+                    ForEach(1..<50, id: \.self) {
+                        Text(String($0))
                     }
                 }
-                .onDelete() { indexSet in
-                    self.model.removeMasterPasswords(atOffsets: indexSet)
-                }.padding(includePadding ? [.leading, .trailing] : [])
+                .validatedField(errorText: formModel.usernameError)
+                Picker(selection: self.$formModel.selectedMasterPassword, label: Text("Master Password")) {
+                    ForEach(self.masterPasswords) {
+                        Text($0.name).tag($0 as MasterPassword?)
+                    }
+                }
+                .validatedField(errorText: formModel.usernameError)
             }
         }
-    }
 }
 
 struct CreatePasswordForm_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordFormView(model: Model.testModel(), formModel: Binding<CreatePasswordFormModel>(get: { CreatePasswordFormModel() }, set: {_ in }), includePadding: true, createMasterPassword: {})
+        CreatePasswordFormView(formModel: Binding.constant(CreatePasswordFormModel()), masterPasswords: Model.testModel().masterPasswords, includePadding: true, removeMasterPasswords: {_ in}, createMasterPassword: {})
     }
 }

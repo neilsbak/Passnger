@@ -45,7 +45,7 @@ struct ContentView: View {
         .background(EmptyView().sheet(isPresented: $toolbar.showCreatePassword) {
             CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem, hashedMasterPassword in
                 self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
-            }
+            }.frame(minHeight: 440)
         }.background(EmptyView().sheet(isPresented: self.showGetMasterPassword) {
             GetMasterPasswordView(
                 masterPassword: self.toolbar.selectedPassword!.masterPassword,

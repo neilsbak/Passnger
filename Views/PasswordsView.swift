@@ -38,7 +38,7 @@ struct PasswordsView: View {
             }.onDelete() { indexSet in
                 self.model.removePasswordItems(atOffsets: indexSet)
             }
-        }.keyboardObserving()
+        }
     }
 }
 

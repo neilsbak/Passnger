@@ -44,7 +44,7 @@ struct CreatePasswordView: View {
                     return
                 case.value(let hashedMasterPassword):
                     if let hashedMasterPassword = hashedMasterPassword {
-                        let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordLength: self.formModel.passwordLength)
+                        let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
                         self.onSave(passwordItem, hashedMasterPassword)
                     } else {
                         self.showGetMasterPassword = true
@@ -54,7 +54,7 @@ struct CreatePasswordView: View {
         }, onCancel: {
             self.presentedAsModal = false
         }) {
-            CreatePasswordFormView(model: model, formModel: $formModel, includePadding: false) {
+            CreatePasswordFormView(formModel: $formModel, masterPasswords: self.model.masterPasswords, includePadding: false, removeMasterPasswords: { self.model.removeMasterPasswords(atOffsets: $0) }) {
                 self.masterPasswordFormModel = MasterPasswordFormModel()
                 self.showCreateMasterPassword = true
             }
@@ -78,7 +78,7 @@ struct CreatePasswordView: View {
             }
         }.background(EmptyView().sheet(isPresented: $showGetMasterPassword) {
             GetMasterPasswordView(masterPassword: self.formModel.selectedMasterPassword!, showGetMasterPassword: self.$showGetMasterPassword) { (hashedMasterPassword) in
-                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordLength: self.formModel.passwordLength)
+                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
                 self.onSave(passwordItem, hashedMasterPassword)
             }
         }))

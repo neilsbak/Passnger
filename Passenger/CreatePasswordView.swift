@@ -39,7 +39,7 @@ struct CreatePasswordView: View {
                     self.model.addMasterPassword(passwordItem.masterPassword, passwordText: passwordText)
                     self.onSave(passwordItem, hashedPassword)
                 })
-                CreatePasswordFormView(model: model, formModel: $formModel, includePadding: true) {
+                CreatePasswordFormView(formModel: $formModel, masterPasswords: self.model.masterPasswords, includePadding: true, removeMasterPasswords: { self.model.removeMasterPasswords(atOffsets: $0) }) {
                     self.masterPasswordFormModel = MasterPasswordFormModel()
                     self.showCreateMasterPassword = true
                 }

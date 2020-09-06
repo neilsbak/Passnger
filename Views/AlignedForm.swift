@@ -25,9 +25,37 @@ struct AlignedForm<Content: View>: View {
             content
         }
         #else
-        VStack {
-            content
+        ScrollView {
+            VStack {
+                content
+            }
         }
         #endif
     }
 }
+
+struct AlignedSection<Header: View, Content: View>: View {
+
+    let content: Content
+    let header: Header
+
+    init(header: Header, @ViewBuilder content: () -> Content) {
+        self.header = header
+        self.content = content()
+    }
+
+    @ViewBuilder
+    var body: some View {
+        #if os(iOS)
+        Section(header: header) {
+            content
+        }
+        #else
+        VStack(alignment: .leading) {
+            header
+            content
+        }.padding(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+        #endif
+    }
+}
+

@@ -35,7 +35,7 @@ struct CreatePasswordView: View {
             ZStack {
                 EmptyView().masterPasswordAlert(masterPassword: self.formModel.selectedMasterPassword, isPresented: $showGetMasterPassword, enteredPassword: { passwordText in
                     let hashedPassword = MasterPassword.hashPassword(passwordText)
-                    let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordLength: self.formModel.passwordLength)
+                    let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
                     self.model.addMasterPassword(passwordItem.masterPassword, passwordText: passwordText)
                     self.onSave(passwordItem, hashedPassword)
                 })
@@ -89,7 +89,7 @@ struct CreatePasswordView: View {
                                 self.showGetMasterPassword = true
                                 return
                             }
-                            let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordLength: self.formModel.passwordLength)
+                            let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
                             self.onSave(passwordItem, hashedMasterPassword)
                         }
                     }

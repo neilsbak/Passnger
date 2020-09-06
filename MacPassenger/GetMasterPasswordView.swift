@@ -11,7 +11,7 @@ import SwiftUI
 struct GetMasterPasswordView: View {
     let masterPassword: MasterPassword
     @Binding var showGetMasterPassword: Bool
-    let onGotHashedPassword: (String) -> ()
+    let onGotPassword: (MasterPassword, String) -> ()
     @State private var passwordText: String = ""
     @State private var passwordError: String?
 
@@ -22,8 +22,7 @@ struct GetMasterPasswordView: View {
                 self.passwordError = "Incorrect Password"
                 return
             }
-            let hashedPassword = MasterPassword.hashPassword(self.passwordText)
-            self.onGotHashedPassword(hashedPassword)
+            self.onGotPassword(self.masterPassword, self.passwordText)
             self.showGetMasterPassword = false
 
         }, onCancel: {
@@ -43,6 +42,6 @@ struct GetMasterPasswordView: View {
 
 struct GetMasterPasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        GetMasterPasswordView(masterPassword: Model.testModel().masterPasswords[0], showGetMasterPassword: Binding(get: { true }, set: { _ in }), onGotHashedPassword: {_ in })
+        GetMasterPasswordView(masterPassword: Model.testModel().masterPasswords[0], showGetMasterPassword: Binding(get: { true }, set: { _ in }), onGotPassword: {_,_ in })
     }
 }

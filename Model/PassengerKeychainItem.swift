@@ -10,7 +10,7 @@ import Foundation
 
 struct PassengerKeychainItem {
 
-    static let service = "com.nbakhle.passenger"
+    static let service = "Passenger"
 
     enum PasswordType {
         case account

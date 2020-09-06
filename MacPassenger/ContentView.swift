@@ -50,8 +50,9 @@ struct ContentView: View {
             GetMasterPasswordView(
                 masterPassword: self.toolbar.selectedPassword!.masterPassword,
                 showGetMasterPassword: self.showGetMasterPassword
-            ) { (hashedMasterPassword) in
-                self.toolbar.gotHashedMasterPassword(hashedMasterPassword)
+            ) { (masterPassword, passwordText) in
+                self.model.addMasterPassword(masterPassword, passwordText: passwordText)
+                self.toolbar.gotHashedMasterPassword(MasterPassword.hashPassword(passwordText))
             }
         }.background(EmptyView().sheet(isPresented: self.toolbar.showInfo) {
             PasswordItemSheet(passwordItem: self.toolbar.selectedPassword!, onCancel: {

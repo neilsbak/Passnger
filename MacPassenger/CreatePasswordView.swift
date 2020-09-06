@@ -24,7 +24,7 @@ struct CreatePasswordView: View {
         self._presentedAsModal = presentedAsModal
         self.onSave = onSave
         var formModel = CreatePasswordFormModel()
-        if model.masterPasswords.count == 1 {
+        if model.masterPasswords.count > 0 {
             formModel.selectedMasterPassword = model.masterPasswords[0]
         }
         self._formModel = State(initialValue: formModel)
@@ -77,9 +77,10 @@ struct CreatePasswordView: View {
                 }
             }
         }.background(EmptyView().sheet(isPresented: $showGetMasterPassword) {
-            GetMasterPasswordView(masterPassword: self.formModel.selectedMasterPassword!, showGetMasterPassword: self.$showGetMasterPassword) { (hashedMasterPassword) in
+            GetMasterPasswordView(masterPassword: self.formModel.selectedMasterPassword!, showGetMasterPassword: self.$showGetMasterPassword) { (masterPassword, passwordText) in
+                self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
-                self.onSave(passwordItem, hashedMasterPassword)
+                self.onSave(passwordItem, MasterPassword.hashPassword(passwordText))
             }
         }))
     }

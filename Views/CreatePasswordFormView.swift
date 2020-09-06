@@ -41,67 +41,70 @@ struct CreatePasswordFormView: View {
     }
 
     var body: some View {
-            AlignedForm {
-                AlignedSection(header: masterPasswordHeaderView) {
-                    Picker(selection: self.$formModel.selectedMasterPassword, label: Text("Master Password")) {
-                        ForEach(self.masterPasswords) {
-                            Text($0.name).tag($0 as MasterPassword?)
-                        }
-                    }.validatedField(errorText: formModel.masterPasswordError)
-                }
-                AlignedSection(header: EmptyView()) {
-                    TextField("Website URL", text: $formModel.websiteUrl)
-                        .autoCapitalizationOff()
-                        .disableAutocorrection(true)
-                        .validatedField(errorText: formModel.websiteUrlError)
-                    TextField("Description", text: $formModel.websiteName)
-                        .autoCapitalizationOff()
-                        .disableAutocorrection(true)
-                        .validatedField(errorText: formModel.websiteNameError)
-                    TextField("Username", text: $formModel.username)
-                        .autoCapitalizationOff()
-                        .disableAutocorrection(true)
-                        .validatedField(errorText: formModel.usernameError)
-                }
+        AlignedForm {
+            AlignedSection(header: masterPasswordHeaderView) {
+                Picker(selection: self.$formModel.selectedMasterPassword, label: Text("Master Password")) {
+                    ForEach(self.masterPasswords) {
+                        Text($0.name).tag($0 as MasterPassword?)
+                    }
+                }.validatedField(errorText: formModel.masterPasswordError)
+            }
+            AlignedSection(header: EmptyView()) {
+                TextField("Website URL", text: $formModel.websiteUrl)
+                    .autoCapitalizationOff()
+                    .disableAutocorrection(true)
+                    .frame(maxWidth: .infinity)
+                    .validatedField(errorText: formModel.websiteUrlError)
+                TextField("Description", text: $formModel.websiteName)
+                    .disableAutocorrection(true)
+                    .frame(maxWidth: .infinity)
+                    .validatedField(errorText: formModel.websiteNameError)
+                TextField("Username", text: $formModel.username)
+                    .autoCapitalizationOff()
+                    .disableAutocorrection(true)
+                    .frame(maxWidth: .infinity)
+                    .validatedField(errorText: formModel.usernameError)
+            }
 
-                    AlignedSection(header: passwordComponentsHeaderView) {
-                        if showPasswordComponents {
-                        Picker(selection: self.$formModel.passwordLength, label: Text("Password Length")) {
-                            ForEach(1..<50, id: \.self) {
-                                Text(String($0))
-                            }
-                        }.validatedField(errorText: formModel.passwordLengthError)
-                        HStack {
-                            Text("Symbols")
-                            TextField("", text: $formModel.symbols)
-                            .autoCapitalizationOff()
-                            .disableAutocorrection(true)
-                            .validatedField(errorText: formModel.symbolsError)
+                AlignedSection(header: passwordComponentsHeaderView) {
+                    if showPasswordComponents {
+                    Picker(selection: self.$formModel.passwordLength, label: Text("Password Length")) {
+                        ForEach(1..<50, id: \.self) {
+                            Text(String($0))
                         }
-                        Picker(selection: self.$formModel.minSymbols, label: Text("Minimum Symbols")) {
-                            ForEach(1..<10, id: \.self) {
-                                Text(String($0))
-                            }
+                    }.validatedField(errorText: formModel.passwordLengthError)
+                    HStack {
+                        Text("Symbols")
+                        TextField("", text: $formModel.symbols)
+                        .autoCapitalizationOff()
+                        .disableAutocorrection(true)
+                        .frame(maxWidth: .infinity)
+                        .validatedField(errorText: formModel.symbolsError)
+                    }
+                    Picker(selection: self.$formModel.minSymbols, label: Text("Minimum Symbols")) {
+                        ForEach(1..<10, id: \.self) {
+                            Text(String($0))
                         }
-                        Picker(selection: self.$formModel.minNumeric, label: Text("Minimum Numbers")) {
-                            ForEach(1..<10, id: \.self) {
-                                Text(String($0))
-                            }
+                    }
+                    Picker(selection: self.$formModel.minNumeric, label: Text("Minimum Numbers")) {
+                        ForEach(1..<10, id: \.self) {
+                            Text(String($0))
                         }
-                        Picker(selection: self.$formModel.minUpperCase, label: Text("Minimum Upper Case")) {
-                            ForEach(1..<10, id: \.self) {
-                                Text(String($0))
-                            }
+                    }
+                    Picker(selection: self.$formModel.minUpperCase, label: Text("Minimum Upper Case")) {
+                        ForEach(1..<10, id: \.self) {
+                            Text(String($0))
                         }
-                        Picker(selection: self.$formModel.minLowerCase, label: Text("Minimum Lower Case")) {
-                            ForEach(1..<10, id: \.self) {
-                                Text(String($0))
-                            }
+                    }
+                    Picker(selection: self.$formModel.minLowerCase, label: Text("Minimum Lower Case")) {
+                        ForEach(1..<10, id: \.self) {
+                            Text(String($0))
                         }
                     }
                 }
             }
-        }
+        }.keyboardObserving()
+    }
 }
 
 struct CreatePasswordForm_Previews: PreviewProvider {

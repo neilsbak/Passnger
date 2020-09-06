@@ -24,7 +24,6 @@ struct MasterPasswordView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .validatedField(errorText: formModel.confirmedPasswordError)
             TextField("Hint", text: $formModel.hint)
-                .autoCapitalizationOff()
                 .disableAutocorrection(true)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .validatedField(errorText: formModel.hintError)

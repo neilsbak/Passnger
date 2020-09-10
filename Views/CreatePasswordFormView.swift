@@ -15,28 +15,28 @@ struct CreatePasswordFormView: View {
     let masterPasswords: [MasterPassword]
     let includePadding: Bool
     let removeMasterPasswords: (IndexSet) -> Void
-    let createMasterPassword: () -> Void
+    let createMasterPassword: (MasterPassword, String) -> Void
 
     @State private var showPasswordComponents = false
+    @State private var showManageMasterPasswords = false
 
     @ViewBuilder
     var masterPasswordHeaderView: some View {
-        HStack {
+        VStack(alignment: .leading) {
             Button(action: {
-                self.createMasterPassword()
+                self.showManageMasterPasswords = true
             }) {
                 Text("Manage Master Passwords")
             }.buttonStyle(BorderlessButtonStyle())
-        }
+        }.padding(.top)
     }
 
     @ViewBuilder
     var passwordComponentsHeaderView: some View {
-        HStack {
+        VStack(alignment: .leading) {
             Button(action: { self.showPasswordComponents.toggle() }) {
                 Text((self.showPasswordComponents ? "Hide" : "Show") + " Password Components")
             }.buttonStyle(BorderlessButtonStyle())
-            Spacer()
         }
     }
 
@@ -66,8 +66,8 @@ struct CreatePasswordFormView: View {
                     .validatedField(errorText: formModel.usernameError)
             }
 
-                AlignedSection(header: passwordComponentsHeaderView) {
-                    if showPasswordComponents {
+            AlignedSection(header: passwordComponentsHeaderView) {
+                if showPasswordComponents {
                     Picker(selection: self.$formModel.passwordLength, label: Text("Password Length")) {
                         ForEach(1..<50, id: \.self) {
                             Text(String($0))
@@ -103,12 +103,16 @@ struct CreatePasswordFormView: View {
                     }
                 }
             }
-        }.keyboardObserving()
+        }
+        .keyboardObserving()
+        .sheet(isPresented: self.$showManageMasterPasswords) {
+            ManageMasterPasswordsView(masterPasswords: self.masterPasswords, onCancel: { self.showManageMasterPasswords = false }, onDelete: self.removeMasterPasswords, onCreate: self.createMasterPassword)
+        }
     }
 }
 
 struct CreatePasswordForm_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordFormView(formModel: Binding.constant(CreatePasswordFormModel()), masterPasswords: Model.testModel().masterPasswords, includePadding: true, removeMasterPasswords: {_ in}, createMasterPassword: {})
+        CreatePasswordFormView(formModel: Binding.constant(CreatePasswordFormModel()), masterPasswords: Model.testModel().masterPasswords, includePadding: true, removeMasterPasswords: {_ in}, createMasterPassword: {_,_ in })
     }
 }

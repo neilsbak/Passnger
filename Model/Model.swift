@@ -49,6 +49,7 @@ public class Model: ObservableObject {
     }
 
     func addPasswordItem(_ passwordItem: PasswordItem, hashedMasterPassword: String) {
+        assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == passwordItem.masterPassword.doubleHashedPassword)
         if let index = passwordItems.firstIndex(where: { $0.id == passwordItem.id }) {
             passwordItems[index] = passwordItem
         } else {

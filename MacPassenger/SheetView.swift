@@ -12,11 +12,11 @@ struct SheetView<Content: View>: View {
     typealias OnSave = () -> Void
     typealias OnCancel = () -> Void
 
-    let onSave: OnSave
+    let onSave: OnSave?
     let onCancel: OnCancel
     let content: Content
 
-    init(onSave: @escaping OnSave, onCancel: @escaping OnCancel, @ViewBuilder content: () -> Content) {
+    init(onSave: OnSave?, onCancel: @escaping OnCancel, @ViewBuilder content: () -> Content) {
         self.onSave = onSave
         self.onCancel = onCancel
         self.content = content()
@@ -28,11 +28,14 @@ struct SheetView<Content: View>: View {
             Spacer()
             HStack {
                 Button(action: onCancel) {
-                    Text("Cancel")
+                    Text(self.onSave == nil ? "Dismiss" : "Cancel")
                 }
-                Spacer()
-                Button(action: onSave) {
-                    Text("Save")
+                onSave.map { sv in
+                    Group {
+                        Button(action: sv) {
+                            Text("Save")
+                        }
+                    }
                 }
             }.padding(.top)
             }.frame(minWidth: 300, minHeight: 300).padding()

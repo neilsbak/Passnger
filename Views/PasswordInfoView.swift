@@ -27,7 +27,6 @@ struct PasswordInfoView: View {
         PasswordInfoViewCell(width: width, title: "Description", valueText: self.passwordItem.resourceDescription)
         PasswordInfoViewCell(width: width, title: "Username", valueText: self.passwordItem.userName)
         PasswordInfoViewCell(width: width, title: "Date Created", valueText: DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
-        PasswordInfoViewCell(width: width, title: "Password Length", valueText: String(self.passwordItem.passwordLength))
         PasswordInfoViewCell(width: width, title: "Master Password", valueText: String(self.passwordItem.masterPassword.name))
         PasswordInfoViewCell(width: width, title: "Renewal Number") {
             TextField("0", text: self.textFieldBinding)
@@ -35,16 +34,23 @@ struct PasswordInfoView: View {
                 .frame(width: 100)
                 .multilineTextAlignment(.trailing)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
-
+        }
+        Group {
+            PasswordInfoViewCell(width: width, title: "Password Length", valueText: String(self.passwordItem.passwordLength))
+            PasswordInfoViewCell(width: width, title: "Symbols", valueText: self.passwordItem.symbols)
+            PasswordInfoViewCell(width: width, title: "Minimum Symbols", valueText: String(self.passwordItem.minSymbols))
+            PasswordInfoViewCell(width: width, title: "Minimum Numbers", valueText: String(self.passwordItem.minNumeric))
+            PasswordInfoViewCell(width: width, title: "Minimum Upper Case", valueText: String(self.passwordItem.minUpperCase))
+            PasswordInfoViewCell(width: width, title: "Minimum Lower Case", valueText: String(self.passwordItem.minLowerCase))
         }
     }
 
     var body: some View {
         GeometryReader { metrics in
         #if os(iOS)
-            List {
-                self.contentRows(width: metrics.size.width)
-            }
+        List {
+            self.contentRows(width: metrics.size.width)
+        }
         #else
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {

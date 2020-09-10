@@ -39,34 +39,8 @@ struct CreatePasswordView: View {
                     self.model.addMasterPassword(passwordItem.masterPassword, passwordText: passwordText)
                     self.onSave(passwordItem, hashedPassword)
                 })
-                CreatePasswordFormView(formModel: $formModel, masterPasswords: self.model.masterPasswords, includePadding: true, removeMasterPasswords: { self.model.removeMasterPasswords(atOffsets: $0) }) {
-                    self.masterPasswordFormModel = MasterPasswordFormModel()
-                    self.showCreateMasterPassword = true
-                }
-            }.sheet(isPresented: $showCreateMasterPassword) {
-                NavigationView {
-                    VStack {
-                        MasterPasswordView(formModel: self.$masterPasswordFormModel)
-                        Spacer()
-                    }
-                    .padding()
-                    .navigationBarTitle("Create Master Password", displayMode: .inline)
-                    .navigationBarItems(
-                        leading: Button(action: {
-                            self.showCreateMasterPassword = false
-                        }) {
-                            Text("Cancel")
-                        },
-                        trailing: Button(action: {
-                            self.masterPasswordFormModel.hasSubmitted = true
-                            if (self.masterPasswordFormModel.validate()) {
-                                let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
-                                self.model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
-                                self.formModel.selectedMasterPassword = masterPassword
-                            }
-                        }) {
-                            Text("Save")
-                    })
+                CreatePasswordFormView(formModel: $formModel, masterPasswords: self.model.masterPasswords, includePadding: true, removeMasterPasswords: { self.model.removeMasterPasswords(atOffsets: $0) }) { masterPassword, passwordText in
+                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 }
             }
             .navigationBarTitle("Create Password", displayMode: .inline)

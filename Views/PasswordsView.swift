@@ -73,8 +73,8 @@ struct PasswordItemRow: View {
                 }
             }) {
                 ZStack {
-                    EmptyView().masterPasswordAlert(masterPassword: self.passwordItem.masterPassword, isPresented: $showGetMasterPassword) { (passwordText) in
-                        self.model.addMasterPassword(self.passwordItem.masterPassword, passwordText: passwordText)
+                    EmptyView().masterPasswordAlert(masterPassword: self.passwordItem.masterPassword, isPresented: $showGetMasterPassword) { (masterPassword, passwordText) in
+                        self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                         self.hashedMasterPassword = MasterPassword.hashPassword(passwordText)
                         self.showGetMasterPassword = false
                         self.linkIsActive = true

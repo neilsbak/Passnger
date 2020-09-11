@@ -1,5 +1,5 @@
 //
-//  MasterPasswordView.swift
+//  MasterPasswordFormView.swift
 //  Passenger
 //
 //  Created by Neil Bakhle on 2020-06-01.
@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct MasterPasswordView: View {
+struct MasterPasswordFormView: View {
     @Binding var formModel: MasterPasswordFormModel
 
     var body: some View {
@@ -32,8 +32,8 @@ struct MasterPasswordView: View {
 
 }
 
-struct MasterPasswordView_Previews: PreviewProvider {
+struct MasterPasswordFormView_Previews: PreviewProvider {
     static var previews: some View {
-        MasterPasswordView(formModel: Binding(get: {MasterPasswordFormModel()}, set: {_ in}))
+        MasterPasswordFormView(formModel: Binding(get: {MasterPasswordFormModel()}, set: {_ in}))
     }
 }

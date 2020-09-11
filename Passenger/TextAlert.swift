@@ -94,8 +94,10 @@ extension View {
         AlertWrapper(isPresented: isPresented, alert: alert, content: self)
     }
 
-    func masterPasswordAlert(masterPassword: MasterPassword?, isPresented: Binding<Bool>, enteredPassword: @escaping (String) -> Void) -> some View {
-            return self.alert(isPresented: isPresented, TextAlert(title: "Enter Master Password", placeholder: "Master Password", isSecure: true) { passwordText in
+    // Allowing masterPassword to be nil since this view modifier will remain hidden
+    // unless password text for a master password is requested
+    func masterPasswordAlert(masterPassword: MasterPassword?, isPresented: Binding<Bool>, onGotPassword: @escaping (MasterPassword, String) -> Void) -> some View {
+        return self.alert(isPresented: isPresented, TextAlert(title: "Enter Master Password", placeholder: masterPassword?.name ?? "", isSecure: true) { passwordText in
                 guard let passwordText = passwordText else {
                     return false
                 }
@@ -103,7 +105,7 @@ extension View {
                 if doubleHashedPassword != masterPassword!.doubleHashedPassword {
                     return false
                 }
-                enteredPassword(passwordText)
+                onGotPassword(masterPassword!, passwordText)
                 return true
             })
     }

@@ -16,42 +16,64 @@ struct ManageMasterPasswordsView: View {
 
     @State private var showCreateMasterPassword = false
     @State private var masterPasswordFormModel = MasterPasswordFormModel()
+    @State private var selectedMasterPassword: MasterPassword? = nil
 
-    private var mainBody: some View {
+    private func mainBody(onTap: ((MasterPassword) -> Void)? = nil) -> some View {
         List {
             ForEach(self.masterPasswords) { masterPassword in
                 Text(masterPassword.name)
+                    .onTapGesture { onTap?(masterPassword) }
+                    .listRowBackground(self.selectedMasterPassword == masterPassword ? Color.blue : Color.clear)
             }
             .onDelete(perform: onDelete)
         }
     }
 
-    private var iOSBody: some View {
-        mainBody
-        .navigationBarItems(
-            leading: Button(action: self.onCancel) { Text("Cancel") },
-            trailing: HStack {
-                EditButton()
-                Button(action: {self.showCreateMasterPassword = true }) { Image(systemName: "plus")}
-                .padding(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 5))
+    private var sheetScaffoldView: some View {
+        #if os(iOS)
+        return SheetScaffoldView(title: "Master Passwords", onCancel: nil, onSave: nil) {
+            mainBody()
+            .navigationBarItems(
+                leading: Button(action: self.onCancel) { Text("Cancel") },
+                trailing: HStack {
+                    EditButton()
+                    Button(action: {self.showCreateMasterPassword = true }) { Image(systemName: "plus")}
+                    .padding(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 5))
+                }
+            )
+        }
+        #else
+        return SheetScaffoldView(title: "Master Passwords", onCancel: onCancel, onSave: nil) {
+            VStack {
+                mainBody {
+                    if self.selectedMasterPassword == $0 {
+                        self.selectedMasterPassword = nil
+                    } else {
+                        self.selectedMasterPassword = $0
+                    }
+                }
+                HStack(spacing: 0) {
+                    ListButton(imageName: NSImage.addTemplateName) {
+                        self.showCreateMasterPassword = true
+                    }.disabled(self.selectedMasterPassword == nil)
+                    Divider()
+                    ListButton(imageName: NSImage.removeTemplateName) {
+                        guard let masterPassword = self.selectedMasterPassword else { return }
+                        guard let index = self.masterPasswords.firstIndex(of: masterPassword) else { return }
+                        self.onDelete(IndexSet(integer: index))
+                    }.disabled(self.selectedMasterPassword == nil)
+                    Divider()
+                    Spacer()
+                }.frame(height: 20)
             }
-        )
-    }
-
-    private var macOSBody: some View {
-        mainBody
+        }
+        #endif
     }
 
     var body: some View {
-        SheetScaffoldView(title: "Master Passwords", onCancel: nil, onSave: nil) {
-            #if os(iOS)
-            self.iOSBody
-            #else
-            self.macOSBody
-            #endif
-        }.sheet(isPresented: self.$showCreateMasterPassword, title: "Create Master Password", onCancel: { self.showCreateMasterPassword = false }, onSave: submitMasterPassword) {
+        self.sheetScaffoldView.sheet(isPresented: self.$showCreateMasterPassword, title: "Create Master Password", onCancel: { self.showCreateMasterPassword = false }, onSave: submitMasterPassword) {
             ScrollView {
-                MasterPasswordView(formModel: self.$masterPasswordFormModel).padding()
+                MasterPasswordFormView(formModel: self.$masterPasswordFormModel).padding()
             }
         }
     }
@@ -65,6 +87,20 @@ struct ManageMasterPasswordsView: View {
         }
     }
 
+}
+
+struct ListButton: View {
+    let imageName: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(nsImage: NSImage(named: imageName)!)
+                .resizable()
+        } //
+        .buttonStyle(BorderlessButtonStyle())
+        .frame(width: 20, height: 20)
+    }
 }
 
 struct ManageMasterPasswordsView_Previews: PreviewProvider {

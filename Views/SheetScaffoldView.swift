@@ -43,21 +43,25 @@ struct SheetScaffoldView<Content: View>: View {
             }
         }
         #else
-        return SheetView(onSave: onSave, onCancel: onCancel, content: { content })
+        SheetView(title: title, onCancel: onCancel ?? {}, onSave: onSave, content: { content })
         #endif
     }
 }
 
 extension View {
     func sheet<Content: View>(isPresented: Binding<Bool>, title: String, onCancel: @escaping () -> Void, onSave: (() -> Void)?, content: @escaping () -> Content) -> some View {
-        #if os(iOS)
-        return self.sheet(isPresented: isPresented) {
+        return self.macSafeSheet(isPresented: isPresented) {
             SheetScaffoldView(title: title, onCancel: onCancel, onSave: onSave, content: content)
         }
+    }
+}
+
+extension View {
+    func macSafeSheet<Content: View>(isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View {
+        #if os(macOS)
+        return self.background(EmptyView().sheet(isPresented: isPresented, content: content))
         #else
-        return self.background(EmptyView().sheet(isPresented: isPresented) {
-            SheetScaffoldView(title: title, onCancel: onCancel, onSave: onSave, content: content)
-        })
+        return self.sheet(isPresented: isPresented, content: content)
         #endif
     }
 }

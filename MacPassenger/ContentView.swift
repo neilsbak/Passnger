@@ -42,26 +42,26 @@ struct ContentView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(EmptyView().sheet(isPresented: $toolbar.showCreatePassword) {
+        .macSafeSheet(isPresented: $toolbar.showCreatePassword) {
             CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem, hashedMasterPassword in
                 self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
-            }.frame(minHeight: 440)
-        }.background(EmptyView().sheet(isPresented: self.showGetMasterPassword) {
+            }
+        }.macSafeSheet(isPresented: self.showGetMasterPassword) {
             GetMasterPasswordView(
-                masterPassword: self.toolbar.selectedPassword!.masterPassword,
-                showGetMasterPassword: self.showGetMasterPassword
+                masterPassword: self.toolbar.selectedPassword?.masterPassword,
+                isPresented: self.showGetMasterPassword
             ) { (masterPassword, passwordText) in
                 self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 self.toolbar.gotHashedMasterPassword(MasterPassword.hashPassword(passwordText))
             }
-        }.background(EmptyView().sheet(isPresented: self.toolbar.showInfo) {
+        }.macSafeSheet(isPresented: self.toolbar.showInfo) {
             PasswordItemSheet(passwordItem: self.toolbar.selectedPassword!, onCancel: {
                 self.toolbar.showInfo.wrappedValue.toggle()
             }) { passwordItem in
                 self.toolbar.changeInfoForPasswordItem(passwordItem, toModel: self.model)
                 self.toolbar.showInfo.wrappedValue.toggle()
             }
-        })))
+        }
         .alert(isPresented: self.$toolbar.confirmDelete) { () -> Alert in
             Alert(title: Text("Delete Password?"), primaryButton: Alert.Button.destructive(Text("Delete")) {
                 self.toolbar.deleteSelectedPassword(fromModel: self.model)
@@ -78,10 +78,10 @@ private struct PasswordItemSheet: View {
     let onSave: (PasswordItem) -> Void
 
     var body: some View {
-        SheetView(onSave: {
-            self.onSave(self.passwordItem)
-        }, onCancel: {
+        SheetView(onCancel: {
             self.onCancel()
+        }, onSave: {
+            self.onSave(self.passwordItem)
         }) {
             PasswordInfoView(passwordItem: self.$passwordItem)
         }

@@ -1,5 +1,5 @@
 //
-//  CreatePasswordFormView.swift
+//  PasswordFormView.swift
 //  Passenger
 //
 //  Created by Neil Bakhle on 2020-05-23.
@@ -8,10 +8,10 @@
 
 import SwiftUI
 
-struct CreatePasswordFormView: View {
+struct PasswordFormView: View {
     static private let numberFormatter = NumberFormatter()
 
-    @Binding var formModel: CreatePasswordFormModel
+    @Binding var formModel: PasswordFormModel
     let masterPasswords: [MasterPassword]
     let includePadding: Bool
     let removeMasterPasswords: (IndexSet) -> Void
@@ -23,9 +23,7 @@ struct CreatePasswordFormView: View {
     @ViewBuilder
     var masterPasswordHeaderView: some View {
         VStack(alignment: .leading) {
-            Button(action: {
-                self.showManageMasterPasswords = true
-            }) {
+            Button(action: { self.showManageMasterPasswords = true }) {
                 Text("Manage Master Passwords")
             }.buttonStyle(BorderlessButtonStyle())
         }.padding(.top)
@@ -65,7 +63,6 @@ struct CreatePasswordFormView: View {
                     .frame(maxWidth: .infinity)
                     .validatedField(errorText: formModel.usernameError)
             }
-
             AlignedSection(header: passwordComponentsHeaderView) {
                 if showPasswordComponents {
                     Picker(selection: self.$formModel.passwordLength, label: Text("Password Length")) {
@@ -76,10 +73,11 @@ struct CreatePasswordFormView: View {
                     HStack {
                         Text("Symbols")
                         TextField("", text: $formModel.symbols)
-                        .autoCapitalizationOff()
-                        .disableAutocorrection(true)
-                        .frame(maxWidth: .infinity)
-                        .validatedField(errorText: formModel.symbolsError)
+                            .multilineTextAlignment(.trailing)
+                            .autoCapitalizationOff()
+                            .disableAutocorrection(true)
+                            .frame(maxWidth: .infinity)
+                            .validatedField(errorText: formModel.symbolsError)
                     }
                     Picker(selection: self.$formModel.minSymbols, label: Text("Minimum Symbols")) {
                         ForEach(1..<10, id: \.self) {
@@ -102,17 +100,17 @@ struct CreatePasswordFormView: View {
                         }
                     }
                 }
+            }.macSafeSheet(isPresented: self.$showManageMasterPasswords) {
+                ManageMasterPasswordsView(masterPasswords: self.masterPasswords, onCancel: { self.showManageMasterPasswords = false }, onDelete: self.removeMasterPasswords, onCreate: self.createMasterPassword)
             }
         }
         .keyboardObserving()
-        .sheet(isPresented: self.$showManageMasterPasswords) {
-            ManageMasterPasswordsView(masterPasswords: self.masterPasswords, onCancel: { self.showManageMasterPasswords = false }, onDelete: self.removeMasterPasswords, onCreate: self.createMasterPassword)
-        }
+        .frame(minHeight: 400)
     }
 }
 
-struct CreatePasswordForm_Previews: PreviewProvider {
+struct PasswordForm_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordFormView(formModel: Binding.constant(CreatePasswordFormModel()), masterPasswords: Model.testModel().masterPasswords, includePadding: true, removeMasterPasswords: {_ in}, createMasterPassword: {_,_ in })
+        PasswordFormView(formModel: Binding.constant(PasswordFormModel()), masterPasswords: Model.testModel().masterPasswords, includePadding: true, removeMasterPasswords: {_ in}, createMasterPassword: {_,_ in })
     }
 }

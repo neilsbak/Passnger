@@ -58,9 +58,9 @@ struct ContentView: View {
                     .keyboardObserving()
                 }
             }
-            .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { passwordText in
+            .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { masterPassword, passwordText in
                     let hashedPassword = MasterPassword.hashPassword(passwordText)
-                    self.model.addMasterPassword(self.passwordItemWithoutMasterPassword!.masterPassword, passwordText: passwordText)
+                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                     UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
                     self.passwordItemWithoutMasterPassword = nil
             }

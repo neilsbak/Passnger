@@ -9,24 +9,22 @@
 import SwiftUI
 
 struct GetMasterPasswordView: View {
-    let masterPassword: MasterPassword
-    @Binding var showGetMasterPassword: Bool
+    let masterPassword: MasterPassword?
+    @Binding var isPresented: Bool
     let onGotPassword: (MasterPassword, String) -> ()
     @State private var passwordText: String = ""
     @State private var passwordError: String?
 
     var body: some View {
-        SheetView(onSave: {
+        SheetView(onCancel: { self.isPresented = false }, onSave: {
             let doubleHashedPassword = MasterPassword.doubleHashPassword(self.passwordText)
-            if doubleHashedPassword != self.masterPassword.doubleHashedPassword {
+            if doubleHashedPassword != self.masterPassword!.doubleHashedPassword {
                 self.passwordError = "Incorrect Password"
                 return
             }
-            self.onGotPassword(self.masterPassword, self.passwordText)
-            self.showGetMasterPassword = false
+            self.onGotPassword(self.masterPassword!, self.passwordText)
+            self.isPresented = false
 
-        }, onCancel: {
-            self.showGetMasterPassword = false
         }) {
             VStack(alignment: .leading, spacing: 12.0) {
                 Text("Enter Master Password")
@@ -42,6 +40,6 @@ struct GetMasterPasswordView: View {
 
 struct GetMasterPasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        GetMasterPasswordView(masterPassword: Model.testModel().masterPasswords[0], showGetMasterPassword: Binding(get: { true }, set: { _ in }), onGotPassword: {_,_ in })
+        GetMasterPasswordView(masterPassword: Model.testModel().masterPasswords[0], isPresented: Binding(get: { true }, set: { _ in }), onGotPassword: {_,_ in })
     }
 }

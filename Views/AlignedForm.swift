@@ -51,9 +51,12 @@ struct AlignedSection<Header: View, Content: View>: View {
             content
         }
         #else
-        VStack(alignment: .leading) {
-            header
-            content
+        HStack {
+            VStack(alignment: .leading) {
+                header
+                content
+            }
+            Spacer()
         }.padding(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
         #endif
     }

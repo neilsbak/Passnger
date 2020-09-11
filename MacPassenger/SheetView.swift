@@ -12,18 +12,21 @@ struct SheetView<Content: View>: View {
     typealias OnSave = () -> Void
     typealias OnCancel = () -> Void
 
-    let onSave: OnSave?
+    let title: String?
     let onCancel: OnCancel
+    let onSave: OnSave?
     let content: Content
 
-    init(onSave: OnSave?, onCancel: @escaping OnCancel, @ViewBuilder content: () -> Content) {
-        self.onSave = onSave
+    init(title: String? = nil, onCancel: @escaping OnCancel, onSave: OnSave? = nil, @ViewBuilder content: () -> Content) {
+        self.title = title
         self.onCancel = onCancel
+        self.onSave = onSave
         self.content = content()
     }
 
     var body: some View {
         VStack {
+            title.map { Text($0) }
             content
             Spacer()
             HStack {
@@ -32,6 +35,7 @@ struct SheetView<Content: View>: View {
                 }
                 onSave.map { sv in
                     Group {
+                        Spacer()
                         Button(action: sv) {
                             Text("Save")
                         }
@@ -44,6 +48,6 @@ struct SheetView<Content: View>: View {
 
 struct SheetFooterView_Previews: PreviewProvider {
     static var previews: some View {
-        SheetView(onSave: {}, onCancel: {}) { Text("OK") }
+        SheetView(title: "Test", onCancel: {}) { Text("OK") }
     }
 }

@@ -1,5 +1,5 @@
 //
-//  CreatePasswordFormModel.swift
+//  PasswordFormModel.swift
 //  Passenger
 //
 //  Created by Neil Bakhle on 2020-05-24.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct CreatePasswordFormModel {
+struct PasswordFormModel {
 
     var websiteName: String
     var websiteUrl: String

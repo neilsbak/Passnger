@@ -1,8 +1,8 @@
 //
 //  CreatePasswordView.swift
-//  MacPassenger
+//  Passenger
 //
-//  Created by Neil Bakhle on 2020-05-30.
+//  Created by Neil Bakhle on 2020-09-09.
 //  Copyright © 2020 Neil. All rights reserved.
 //
 
@@ -10,12 +10,10 @@ import SwiftUI
 
 struct CreatePasswordView: View {
     typealias OnSave = (_ passwordItem: PasswordItem, _ hashedMasterPassword: String) -> Void
-
     @ObservedObject var model: Model
     @Binding var presentedAsModal: Bool
-    @State var formModel = CreatePasswordFormModel()
+    @State var formModel = PasswordFormModel()
     @State private var masterPasswordFormModel =  MasterPasswordFormModel()
-    @State private var showCreateMasterPassword = false
     @State private var showGetMasterPassword = false
     let onSave: OnSave
 
@@ -23,7 +21,7 @@ struct CreatePasswordView: View {
         self.model = model
         self._presentedAsModal = presentedAsModal
         self.onSave = onSave
-        var formModel = CreatePasswordFormModel()
+        var formModel = PasswordFormModel()
         if model.masterPasswords.count > 0 {
             formModel.selectedMasterPassword = model.masterPasswords[0]
         }
@@ -32,10 +30,9 @@ struct CreatePasswordView: View {
 
 
     var body: some View {
-        SheetView(onSave: {
+        SheetScaffoldView(title: "Create Password", onCancel: { self.presentedAsModal = false },  onSave: {
             self.formModel.hasSubmitted = true
             if self.formModel.validate()  {
-                self.presentedAsModal = false
                 guard let selectedMasterPassword = self.formModel.selectedMasterPassword else {
                     return
                 }
@@ -46,48 +43,33 @@ struct CreatePasswordView: View {
                     if let hashedMasterPassword = hashedMasterPassword {
                         let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
                         self.onSave(passwordItem, hashedMasterPassword)
+                        self.presentedAsModal = false
                     } else {
                         self.showGetMasterPassword = true
                     }
                 }
             }
-        }, onCancel: {
-            self.presentedAsModal = false
         }) {
-            CreatePasswordFormView(formModel: $formModel, masterPasswords: self.model.masterPasswords, includePadding: false, removeMasterPasswords: { self.model.removeMasterPasswords(atOffsets: $0) }) {
-                self.masterPasswordFormModel = MasterPasswordFormModel()
-                self.showCreateMasterPassword = true
-            }
-        }
-        .background(EmptyView().sheet(isPresented: $showCreateMasterPassword) {
-            SheetView(onSave: {
-                self.masterPasswordFormModel.hasSubmitted = true
-                if (self.masterPasswordFormModel.validate()) {
-                    let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
-                    self.model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
-                    self.formModel.selectedMasterPassword = masterPassword
-                    self.showCreateMasterPassword = false
+            PasswordFormView(
+                formModel: $formModel,
+                masterPasswords: self.model.masterPasswords,
+                includePadding: false,
+                removeMasterPasswords: { self.model.removeMasterPasswords(atOffsets: $0) },
+                createMasterPassword: { masterPassword, passwordText in
+                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 }
-            }, onCancel: {
-                self.showCreateMasterPassword = false
-            }) {
-                VStack {
-                    Text("Create Master Password")
-                    MasterPasswordView(formModel: self.$masterPasswordFormModel)
-                }
-            }
-        }.background(EmptyView().sheet(isPresented: $showGetMasterPassword) {
-            GetMasterPasswordView(masterPassword: self.formModel.selectedMasterPassword!, showGetMasterPassword: self.$showGetMasterPassword) { (masterPassword, passwordText) in
+            )}
+        .getMasterPassword(masterPassword: self.formModel.selectedMasterPassword, isPresented: self.$showGetMasterPassword) { (masterPassword, passwordText) in
                 self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
                 self.onSave(passwordItem, MasterPassword.hashPassword(passwordText))
-            }
-        }))
+                self.presentedAsModal = false
+        }
     }
 }
 
 struct CreatePasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding<Bool>(get: { true }, set: {_ in })) { _, _ in }
+        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding.constant(true), onSave: { _, _ in })
     }
 }

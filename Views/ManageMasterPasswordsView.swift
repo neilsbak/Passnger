@@ -22,6 +22,7 @@ struct ManageMasterPasswordsView: View {
         List {
             ForEach(self.masterPasswords) { masterPassword in
                 Text(masterPassword.name)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .onTapGesture { onTap?(masterPassword) }
                     .listRowBackground(self.selectedMasterPassword == masterPassword ? Color.blue : Color.clear)
             }
@@ -55,7 +56,7 @@ struct ManageMasterPasswordsView: View {
                 HStack(spacing: 0) {
                     ListButton(imageName: NSImage.addTemplateName) {
                         self.showCreateMasterPassword = true
-                    }.disabled(self.selectedMasterPassword == nil)
+                    }
                     Divider()
                     ListButton(imageName: NSImage.removeTemplateName) {
                         guard let masterPassword = self.selectedMasterPassword else { return }

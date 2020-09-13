@@ -80,11 +80,17 @@ public class Model: ObservableObject {
     }
 
     func removePasswordItems(atOffsets indexSet: IndexSet) {
+        for index in indexSet {
+            do { try passwordItems[index].deletePassword() } catch {}
+        }
         passwordItems.remove(atOffsets: indexSet)
         saveModel()
     }
 
     func removeMasterPasswords(atOffsets indexSet: IndexSet) {
+        for index in indexSet {
+            do { try masterPasswords[index].deletePassword() } catch {}
+        }
         masterPasswords.remove(atOffsets: indexSet)
         saveModel()
     }

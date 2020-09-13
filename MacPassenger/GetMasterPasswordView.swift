@@ -28,7 +28,7 @@ struct GetMasterPasswordView: View {
         }) {
             VStack(alignment: .leading, spacing: 12.0) {
                 Text("Enter Master Password")
-                SecureField("Password", text: $passwordText)
+                SecureField(masterPassword?.name ?? "Password", text: $passwordText)
                     .autoCapitalizationOff()
                     .disableAutocorrection(true)
                     .textFieldStyle(RoundedBorderTextFieldStyle())

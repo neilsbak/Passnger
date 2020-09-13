@@ -23,6 +23,7 @@ struct ManageMasterPasswordsView: View {
             ForEach(self.masterPasswords) { masterPassword in
                 Text(masterPassword.name)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
                     .onTapGesture { onTap?(masterPassword) }
                     .listRowBackground(self.selectedMasterPassword == masterPassword ? Color.blue : Color.clear)
             }
@@ -35,13 +36,13 @@ struct ManageMasterPasswordsView: View {
         return SheetScaffoldView(title: "Master Passwords", onCancel: nil, onSave: nil) {
             mainBody()
             .navigationBarItems(
-                leading: Button(action: self.onCancel) { Text("Cancel") },
+                leading: Button(action: self.onCancel) { Text("Cancel").padding([.trailing, .top, .bottom]) },
                 trailing: HStack {
-                    EditButton()
-                    Button(action: {self.showCreateMasterPassword = true }) { Image(systemName: "plus")}
-                    .padding(EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 5))
+                    Button(action: {self.showCreateMasterPassword = true }) {
+                        Image(systemName: "plus").imageScale(.large).padding()
+                    }
                 }
-            )
+            ).environment(\.editMode, Binding.constant(EditMode.active))
         }
         #else
         return SheetScaffoldView(title: "Master Passwords", onCancel: onCancel, onSave: nil) {
@@ -90,6 +91,7 @@ struct ManageMasterPasswordsView: View {
 
 }
 
+#if os(macOS)
 struct ListButton: View {
     let imageName: String
     let action: () -> Void
@@ -103,6 +105,7 @@ struct ListButton: View {
         .frame(width: 20, height: 20)
     }
 }
+#endif
 
 struct ManageMasterPasswordsView_Previews: PreviewProvider {
     static var previews: some View {

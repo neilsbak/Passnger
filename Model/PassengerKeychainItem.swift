@@ -33,7 +33,7 @@ struct PassengerKeychainItem {
             accountName = "accountPassword:\(name)"
             sync = true
         case .master:
-            accountName = "masterPasswrod:\(name)"
+            accountName = "masterPassword:\(name)"
             sync = false
         }
 
@@ -47,5 +47,9 @@ struct PassengerKeychainItem {
 
     func savePassword(_ password: String) throws {
         try keychainPasswordItem.savePassword(password)
+    }
+
+    func deletePassword() throws {
+        try keychainPasswordItem.deleteItem()
     }
 }

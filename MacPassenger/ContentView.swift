@@ -25,9 +25,12 @@ struct ContentView: View {
     var body: some View {
         Group {
             if self.model.passwordItems.count == 0 && self.model.masterPasswords.count == 0 && !toolbar.showCreatePassword {
-                IntroSetupView() { masterPasswordFormModel in
-                    let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
-                    self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
+                VStack {
+                    Text("Your Master Password").font(.title).padding(.top)
+                    IntroSetupView() { masterPasswordFormModel in
+                        let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
+                        self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
+                    }
                 }
             } else if model.passwordItems.count == 0 {
                 Text("You have no saved passwords.")

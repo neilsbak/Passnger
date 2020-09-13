@@ -69,7 +69,7 @@ struct ContentView: View {
                 self.showCreatePassword = true;
             }) {
                 if model.masterPasswords.count > 0 {
-                    Image(systemName: "plus").padding()
+                    Image(systemName: "plus").imageScale(.large).padding()
                 }
             }.sheet(isPresented: $showCreatePassword) {
                 CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { (passwordItem, hashedPassword) in

@@ -37,8 +37,8 @@ struct SheetScaffoldView<Content: View>: View {
                 content
                 .navigationBarTitle(Text(self.title ?? ""), displayMode: .inline)
                 .navigationBarItems(
-                    leading: onCancel.map { Button(action: $0) { Text("Cancel")}},
-                    trailing: onSave.map { Button(action: $0) { Text("Save")}}
+                    leading: onCancel.map { Button(action: $0) { Text("Cancel")}.padding([.trailing, .top, .bottom]) },
+                    trailing: onSave.map { Button(action: $0) { Text("Save")}.padding([.leading, .top, .bottom]) }
                 )
             }
         }

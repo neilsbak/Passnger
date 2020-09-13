@@ -83,6 +83,9 @@ struct PasswordItem: Identifiable, Equatable {
         return String(data: textData, encoding: .utf8)!
     }
 
+    func deletePassword() throws {
+        try passwordKeychainItem.deletePassword()
+    }
 }
 
 extension PasswordItem: Codable {
@@ -104,6 +107,10 @@ extension PasswordItem: Codable {
 
 
 struct MasterPassword: Identifiable, Equatable, Hashable {
+
+    class CachedPassword: NSObject {
+        var password: String? = nil
+    }
 
     enum MasterPasswordError: Error {
         case PassowordDoesNotMatch
@@ -136,17 +143,21 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
 
     private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: name, type: .master, passcodeProtected: securityLevel == .protectedSave, keychainService: keychainService) }
 
-    private var inMemoryHashedPassword: String?
+    private var inMemoryHashedPassword = CachedPassword()
 
     /// Master Passwords may not have the password saved in the keychain if was created on another device.
     /// If this function returns nil, then it is up to the UI to get the master password from the user.
     func getHashedPassword() throws -> CancellablePasswordText {
-        if let inMemoryHashedPassword = inMemoryHashedPassword, securityLevel != .noSave{
+        if let inMemoryHashedPassword = inMemoryHashedPassword.password, securityLevel != .noSave{
             return .value(inMemoryHashedPassword)
         }
         let hashedPassword: CancellablePasswordText
         do {
-            hashedPassword = .value(try passwordKeychainItem.readPassword())
+            let password = try passwordKeychainItem.readPassword()
+            hashedPassword = .value(password)
+            if securityLevel != .noSave {
+                inMemoryHashedPassword.password = password
+            }
         } catch KeychainPasswordItem.KeychainError.noPassword {
             hashedPassword = .value(nil)
         } catch KeychainPasswordItem.KeychainError.cancelled {
@@ -162,11 +173,16 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
         }
         let hashedPassword = MasterPassword.hashPassword(password)
         if securityLevel != .noSave {
-            inMemoryHashedPassword = hashedPassword
+            inMemoryHashedPassword.password = hashedPassword
         }
         if (securityLevel != .noSave) {
             try! passwordKeychainItem.savePassword(hashedPassword)
         }
+    }
+
+    mutating func deletePassword() throws {
+        try passwordKeychainItem.deletePassword()
+        inMemoryHashedPassword.password = nil
     }
 
     static func hashPasswordDataToData(passwordData: Data) -> Data {

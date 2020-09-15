@@ -41,7 +41,7 @@ struct SheetScaffoldView<Content: View>: View {
                     trailing: onSave.map { Button(action: $0) { Text("Save")}.padding([.leading, .top, .bottom]) }
                 )
             }
-        }
+        }.navigationViewStyle(StackNavigationViewStyle())
         #else
         SheetView(title: title, onCancel: onCancel ?? {}, onSave: onSave, content: { content })
         #endif

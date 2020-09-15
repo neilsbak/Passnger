@@ -1,6 +1,6 @@
 //
 //  PasswordItem.swift
-//  Passenger
+//  Passnger
 //
 //  Created by Neil Bakhle on 2020-04-12.
 //  Copyright © 2020 Neil. All rights reserved.
@@ -16,7 +16,7 @@ enum CancellablePasswordText: Equatable {
 
 struct PasswordItem: Identifiable, Equatable {
 
-    init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, keychainService: String = PassengerKeychainItem.service, created: Date = Date(), numRenewals: Int = 0, passwordScheme: PasswordScheme) {
+    init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, keychainService: String = PassngerKeychainItem.service, created: Date = Date(), numRenewals: Int = 0, passwordScheme: PasswordScheme) {
         self.userName = userName
         self.masterPassword = masterPassword
         self.url = url
@@ -45,9 +45,9 @@ struct PasswordItem: Identifiable, Equatable {
     let minUpperCase: Int
     let minLowerCase: Int
     let masterPassword: MasterPassword
-    var keychainService: String = PassengerKeychainItem.service
+    var keychainService: String = PassngerKeychainItem.service
 
-    private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: url + "::" + userName, type: .account, passcodeProtected: false, keychainService: keychainService) }
+    private var passwordKeychainItem:  PassngerKeychainItem {  PassngerKeychainItem(name: url + "::" + userName, type: .account, passcodeProtected: false, keychainService: keychainService) }
 
     func passwordScheme() throws -> PasswordScheme {
         try PasswordScheme(passwordLength: passwordLength, symbols: symbols, minSymbols: minSymbols, minLowerCase: minLowerCase, minUpperCase: minUpperCase, minNumeric: minNumeric)
@@ -123,14 +123,14 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
         case noSave
     }
 
-    init(name: String, securityLevel: SecurityLevel, doubleHashedPassword: String, keychainService: String = PassengerKeychainItem.service) {
+    init(name: String, securityLevel: SecurityLevel, doubleHashedPassword: String, keychainService: String =  PassngerKeychainItem.service) {
         self.name = name
         self.securityLevel = securityLevel
         self.doubleHashedPassword = doubleHashedPassword
         self.keychainService = keychainService
     }
 
-    init(name: String, password: String, securityLevel: SecurityLevel, keychainService: String = PassengerKeychainItem.service) {
+    init(name: String, password: String, securityLevel: SecurityLevel, keychainService: String =  PassngerKeychainItem.service) {
         let doubleHashed = MasterPassword.doubleHashPassword(password)
         self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed, keychainService: keychainService)
     }
@@ -139,9 +139,9 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
     let name: String
     let securityLevel: SecurityLevel
     let doubleHashedPassword: String
-    var keychainService: String = PassengerKeychainItem.service
+    var keychainService: String =  PassngerKeychainItem.service
 
-    private var passwordKeychainItem: PassengerKeychainItem { PassengerKeychainItem(name: name, type: .master, passcodeProtected: securityLevel == .protectedSave, keychainService: keychainService) }
+    private var passwordKeychainItem:  PassngerKeychainItem {  PassngerKeychainItem(name: name, type: .master, passcodeProtected: securityLevel == .protectedSave, keychainService: keychainService) }
 
     private var inMemoryHashedPassword = CachedPassword()
 

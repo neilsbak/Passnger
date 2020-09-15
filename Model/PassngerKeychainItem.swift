@@ -1,6 +1,6 @@
 //
-//  PassengerKeychainItem.swift
-//  Passenger
+//  PassngerKeychainItem.swift
+//  Passnger
 //
 //  Created by Neil Bakhle on 2020-05-06.
 //  Copyright © 2020 Neil. All rights reserved.
@@ -8,9 +8,9 @@
 
 import Foundation
 
-struct PassengerKeychainItem {
+struct PassngerKeychainItem {
 
-    static let service = "Passenger"
+    static let service = "Passnger"
 
     enum PasswordType {
         case account
@@ -22,7 +22,7 @@ struct PassengerKeychainItem {
     let passcodeProtected: Bool
     private let keychainPasswordItem: KeychainPasswordItem
 
-    init(name: String, type: PasswordType, passcodeProtected: Bool, keychainService: String = PassengerKeychainItem.service) {
+    init(name: String, type: PasswordType, passcodeProtected: Bool, keychainService: String = PassngerKeychainItem.service) {
         self.name = name
         self.type = type
         self.passcodeProtected = passcodeProtected

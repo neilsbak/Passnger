@@ -42,7 +42,7 @@ public class Model: ObservableObject {
         }.eraseToAnyPublisher()
     }
 
-    init(keychainService: String = PassengerKeychainItem.service) {
+    init(keychainService: String =  PassngerKeychainItem.service) {
         passwordKeychainItem = Model.passwordKeychainItem(keychainService: keychainService)
         masterKeychainItem = Model.masterKeychainItem(keychainService: keychainService)
         shownPasswordItemsCancellable = shownPasswordItemsPublisher.assign(to: \.shownPasswordItems, on: self)
@@ -105,7 +105,7 @@ public class Model: ObservableObject {
         try! passwordKeychainItem.savePassword(passwordItemJson)
     }
 
-    static func loadModel(keychainService: String = PassengerKeychainItem.service) -> Model {
+    static func loadModel(keychainService: String =  PassngerKeychainItem.service) -> Model {
         let model = Model(keychainService: keychainService)
 
         let masterPasswordsKeychainItem = Model.masterKeychainItem(keychainService: keychainService)

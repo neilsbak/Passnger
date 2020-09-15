@@ -105,7 +105,7 @@ struct PasswordFormView: View {
             }
         }
         .keyboardObserving()
-        .frame(minHeight: 400)
+        .frame(minHeight: 340)
     }
 }
 

@@ -78,7 +78,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered, defer: false)
-        window.title = "Passenger"
+        window.title = "Passnger"
         //window.titleVisibility = NSWindow.TitleVisibility.hidden
         window.center()
         window.setFrameAutosaveName("Main Window")
@@ -99,6 +99,7 @@ extension AppDelegate {
     }
 
     var copyMenuItem: NSMenuItem? { menuItem(widthTitle: "Copy") }
+    var pasteMenuItem: NSMenuItem? { menuItem(widthTitle: "Paste") }
     var deleteMenuItem: NSMenuItem? { menuItem(widthTitle: "Delete") }
     var infoMenuItem: NSMenuItem? { menuItem(widthTitle: "Info") }
 

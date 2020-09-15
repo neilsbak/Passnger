@@ -77,7 +77,7 @@ struct ContentView: View {
                     self.showCreatePassword = false
                 }
             })
-        }
+        }.navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

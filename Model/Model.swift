@@ -105,21 +105,21 @@ public class Model: ObservableObject {
         try! passwordKeychainItem.savePassword(passwordItemJson)
     }
 
+    func loadModel() {
+        if let masterPasswordsJson = try? masterKeychainItem.readPassword(),
+           let masterPasswords = try? JSONDecoder().decode([MasterPassword].self, from: masterPasswordsJson.data(using: .utf8)!) {
+            self.masterPasswords = masterPasswords
+        }
+        if let passwordItemsJson = try? passwordKeychainItem.readPassword(),
+           let passwordItems = try? JSONDecoder().decode([PasswordItem].self, from: passwordItemsJson.data(using: .utf8)!) {
+            self.passwordItems = passwordItems
+        }
+        print("LOADED")
+    }
+
     static func loadModel(keychainService: String =  PassngerKeychainItem.service) -> Model {
         let model = Model(keychainService: keychainService)
-
-        let masterPasswordsKeychainItem = Model.masterKeychainItem(keychainService: keychainService)
-        guard let masterPasswordsJson = try? masterPasswordsKeychainItem.readPassword() else {
-            return model
-        }
-        model.masterPasswords = (try? JSONDecoder().decode([MasterPassword].self, from: masterPasswordsJson.data(using: .utf8)!)) ?? []
-
-        let passwordItemsKeychainItem = Model.passwordKeychainItem(keychainService: keychainService)
-        guard let passwordItemsJson = try? passwordItemsKeychainItem.readPassword() else {
-            return model
-        }
-        model.passwordItems = (try? JSONDecoder().decode([PasswordItem].self, from: passwordItemsJson.data(using: .utf8)!)) ?? []
-
+        model.loadModel()
         return model
     }
 

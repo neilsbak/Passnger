@@ -33,7 +33,14 @@ struct ContentView: View {
                     }
                 }
             } else if model.passwordItems.count == 0 {
-                Text("You have no saved passwords.")
+                VStack {
+                    Text("You have no saved passwords.")
+                    HStack(spacing: 0) {
+                        Text("Press the  ")
+                        Image(nsImage: NSImage(named: NSImage.addTemplateName)!)
+                        Text("  button to create a password.")
+                    }
+                }
             } else {
                 PasswordsView(model: model, selectedPassword: toolbar.selectedPassword) { passwordItem in
                     if (self.toolbar.selectedPassword == passwordItem) {

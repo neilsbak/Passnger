@@ -26,7 +26,7 @@ struct SheetView<Content: View>: View {
 
     var body: some View {
         VStack {
-            title.map { Text($0) }
+            title.map { Text($0).font(.subheadline) }
             content
             Spacer()
             HStack {

@@ -30,7 +30,14 @@ struct ContentView: View {
                         self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
                     }
                 } else if model.passwordItems.count == 0 {
-                    Text("You have no saved passwords.")
+                    VStack {
+                        Text("You have no saved passwords.")
+                        HStack(spacing: 0) {
+                            Text("Press the  ")
+                            Image(systemName: "plus")
+                            Text("  button to create a password.")
+                        }
+                    }
                 } else {
                     VStack(spacing: 0) {
                         SearchBar(text: $model.searchText)

@@ -546,7 +546,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.Passnger;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.passnger;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -571,7 +571,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.Passnger;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.passnger;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
@@ -701,11 +701,12 @@
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Passnger/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.Passnger;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.passnger;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -721,11 +722,12 @@
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = Passnger/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.Passnger;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.passnger;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

@@ -14,11 +14,14 @@ import Combine
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     var window: NSWindow!
+
     private let toolbarObservable = ToolbarObservable()
 
     private lazy var model: Model = {
         return Model.loadModel()
     }()
+
+    private var hasStarted = false
 
     private lazy var deleteToolbarButton: NSButton = {
         let button = NSButton(image: NSImage(imageLiteralResourceName: "trash").tint(color: NSColor.textColor), target: self, action: #selector(deletePassword))
@@ -84,11 +87,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.setFrameAutosaveName("Main Window")
         window.contentView = NSHostingView(rootView: ContentView(model: model, toolbar: toolbarObservable))
         window.toolbar = toolbar
+        window.delegate = self
         window.makeKeyAndOrderFront(nil)
     }
 
+
+
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+    }
+}
+
+extension AppDelegate: NSWindowDelegate {
+
+    func windowDidBecomeMain(_ notification: Notification) {
+        if hasStarted {
+            model.loadModel()
+        }
+        hasStarted = true
     }
 }
 

@@ -63,7 +63,7 @@ struct PasswordItemRow: View {
             Spacer()
             #if os(iOS)
             Button(action: {
-                switch try! self.passwordItem.masterPassword.getHashedPassword() {
+                switch try! self.passwordItem.masterPassword.getHashedPassword(keychainService: self.model.keychainService) {
                 case .cancelled:
                     return
                 case .value(let hashedMasterPassword):

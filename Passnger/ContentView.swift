@@ -42,7 +42,7 @@ struct ContentView: View {
                     VStack(spacing: 0) {
                         SearchBar(text: $model.searchText)
                         PasswordsView(model: model) { selectedPasswordItem in
-                            switch try! selectedPasswordItem.getPassword() {
+                            switch try! selectedPasswordItem.getPassword(keychainService: self.model.keychainService) {
                             case .cancelled:
                                 return
                             case .value(let password):
@@ -68,7 +68,7 @@ struct ContentView: View {
             .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { masterPassword, passwordText in
                     let hashedPassword = MasterPassword.hashPassword(passwordText)
                     self.model.addMasterPassword(masterPassword, passwordText: passwordText)
-                    UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
+                UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword, keychainService: self.model.keychainService)
                     self.passwordItemWithoutMasterPassword = nil
             }
             .navigationBarTitle(model.masterPasswords.count == 0 ? "Master Password" : "Passwords")

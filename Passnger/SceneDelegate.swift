@@ -14,7 +14,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     private lazy var model: Model = {
-        return Model.loadModel()
+        return Model.testModel()
     }()
 
     private var hasStarted = false

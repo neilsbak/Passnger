@@ -36,7 +36,7 @@ struct CreatePasswordView: View {
                 guard let selectedMasterPassword = self.formModel.selectedMasterPassword else {
                     return
                 }
-                switch try! selectedMasterPassword.getHashedPassword() {
+                switch try! selectedMasterPassword.getHashedPassword(keychainService: self.model.keychainService) {
                 case .cancelled:
                     return
                 case.value(let hashedMasterPassword):

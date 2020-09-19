@@ -68,13 +68,13 @@ struct ContentView: View {
             PasswordItemSheet(passwordItem: self.toolbar.selectedPassword!, onCancel: {
                 self.toolbar.showInfo.wrappedValue.toggle()
             }) { passwordItem in
-                self.toolbar.changeInfoForPasswordItem(passwordItem, toModel: self.model)
+                self.toolbar.changeInfoForPasswordItem(passwordItem)
                 self.toolbar.showInfo.wrappedValue.toggle()
             }
         }
         .alert(isPresented: self.$toolbar.confirmDelete) { () -> Alert in
             Alert(title: Text("Delete Password?"), primaryButton: Alert.Button.destructive(Text("Delete")) {
-                self.toolbar.deleteSelectedPassword(fromModel: self.model)
+                self.toolbar.deleteSelectedPassword()
             }, secondaryButton: Alert.Button.cancel())
         }
     }
@@ -101,6 +101,6 @@ private struct PasswordItemSheet: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(model: Model.testModel(), toolbar: ToolbarObservable())
+        ContentView(model: Model.testModel(), toolbar: ToolbarObservable(model: Model.testModel()))
     }
 }

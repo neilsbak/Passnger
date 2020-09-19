@@ -135,7 +135,18 @@ public class Model: ObservableObject {
         }
         model.passwordItems = [
             PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[0], url: "gmail.com", resourceDescription: "Gmail", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "neil123", masterPassword: model.masterPasswords[1], url: "google.com", resourceDescription: "Google", passwordScheme: PasswordScheme())
+            PasswordItem(userName: "pw_smith.to", masterPassword: model.masterPasswords[1], url: "amazon.com", resourceDescription: "Amazon", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[0], url: "sunbank.com", resourceDescription: "Sun Bank", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "apple.com", resourceDescription: "Apple", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "github.com", resourceDescription: "GitHub", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pwsmithto@hotmail.com", masterPassword: model.masterPasswords[0], url: "facebook.com", resourceDescription: "Facebook", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[0], url: "turbotax.com", resourceDescription: "Turbo Tax", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pwsmithto", masterPassword: model.masterPasswords[1], url: "hotmail.com", resourceDescription: "Hotmail", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "jencarford", masterPassword: model.masterPasswords[1], url: "gmail.com", resourceDescription: "Jen Gmail", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pwsmithto@hotmail.com", masterPassword: model.masterPasswords[0], url: "twitter.com", resourceDescription: "Twitter", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "starbucks.com", resourceDescription: "Starbucks", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[1], url: "yahoo.com", resourceDescription: "Yahoo", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[0], url: "slack.com", resourceDescription: "Slack", passwordScheme: PasswordScheme()),
         ]
         for p in model.passwordItems {
             let hashedMasterPassword = MasterPassword.hashPassword(masterPasswords[p.masterPassword.name]!)

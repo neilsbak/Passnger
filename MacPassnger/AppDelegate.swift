@@ -15,11 +15,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var window: NSWindow!
 
-    private let toolbarObservable = ToolbarObservable()
+    private lazy var toolbarObservable = { ToolbarObservable(model: self.model) }()
 
-    private lazy var model: Model = {
-        return Model.loadModel()
-    }()
+    private lazy var model: Model = { Model.loadModel() }()
 
     private var hasStarted = false
 
@@ -213,7 +211,7 @@ extension AppDelegate: NSToolbarDelegate {
 
     @objc func copyPassword() {
         guard let item = toolbarObservable.selectedPassword else { return }
-        switch try! item.getPassword() {
+        switch try! item.getPassword(keychainService: model.keychainService) {
         case .cancelled:
             return
         case .value(let password):
@@ -228,7 +226,7 @@ extension AppDelegate: NSToolbarDelegate {
 
     @objc func showInfo() {
         guard let item = toolbarObservable.selectedPassword else { return }
-        switch try! item.masterPassword.getHashedPassword() {
+        switch try! item.masterPassword.getHashedPassword(keychainService: model.keychainService) {
         case .cancelled:
             return
         case .value(let password):
@@ -242,6 +240,12 @@ extension AppDelegate: NSToolbarDelegate {
 }
 
 class ToolbarObservable: ObservableObject {
+
+    let model: Model
+
+    init(model: Model) {
+        self.model = model
+    }
 
     enum GetMasterPasswordReason {
         case copy
@@ -287,12 +291,12 @@ class ToolbarObservable: ObservableObject {
 
     private func copyPassword(hashedMasterPassword: String) {
         guard let item = selectedPassword else { return }
-        let password = try! item.getPassword(hashedMasterPassword: hashedMasterPassword)
+        let password = try! item.getPassword(hashedMasterPassword: hashedMasterPassword, keychainService: model.keychainService)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(password, forType: .string)
     }
 
-    func deleteSelectedPassword(fromModel model: Model) {
+    func deleteSelectedPassword() {
         guard let deletedPassword = selectedPassword else {
             return
         }
@@ -300,7 +304,7 @@ class ToolbarObservable: ObservableObject {
         confirmDelete = false
     }
 
-    func changeInfoForPasswordItem(_ passwordItem: PasswordItem, toModel model: Model) {
+    func changeInfoForPasswordItem(_ passwordItem: PasswordItem) {
         guard let hashedMasterPassword = showInfoHashedMasterPassword else { return }
         model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
     }

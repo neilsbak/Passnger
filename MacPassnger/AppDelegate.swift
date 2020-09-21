@@ -17,7 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var toolbarObservable = { ToolbarObservable(model: self.model) }()
 
-    private lazy var model: Model = { Model.loadModel() }()
+    private lazy var model: Model = { Model.testModel() }()
 
     private var hasStarted = false
 
@@ -89,8 +89,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
     }
 
-
-
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
     }
@@ -103,6 +101,15 @@ extension AppDelegate: NSWindowDelegate {
             model.loadModel()
         }
         hasStarted = true
+    }
+
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        NSApplication.shared.hide(self)
+        return false
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        NSApplication.shared.unhide(self)
     }
 }
 

@@ -78,6 +78,7 @@
 		4F25F08924CDECB200D990B3 /* PasswordInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordInfoView.swift; sourceTree = "<group>"; };
 		4F25F08C24DB077900D990B3 /* SquareNotifierViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SquareNotifierViewModifier.swift; sourceTree = "<group>"; };
 		4F3C2AD82510080B0025950A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		4F3C2AF9251858D10025950A /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		4F4DDCC125082C71006CAFB2 /* ManageMasterPasswordsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageMasterPasswordsView.swift; sourceTree = "<group>"; };
 		4F4DDCC725096663006CAFB2 /* SheetScaffoldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetScaffoldView.swift; sourceTree = "<group>"; };
 		4F4DDCEA2509D696006CAFB2 /* CreatePasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatePasswordView.swift; sourceTree = "<group>"; };
@@ -181,6 +182,7 @@
 		4F8704F8244379C500769A9D = {
 			isa = PBXGroup;
 			children = (
+				4F3C2AF9251858D10025950A /* LICENSE */,
 				4F3C2AD82510080B0025950A /* README.md */,
 				4F7DEDB624687C870012041B /* Assets.xcassets */,
 				4FEC0E6D248893D300869313 /* Model */,

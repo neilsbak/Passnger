@@ -17,7 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var toolbarObservable = { ToolbarObservable(model: self.model) }()
 
-    private lazy var model: Model = { Model.testModel() }()
+    private lazy var model: Model = { Model.loadModel() }()
 
     private var hasStarted = false
 

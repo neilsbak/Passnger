@@ -85,6 +85,7 @@
 		4F4E9CB224F6F7E4006FDFC5 /* SheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetView.swift; sourceTree = "<group>"; };
 		4F4E9CB624FAF950006FDFC5 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		4F4E9CB824FDF3F7006FDFC5 /* KeyboardObserving.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardObserving.swift; sourceTree = "<group>"; };
+		4F5179832520467D00578B68 /* PRIVACY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = PRIVACY.md; sourceTree = "<group>"; };
 		4F589F272493F92E0099AB5A /* NSImageExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSImageExtension.swift; sourceTree = "<group>"; };
 		4F589F2924A91BA90099AB5A /* GetMasterPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetMasterPasswordView.swift; sourceTree = "<group>"; };
 		4F589F2B24B255710099AB5A /* TextAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextAlert.swift; sourceTree = "<group>"; };
@@ -182,6 +183,7 @@
 		4F8704F8244379C500769A9D = {
 			isa = PBXGroup;
 			children = (
+				4F5179832520467D00578B68 /* PRIVACY.md */,
 				4F3C2AF9251858D10025950A /* LICENSE */,
 				4F3C2AD82510080B0025950A /* README.md */,
 				4F7DEDB624687C870012041B /* Assets.xcassets */,
@@ -538,7 +540,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"MacPassnger/Preview Content\"";
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -564,7 +566,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"MacPassnger/Preview Content\"";
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -701,7 +703,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"Passnger/Preview Content\"";
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_PREVIEWS = YES;
@@ -723,7 +725,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_ASSET_PATHS = "\"Passnger/Preview Content\"";
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_PREVIEWS = YES;

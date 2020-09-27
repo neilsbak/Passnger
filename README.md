@@ -3,8 +3,8 @@
 Passnger is an iOS and macOS app where you can use a single master password to generate unique passwords for all your accounts.  All your passwords are stored using the Secure Enclave and synced to all your devices using iCloud Keychain.  
 
 <p float="left">
-    <img src="/.github/readme/macos_app.png" alt="macOS Screenshot" width="600">
-    <img src="/.github/readme/ios_app.png" alt="iOS Screenshot" width="320">
+    <img src="/.github/readme/macos_app.png" alt="macOS Screenshot" width="500">
+    <img src="/.github/readme/ios_app.png" alt="iOS Screenshot" width="200">
 </p>
 
 ## Why?

@@ -62,3 +62,16 @@ struct AlignedSection<Header: View, Content: View>: View {
     }
 }
 
+
+struct AlignedForm_Previews: PreviewProvider {
+    static var previews: some View {
+        AlignedForm {
+            AlignedSection(header: Text("Header")) {
+                TextField("FormField", text: Binding.constant("Form Field Value"))
+            }
+            AlignedSection(header: Text("Header 2")) {
+                TextField("FormField", text: Binding.constant("Form Field Value"))
+            }
+        }
+    }
+}

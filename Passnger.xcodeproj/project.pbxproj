@@ -95,7 +95,7 @@
 		4F589F3B24C3618B0099AB5A /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		4F589F4124C87E880099AB5A /* IntroSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntroSetupView.swift; sourceTree = "<group>"; };
 		4F7C544D2502B47F004BCEC5 /* AlignedForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlignedForm.swift; sourceTree = "<group>"; };
-		4F7DEDB024687C850012041B /* MacPassnger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacPassnger.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F7DEDB024687C850012041B /* Passnger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Passnger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F7DEDB224687C850012041B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4F7DEDB424687C850012041B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		4F7DEDB624687C870012041B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -200,7 +200,7 @@
 			isa = PBXGroup;
 			children = (
 				4F870501244379C500769A9D /* Passnger.app */,
-				4F7DEDB024687C850012041B /* MacPassnger.app */,
+				4F7DEDB024687C850012041B /* Passnger.app */,
 				4F589F3124BE1A6A0099AB5A /* PassngerTests.xctest */,
 			);
 			name = Products;
@@ -297,7 +297,7 @@
 			);
 			name = MacPassnger;
 			productName = MacPassenger;
-			productReference = 4F7DEDB024687C850012041B /* MacPassnger.app */;
+			productReference = 4F7DEDB024687C850012041B /* Passnger.app */;
 			productType = "com.apple.product-type.application";
 		};
 		4F870500244379C500769A9D /* Passnger */ = {
@@ -540,7 +540,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"MacPassnger/Preview Content\"";
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -552,7 +552,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.passnger;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Passnger;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};
@@ -566,7 +566,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 4;
+				CURRENT_PROJECT_VERSION = 5;
 				DEVELOPMENT_ASSET_PATHS = "\"MacPassnger/Preview Content\"";
 				DEVELOPMENT_TEAM = 54ZXBTM75W;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -578,7 +578,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = com.nbakhle.passnger;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Passnger;
 				SDKROOT = macosx;
 				SWIFT_VERSION = 5.0;
 			};

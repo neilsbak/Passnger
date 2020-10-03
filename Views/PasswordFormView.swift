@@ -104,7 +104,6 @@ struct PasswordFormView: View {
                 ManageMasterPasswordsView(masterPasswords: self.masterPasswords, onCancel: { self.showManageMasterPasswords = false }, onDelete: self.removeMasterPasswords, onCreate: self.createMasterPassword)
             }
         }
-        .keyboardObserving()
         .frame(minHeight: 340)
     }
 }

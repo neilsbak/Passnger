@@ -148,6 +148,7 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
     /// Master Passwords may not have the password saved in the keychain if was created on another device.
     /// If this function returns nil, then it is up to the UI to get the master password from the user.
     func getHashedPassword(keychainService: String) throws -> CancellablePasswordText {
+        return .value(nil)
         if let inMemoryHashedPassword = inMemoryHashedPassword.password, securityLevel != .noSave{
             return .value(inMemoryHashedPassword)
         }

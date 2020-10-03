@@ -51,12 +51,7 @@ struct ContentView: View {
                                     self.showGetMasterPassword = true
                                     return
                                 }
-                                withAnimation {
-                                    self.showCopied = true
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                    self.showCopied = false
-                                }
+                                self.showCopiedNotifier()
                                 UIPasteboard.general.string = password
                             }
                         }
@@ -65,10 +60,11 @@ struct ContentView: View {
                 }
             }
             .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { masterPassword, passwordText in
-                    let hashedPassword = MasterPassword.hashPassword(passwordText)
-                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
+                let hashedPassword = MasterPassword.hashPassword(passwordText)
+                self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword, keychainService: self.model.keychainService)
-                    self.passwordItemWithoutMasterPassword = nil
+                self.passwordItemWithoutMasterPassword = nil
+                self.showCopiedNotifier()
             }
             .navigationBarTitle(model.masterPasswords.count == 0 ? "Master Password" : "Passwords")
             .navigationBarItems(trailing: Button(action: {
@@ -85,6 +81,17 @@ struct ContentView: View {
             })
         }.navigationViewStyle(StackNavigationViewStyle())
     }
+
+    private func showCopiedNotifier() {
+        withAnimation {
+            self.showCopied = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.showCopied = false
+        }
+
+    }
+
 }
 
 struct ContentView_Previews: PreviewProvider {

@@ -56,8 +56,8 @@ struct AlertWrapper<Content: View>: UIViewControllerRepresentable {
                     self.isPresented = false
                     return false
                 }
-                let isValid = self.alert.action(text)
                 self.isPresented = false
+                let isValid = self.alert.action(text)
                 if !isValid {
                     //The alert has been dismissed from the action button,
                     //So show a new one

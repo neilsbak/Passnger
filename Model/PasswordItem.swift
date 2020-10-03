@@ -176,7 +176,12 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
             inMemoryHashedPassword.password = hashedPassword
         }
         if (securityLevel != .noSave) {
-            try! passwordKeychainItem(keychainService: keychainService).savePassword(hashedPassword)
+            do {
+                try passwordKeychainItem(keychainService: keychainService).savePassword(hashedPassword)
+            } catch _ {
+                // Device probably doesn't have a passcode, which means the user will have
+                // to enter their master password every time
+            }
         }
     }
 

@@ -79,19 +79,17 @@ struct PasswordItemRow: View {
                         self.showGetMasterPassword = false
                         self.linkIsActive = true
                     }
-                    if linkIsActive {
-                        NavigationLink(
-                            destination: PasswordInfoModifier(
-                                passwordItem: passwordItem) {updatedPasswordItem in
-                                    self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
-                                }
-                            .navigationBarTitle("Password Info", displayMode: .inline),
-                            isActive: self.$linkIsActive
-                        ) {
-                            EmptyView()
-                        }
+                    NavigationLink(
+                        destination: PasswordInfoModifier(
+                            passwordItem: passwordItem) {updatedPasswordItem in
+                                self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
+                            }
+                        .navigationBarTitle("Password Info", displayMode: .inline),
+                        isActive: self.$linkIsActive
+                    ) {
+                        EmptyView()
                     }
-                    Image("info").resizable().frame(width: 24, height: 24).padding()
+                    Image(systemName: "info.circle").resizable().frame(width: 18, height: 18).padding()
                 }
             }
             .buttonStyle(BorderlessButtonStyle())

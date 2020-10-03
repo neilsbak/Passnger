@@ -62,7 +62,6 @@ struct ContentView: View {
                         }
                     }
                     .squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
-                    .keyboardObserving()
                 }
             }
             .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { masterPassword, passwordText in

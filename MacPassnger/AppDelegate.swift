@@ -13,7 +13,7 @@ import Combine
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    var window: NSWindow!
+    var window: NSWindow?
 
     private lazy var toolbarObservable = { ToolbarObservable(model: self.model) }()
 
@@ -56,26 +56,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private var toolbarCancellable: AnyCancellable?
 
-
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Create the SwiftUI view that provides the window contents.
-
-        let toolbar = NSToolbar(identifier: "MainToolbar")
-        toolbar.displayMode = .iconOnly
-        toolbar.delegate = self
 
         toolbarCancellable = toolbarObservable.$selectedPassword.sink(receiveValue: { passwordItem in
             self.deleteToolbarButton.isEnabled = (passwordItem != nil)
             self.copyButton.isEnabled = (passwordItem != nil)
             self.infoButton.isEnabled = (passwordItem != nil)
-            self.copyMenuItem?.isEnabled = (passwordItem != nil)
-            self.deleteMenuItem?.isEnabled = (passwordItem != nil)
-            self.infoMenuItem?.isEnabled = (passwordItem != nil)
-
         })
+        window = getWindow()
+        window?.makeKeyAndOrderFront(nil)
+    }
 
-        // Create the window and set the content view. 
-        window = NSWindow(
+    func getWindow() -> NSWindow {
+        let toolbar = NSToolbar(identifier: "MainToolbar")
+        toolbar.displayMode = .iconOnly
+        toolbar.delegate = self
+
+        let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 480, height: 300),
             styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered, defer: false)
@@ -86,11 +84,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentView = NSHostingView(rootView: ContentView(model: model, toolbar: toolbarObservable))
         window.toolbar = toolbar
         window.delegate = self
-        window.makeKeyAndOrderFront(nil)
+        window.isReleasedWhenClosed = false
+        return window
     }
 
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if flag {
+            return false
+        }
+        self.openWindow(nil)
+        return true
+    }
+
+    @IBAction func openWindow(_ sender: Any?) {
+        if let window = window {
+            window.makeKeyAndOrderFront(nil)
+        } else {
+            window = getWindow()
+            window?.makeKeyAndOrderFront(nil)
+        }
     }
 }
 
@@ -104,31 +116,13 @@ extension AppDelegate: NSWindowDelegate {
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        NSApplication.shared.hide(self)
-        return false
+        self.window = nil
+        return true
     }
 
-    func applicationDidBecomeActive(_ notification: Notification) {
-        NSApplication.shared.unhide(self)
-    }
 }
 
-extension AppDelegate {
-
-    private func menuItem(widthTitle title: String) -> NSMenuItem? {
-        return NSApplication.shared.mainMenu?.item(withTitle: title)
-    }
-
-    var copyMenuItem: NSMenuItem? { menuItem(widthTitle: "Copy") }
-    var pasteMenuItem: NSMenuItem? { menuItem(widthTitle: "Paste") }
-    var deleteMenuItem: NSMenuItem? { menuItem(widthTitle: "Delete") }
-    var infoMenuItem: NSMenuItem? { menuItem(widthTitle: "Info") }
-
-    private func disableMenuItems() {
-        copyMenuItem?.isEnabled = false
-        deleteMenuItem?.isEnabled = false
-        infoMenuItem?.isEnabled = false
-    }
+extension AppDelegate: NSUserInterfaceValidations {
 
     @IBAction func newDocument(_ sender: Any) {
         createPassword()
@@ -148,6 +142,22 @@ extension AppDelegate {
 
     @IBAction func find(_ sender: Any) {
         searchField.becomeFirstResponder()
+    }
+
+    func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
+        if item.action == #selector(openWindow(_:)) {
+            return true
+        }
+        if item.action == #selector(copy(_:)) {
+            return copyButton.isEnabled
+        }
+        if item.action == #selector(delete(_:)) {
+            return deleteToolbarButton.isEnabled
+        }
+        if item.action == #selector(info(_:)) {
+            return infoButton.isEnabled
+        }
+        return NSApplication.shared.validateUserInterfaceItem(item)
     }
 
 }

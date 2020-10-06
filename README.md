@@ -7,6 +7,8 @@ Passnger is an iOS and macOS app where you can use a single master password to g
     <img src="/.github/readme/ios_app.png" alt="iOS Screenshot" width="200">
 </p>
 
+[![Get it from the App Store](/.github/readme/badge-download-on-the-app-store.svg)](https://apps.apple.com/us/app/id1531915711)
+
 ## Why?
 
 Managing your passwords is a pain.  Many of us reuse the same password, with slight variations, for various accounts across multiple websites and services. This leaves our accounts vulnerable. There are commercial password manager services, but sharing your passwords with a 3rd party seems risky.

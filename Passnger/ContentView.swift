@@ -56,6 +56,7 @@ struct ContentView: View {
                             }
                         }
                     }
+                    .keyboardObserving()
                     .squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
                 }
             }

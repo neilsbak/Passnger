@@ -60,6 +60,7 @@
 		4F87051B244398C400769A9D /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F87051A244398C400769A9D /* Model.swift */; };
 		4FCF4D1A24632D8700F98F3C /* KeychainPasswordItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCF4D1924632D8700F98F3C /* KeychainPasswordItem.swift */; };
 		4FCF4D1C24632F4000F98F3C /* PassngerKeychainItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FCF4D1B24632F4000F98F3C /* PassngerKeychainItem.swift */; };
+		4FE8B61F252D659B004BF440 /* KeyboardObserving.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE8B61E252D659B004BF440 /* KeyboardObserving.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -117,6 +118,7 @@
 		4F87051A244398C400769A9D /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		4FCF4D1924632D8700F98F3C /* KeychainPasswordItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainPasswordItem.swift; sourceTree = "<group>"; };
 		4FCF4D1B24632F4000F98F3C /* PassngerKeychainItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PassngerKeychainItem.swift; sourceTree = "<group>"; };
+		4FE8B61E252D659B004BF440 /* KeyboardObserving.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyboardObserving.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +208,7 @@
 		4F870503244379C500769A9D /* Passnger */ = {
 			isa = PBXGroup;
 			children = (
+				4FE8B61E252D659B004BF440 /* KeyboardObserving.swift */,
 				4F870504244379C500769A9D /* AppDelegate.swift */,
 				4F870506244379C500769A9D /* SceneDelegate.swift */,
 				4F870508244379C500769A9D /* ContentView.swift */,
@@ -430,6 +433,7 @@
 			files = (
 				4F87051B244398C400769A9D /* Model.swift in Sources */,
 				4F7DEDDC2485589A0012041B /* MasterPasswordFormModel.swift in Sources */,
+				4FE8B61F252D659B004BF440 /* KeyboardObserving.swift in Sources */,
 				4F4DDCEB2509D696006CAFB2 /* CreatePasswordView.swift in Sources */,
 				4F4DDCC825096663006CAFB2 /* SheetScaffoldView.swift in Sources */,
 				4FCF4D1C24632F4000F98F3C /* PassngerKeychainItem.swift in Sources */,

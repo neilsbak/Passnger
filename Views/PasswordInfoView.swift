@@ -50,7 +50,7 @@ struct PasswordInfoView: View {
         #if os(iOS)
         List {
             self.contentRows(width: metrics.size.width)
-        }
+        }.keyboardObserving()
         #else
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {

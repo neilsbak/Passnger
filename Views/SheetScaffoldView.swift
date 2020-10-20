@@ -58,11 +58,7 @@ extension View {
 
 extension View {
     func macSafeSheet<Content: View>(isPresented: Binding<Bool>, content: @escaping () -> Content) -> some View {
-        #if os(macOS)
         return self.background(EmptyView().sheet(isPresented: isPresented, content: content))
-        #else
-        return self.sheet(isPresented: isPresented, content: content)
-        #endif
     }
 }
 

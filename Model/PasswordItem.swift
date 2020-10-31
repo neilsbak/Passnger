@@ -65,7 +65,7 @@ struct PasswordItem: Identifiable, Equatable {
     /// Assumes the masterPassword is obtainable in from memory or disk
     /// or returns nil otherwise
     func getPassword(keychainService: String) throws -> CancellablePasswordText {
-        let mPassword = try masterPassword.getHashedPassword(keychainService: keychainService)
+        let mPassword = masterPassword.getHashedPassword(keychainService: keychainService)
         switch mPassword {
         case .cancelled:
             return .cancelled
@@ -156,7 +156,7 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
 
     /// Master Passwords may not have the password saved in the keychain if was created on another device.
     /// If this function returns nil, then it is up to the UI to get the master password from the user.
-    func getHashedPassword(keychainService: String) throws -> CancellablePasswordText {
+    func getHashedPassword(keychainService: String) -> CancellablePasswordText {
         if let inMemoryHashedPassword = MasterPassword.getCachedPassword(forMasterPassword: self), securityLevel != .noSave{
             return .value(inMemoryHashedPassword)
         }
@@ -171,6 +171,10 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
             hashedPassword = .value(nil)
         } catch KeychainPasswordItem.KeychainError.cancelled {
             hashedPassword = .cancelled
+        } catch (_) {
+            // all other errors are unexpected, but we can return nil
+            // to force the user to enter their master password instead.
+            hashedPassword = .value(nil)
         }
         return hashedPassword
     }

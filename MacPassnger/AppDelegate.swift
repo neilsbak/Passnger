@@ -243,7 +243,7 @@ extension AppDelegate: NSToolbarDelegate {
 
     @objc func showInfo() {
         guard let item = toolbarObservable.selectedPassword else { return }
-        switch try! item.masterPassword.getHashedPassword(keychainService: model.keychainService) {
+        switch item.masterPassword.getHashedPassword(keychainService: model.keychainService) {
         case .cancelled:
             return
         case .value(let password):

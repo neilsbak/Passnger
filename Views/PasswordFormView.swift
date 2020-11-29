@@ -80,22 +80,22 @@ struct PasswordFormView: View {
                             .validatedField(errorText: formModel.symbolsError)
                     }
                     Picker(selection: self.$formModel.minSymbols, label: Text("Minimum Symbols")) {
-                        ForEach(1..<10, id: \.self) {
+                        ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }
                     }
                     Picker(selection: self.$formModel.minNumeric, label: Text("Minimum Numbers")) {
-                        ForEach(1..<10, id: \.self) {
+                        ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }
                     }
                     Picker(selection: self.$formModel.minUpperCase, label: Text("Minimum Upper Case")) {
-                        ForEach(1..<10, id: \.self) {
+                        ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }
                     }
                     Picker(selection: self.$formModel.minLowerCase, label: Text("Minimum Lower Case")) {
-                        ForEach(1..<10, id: \.self) {
+                        ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }
                     }

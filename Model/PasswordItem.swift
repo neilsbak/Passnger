@@ -53,10 +53,10 @@ struct PasswordItem: Identifiable, Equatable {
         try PasswordScheme(passwordLength: passwordLength, symbols: symbols, minSymbols: minSymbols, minLowerCase: minLowerCase, minUpperCase: minUpperCase, minNumeric: minNumeric)
     }
 
-    func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String, keychainService: String) {
+    func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String, keychainService: String) throws {
         assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
-        let password = try! PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url + String(numRenewals), scheme: passwordScheme())
+        let password = try PasswordGenerator.genPassword(phrase: hashedMasterPassword + userName + url + String(numRenewals), scheme: passwordScheme())
         let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
         let combined = sealBox.combined!
         try! passwordKeychainItem(keychainService: keychainService).savePassword(combined.base64EncodedString())

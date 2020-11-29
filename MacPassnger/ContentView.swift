@@ -11,6 +11,7 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var model: Model
     @ObservedObject var toolbar: ToolbarObservable
+    @State private var errorMessage: String? = nil
 
     private var showGetMasterPassword: Binding<Bool> {
         Binding<Bool>(
@@ -22,6 +23,21 @@ struct ContentView: View {
             }
         )
     }
+
+    // handles any error that can happen when generating password
+    // return true if there were no errors
+    private func tryAddPassword(block: () throws -> Void) -> Bool {
+        do {
+            try block()
+            return true
+        } catch PasswordGenerator.PasswordGeneratorError.passwordError(_) {
+            self.errorMessage = "Try incrementing the Renewal Number, or try a different password configuration."
+        } catch {
+            self.errorMessage = "There was an unexpected error."
+        }
+        return false
+    }
+
     var body: some View {
         Group {
             if self.model.passwordItems.count == 0 && self.model.masterPasswords.count == 0 && !toolbar.showCreatePassword {
@@ -54,7 +70,9 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .macSafeSheet(isPresented: $toolbar.showCreatePassword) {
             CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem, hashedMasterPassword in
-                self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
+                return self.tryAddPassword {
+                    try self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
+                }
             }
         }.macSafeSheet(isPresented: self.showGetMasterPassword) {
             GetMasterPasswordView(
@@ -68,14 +86,23 @@ struct ContentView: View {
             PasswordItemSheet(passwordItem: self.toolbar.selectedPassword!, onCancel: {
                 self.toolbar.showInfo.wrappedValue.toggle()
             }) { passwordItem in
-                self.toolbar.changeInfoForPasswordItem(passwordItem)
-                self.toolbar.showInfo.wrappedValue.toggle()
+                let success = self.tryAddPassword {
+                    try self.toolbar.changeInfoForPasswordItem(passwordItem)
+                }
+                if success {
+                    self.toolbar.showInfo.wrappedValue.toggle()
+                }
             }
         }
         .alert(isPresented: self.$toolbar.confirmDelete) { () -> Alert in
             Alert(title: Text("Delete Password?"), primaryButton: Alert.Button.destructive(Text("Delete")) {
                 self.toolbar.deleteSelectedPassword()
             }, secondaryButton: Alert.Button.cancel())
+        }
+        .alert(isPresented: Binding<Bool>(get: { self.errorMessage != nil }, set: { p in self.errorMessage = p ? self.errorMessage : nil })) { () -> Alert in
+            Alert(title: Text("Could Not Generate Password"), message: Text(self.errorMessage ?? "Error"), dismissButton: Alert.Button.cancel() {
+                self.errorMessage = nil
+            })
         }
     }
 }

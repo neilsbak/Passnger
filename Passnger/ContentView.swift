@@ -18,6 +18,7 @@ struct ContentView: View {
     @State private var passwordItemWithoutMasterPassword: PasswordItem?
     @State private var showGetMasterPassword = false
     @State private var showCopied = false
+    @State private var createErrorMessage: String? = nil
 
     lazy var blah = model.$passwordItems
 
@@ -76,8 +77,19 @@ struct ContentView: View {
                 }
             }.sheet(isPresented: $showCreatePassword) {
                 CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { (passwordItem, hashedPassword) in
-                    self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedPassword)
-                    self.showCreatePassword = false
+                    do {
+                        try self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedPassword)
+                        return true
+                    } catch PasswordGenerator.PasswordGeneratorError.passwordError(let message) {
+                        self.createErrorMessage = message
+                    } catch {
+                        self.createErrorMessage = "There was an unexpected error."
+                    }
+                    return false
+                }.alert(isPresented: Binding<Bool>(get: { self.createErrorMessage != nil }, set: { p in self.createErrorMessage = p ? self.createErrorMessage : nil })) { () -> Alert in
+                    Alert(title: Text("Could Not Generate Password"), message: Text(self.createErrorMessage ?? "Error"), dismissButton: Alert.Button.cancel() {
+                        self.createErrorMessage = nil
+                    })
                 }
             })
         }.navigationViewStyle(StackNavigationViewStyle())
@@ -90,7 +102,6 @@ struct ContentView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.showCopied = false
         }
-
     }
 
 }

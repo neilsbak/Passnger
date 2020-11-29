@@ -42,13 +42,13 @@ struct PasswordsView: View {
     }
 }
 
-
 struct PasswordItemRow: View {
     @State private var hashedMasterPassword: String?
     @State private var showGetMasterPassword = false
     @State private var linkIsActive = false
     let passwordItem: PasswordItem
     let model: Model
+    @State private var errorMessage: String? = nil
 
     var body: some View {
         HStack {
@@ -82,8 +82,14 @@ struct PasswordItemRow: View {
                     NavigationLink(
                         destination: PasswordInfoModifier(
                             passwordItem: passwordItem) {updatedPasswordItem in
-                                self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
+                            do {
+                                try self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
+                            } catch PasswordGenerator.PasswordGeneratorError.passwordError(let message) {
+                                self.errorMessage = message
+                            } catch {
+                                self.errorMessage = "There was an unexpected error."
                             }
+                        }
                         .navigationBarTitle("Password Info", displayMode: .inline),
                         isActive: self.$linkIsActive
                     ) {
@@ -95,6 +101,10 @@ struct PasswordItemRow: View {
             .buttonStyle(BorderlessButtonStyle())
             .frame(width: 24, height: 24).padding()
             #endif
+        }.alert(isPresented: Binding<Bool>(get: { self.errorMessage != nil }, set: { p in self.errorMessage = p ? self.errorMessage : nil })) { () -> Alert in
+            Alert(title: Text("Could Not Generate Password"), message: Text(self.errorMessage ?? "Error"), dismissButton: Alert.Button.cancel() {
+                self.errorMessage = nil
+            })
         }
     }
 }

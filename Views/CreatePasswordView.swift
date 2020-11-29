@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct CreatePasswordView: View {
-    typealias OnSave = (_ passwordItem: PasswordItem, _ hashedMasterPassword: String) -> Void
+    typealias OnSave = (_ passwordItem: PasswordItem, _ hashedMasterPassword: String) -> Bool
     @ObservedObject var model: Model
     @Binding var presentedAsModal: Bool
     @State var formModel = PasswordFormModel()
@@ -42,8 +42,9 @@ struct CreatePasswordView: View {
                 case.value(let hashedMasterPassword):
                     if let hashedMasterPassword = hashedMasterPassword {
                         let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
-                        self.onSave(passwordItem, hashedMasterPassword)
-                        self.presentedAsModal = false
+                        if self.onSave(passwordItem, hashedMasterPassword) {
+                            self.presentedAsModal = false
+                        }
                     } else {
                         self.showGetMasterPassword = true
                     }
@@ -62,14 +63,15 @@ struct CreatePasswordView: View {
         .getMasterPassword(masterPassword: self.formModel.selectedMasterPassword, isPresented: self.$showGetMasterPassword) { (masterPassword, passwordText) in
                 self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
-                self.onSave(passwordItem, MasterPassword.hashPassword(passwordText))
-                self.presentedAsModal = false
+                if self.onSave(passwordItem, MasterPassword.hashPassword(passwordText)) {
+                    self.presentedAsModal = false
+                }
         }
     }
 }
 
 struct CreatePasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding.constant(true), onSave: { _, _ in })
+        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding.constant(true), onSave: { _, _ in true})
     }
 }

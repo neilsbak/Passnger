@@ -12,6 +12,15 @@ import CryptoKit
 enum CancellablePasswordText: Equatable {
     case cancelled
     case value(String?)
+
+    var password: String? {
+        switch self {
+        case .value(let password):
+            return password
+        default:
+            return nil
+        }
+    }
 }
 
 struct PasswordItem: Identifiable, Equatable {
@@ -134,7 +143,7 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
         case noSave
     }
 
-    init(name: String, securityLevel: SecurityLevel, doubleHashedPassword: String, keychainService: String =  PassngerKeychainItem.service) {
+    init(name: String, securityLevel: SecurityLevel, doubleHashedPassword: String) {
         self.name = name
         self.securityLevel = securityLevel
         self.doubleHashedPassword = doubleHashedPassword

@@ -42,7 +42,7 @@ struct SheetView<Content: View>: View {
                     }
                 }
             }.padding(.top)
-            }.frame(minWidth: 300, minHeight: 300).padding()
+            }.frame(minWidth: 400, minHeight: 300).padding()
     }
 }
 

@@ -81,7 +81,8 @@ struct PasswordItemRow: View {
                     }
                     NavigationLink(
                         destination: PasswordInfoModifier(
-                            passwordItem: passwordItem) {updatedPasswordItem in
+                            passwordItem: passwordItem,
+                            password: try? passwordItem.getPassword(keychainService: self.model.keychainService).password) {updatedPasswordItem in
                             do {
                                 try self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
                             } catch PasswordGenerator.PasswordGeneratorError.passwordError(let message) {
@@ -94,7 +95,7 @@ struct PasswordItemRow: View {
                         isActive: self.$linkIsActive
                     ) {
                         EmptyView()
-                    }
+                    }.frame(width: 0).opacity(0)
                     Image(systemName: "info.circle").resizable().frame(width: 18, height: 18).padding()
                 }
             }
@@ -112,10 +113,11 @@ struct PasswordItemRow: View {
 // This only saves the passwordItem when the page is dismissed
 private struct PasswordInfoModifier: View {
     @State var passwordItem: PasswordItem
+    let password: String?
     let onSave: (PasswordItem) -> Void
 
     var body: some View {
-        return PasswordInfoView(passwordItem: $passwordItem).onDisappear {
+        return PasswordInfoView(passwordItem: $passwordItem, password: self.password).onDisappear {
             self.onSave(self.passwordItem)
         }
     }

@@ -11,6 +11,9 @@ import SwiftUI
 struct PasswordInfoView: View {
 
     @Binding var passwordItem: PasswordItem
+    let password: String?
+
+    @State private var showPassword: Bool = false
 
     var textFieldBinding: Binding<String> {
         Binding<String>(
@@ -23,7 +26,29 @@ struct PasswordInfoView: View {
 
     @ViewBuilder
     private func contentRows(width: CGFloat) -> some View {
-        PasswordInfoViewCell(width:width, title: "Website URL", valueText: self.passwordItem.url)
+        self.password.map { password in
+            PasswordInfoViewCell(width: width, title: "Password") {
+                HStack {
+                    if showPassword {
+                        SelectableLabel(text: password).fixedSize()
+                    } else {
+                        Text(String(repeating: "*", count: password.count))
+                    }
+                    Button(action: { self.showPassword.toggle() }) {
+                        #if os(macOS)
+                        if #available(macOS 11, *) {
+                            Image(systemName: self.showPassword ? "eye.slash": "eye")
+                        } else {
+                            Text(self.showPassword ? "Hide": "Show")
+                        }
+                        #else
+                        Image(systemName: self.showPassword ? "eye.slash": "eye")
+                        #endif
+                    }.buttonStyle(BorderlessButtonStyle())
+                }
+            }
+        }
+        PasswordInfoViewCell(width: width, title: "Website URL", valueText: self.passwordItem.url)
         PasswordInfoViewCell(width: width, title: "Description", valueText: self.passwordItem.resourceDescription)
         PasswordInfoViewCell(width: width, title: "Username", valueText: self.passwordItem.userName)
         PasswordInfoViewCell(width: width, title: "Date Created", valueText: DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
@@ -84,6 +109,6 @@ extension PasswordInfoViewCell where Content == Text {
 
 struct PasswordInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordInfoView(passwordItem: Binding.constant(Model.testModel().passwordItems[0]))
+        PasswordInfoView(passwordItem: Binding.constant(Model.testModel().passwordItems[0]), password: "testpassword")
     }
 }

@@ -83,9 +83,12 @@ struct ContentView: View {
                 self.toolbar.gotHashedMasterPassword(MasterPassword.hashPassword(passwordText))
             }
         }.macSafeSheet(isPresented: self.toolbar.showInfo) {
-            PasswordItemSheet(passwordItem: self.toolbar.selectedPassword!, onCancel: {
-                self.toolbar.showInfo.wrappedValue.toggle()
-            }) { passwordItem in
+            PasswordItemSheet(
+                passwordItem: self.toolbar.selectedPassword!,
+                password: try? self.toolbar.selectedPassword!.getPassword(keychainService: self.model.keychainService).password,
+                onCancel: {
+                    self.toolbar.showInfo.wrappedValue.toggle()
+                }) { passwordItem in
                 let success = self.tryAddPassword {
                     try self.toolbar.changeInfoForPasswordItem(passwordItem)
                 }
@@ -111,6 +114,7 @@ struct ContentView: View {
 // it only changes on submit
 private struct PasswordItemSheet: View {
     @State var passwordItem: PasswordItem
+    let password: String?
     let onCancel: () -> Void
     let onSave: (PasswordItem) -> Void
 
@@ -120,7 +124,7 @@ private struct PasswordItemSheet: View {
         }, onSave: {
             self.onSave(self.passwordItem)
         }) {
-            PasswordInfoView(passwordItem: self.$passwordItem)
+            PasswordInfoView(passwordItem: self.$passwordItem, password: self.password)
         }
     }
 }

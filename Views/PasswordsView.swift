@@ -44,6 +44,9 @@ struct PasswordsView: View {
 
 struct PasswordItemRow: View {
     @State private var hashedMasterPassword: String?
+    private var password: String? {
+        self.hashedMasterPassword.flatMap { try? passwordItem.getPassword(hashedMasterPassword: $0, keychainService: self.model.keychainService) }
+    }
     @State private var showGetMasterPassword = false
     @State private var linkIsActive = false
     let passwordItem: PasswordItem
@@ -82,7 +85,7 @@ struct PasswordItemRow: View {
                     NavigationLink(
                         destination: PasswordInfoModifier(
                             passwordItem: passwordItem,
-                            password: try? passwordItem.getPassword(keychainService: self.model.keychainService).password) {updatedPasswordItem in
+                            password: password) {updatedPasswordItem in
                             do {
                                 try self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
                             } catch PasswordGenerator.PasswordGeneratorError.passwordError(let message) {
@@ -115,10 +118,20 @@ private struct PasswordInfoModifier: View {
     @State var passwordItem: PasswordItem
     let password: String?
     let onSave: (PasswordItem) -> Void
+    private let initialNumRenewals: Int
+
+    init(passwordItem: PasswordItem, password: String?, onSave: @escaping (PasswordItem) -> Void) {
+        self._passwordItem = State(wrappedValue: passwordItem)
+        self.password = password
+        self.onSave = onSave
+        self.initialNumRenewals = passwordItem.numRenewals
+    }
 
     var body: some View {
         return PasswordInfoView(passwordItem: $passwordItem, password: self.password).onDisappear {
-            self.onSave(self.passwordItem)
+            if self.initialNumRenewals != passwordItem.numRenewals {
+                self.onSave(self.passwordItem)
+            }
         }
     }
 }

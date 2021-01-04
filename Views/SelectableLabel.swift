@@ -20,6 +20,8 @@ struct SelectableLabel: View, NSViewRepresentable {
         label.isEditable = false
         label.drawsBackground = false
         label.isSelectable = true
+        label.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        label.setContentHuggingPriority(.defaultHigh, for: .vertical)
         return label
     }
 

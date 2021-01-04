@@ -87,7 +87,7 @@ struct ContentView: View {
                     }
                     return false
                 }.alert(isPresented: Binding<Bool>(get: { self.createErrorMessage != nil }, set: { p in self.createErrorMessage = p ? self.createErrorMessage : nil })) { () -> Alert in
-                    Alert(title: Text("Could Not Generate Password"), message: Text(self.createErrorMessage ?? "Error"), dismissButton: Alert.Button.cancel() {
+                    Alert(title: Text("Could Not Generate Password"), message: Text(self.createErrorMessage ?? "Error"), dismissButton: Alert.Button.cancel(Text("Ok")) {
                         self.createErrorMessage = nil
                     })
                 }

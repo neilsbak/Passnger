@@ -321,8 +321,8 @@ class ToolbarObservable: ObservableObject {
         confirmDelete = false
     }
 
-    func changeInfoForPasswordItem(_ passwordItem: PasswordItem) throws {
+    func changeInfoForPasswordItem(_ passwordItem: PasswordItem, onComplete: @escaping (Result<Void, Error>) ->Void) throws {
         guard let hashedMasterPassword = showInfoHashedMasterPassword else { return }
-        try model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
+        model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword, onComplete: onComplete)
     }
 }

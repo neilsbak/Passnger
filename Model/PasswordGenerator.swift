@@ -119,11 +119,12 @@ class PasswordGenerator {
         return symbolMap
     }
 
-    static func genPassword(phrase: String, scheme: PasswordScheme) throws -> String {
+
+    static func genPassword(phrase: String, scheme: PasswordScheme, numTries: Int = 50000) throws -> String {
         let symbolMap = try getSymbolMap(fromSymbols: scheme.symbols)
         var password: String?
 
-        for i in 0...10000 {
+        for i in 0...numTries {
             let hashed = SHA256.hash(data: Data((phrase + String(i)).utf8))
             let symbolizedHashString = Data(hashed).base64EncodedString().prefix(scheme.passwordLength).reduce("") { $0 + (symbolMap[$1] ?? String($1)) }
             if scheme.isValidPassword(symbolizedHashString) {
@@ -138,4 +139,16 @@ class PasswordGenerator {
         }
         return generatedPassword
     }
+
+    static func genPasswordForDuration(phrase: String, scheme: PasswordScheme, maxTimeInterval: TimeInterval) throws -> String {
+        let currentDate = Date()
+        while currentDate.distance(to: Date()) < maxTimeInterval {
+            do {
+                 return try genPassword(phrase: phrase, scheme: scheme, numTries: 1000)
+            } catch PasswordGeneratorError.passwordError(_) {
+            }
+        }
+        throw PasswordGeneratorError.passwordError("Could not generate a password for the given configuration")
+    }
+
 }

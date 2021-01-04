@@ -44,9 +44,6 @@ struct PasswordsView: View {
 
 struct PasswordItemRow: View {
     @State private var hashedMasterPassword: String?
-    private var password: String? {
-        self.hashedMasterPassword.flatMap { try? passwordItem.getPassword(hashedMasterPassword: $0, keychainService: self.model.keychainService) }
-    }
     @State private var showGetMasterPassword = false
     @State private var linkIsActive = false
     let passwordItem: PasswordItem
@@ -83,17 +80,9 @@ struct PasswordItemRow: View {
                         self.linkIsActive = true
                     }
                     NavigationLink(
-                        destination: PasswordInfoModifier(
+                        destination: PasswordInfoView(
                             passwordItem: passwordItem,
-                            password: password) {updatedPasswordItem in
-                            do {
-                                try self.model.addPasswordItem(updatedPasswordItem, hashedMasterPassword: self.hashedMasterPassword!)
-                            } catch PasswordGenerator.PasswordGeneratorError.passwordError(let message) {
-                                self.errorMessage = message
-                            } catch {
-                                self.errorMessage = "There was an unexpected error."
-                            }
-                        }
+                            hashedMasterPassword: hashedMasterPassword)
                         .navigationBarTitle("Password Info", displayMode: .inline),
                         isActive: self.$linkIsActive
                     ) {
@@ -113,28 +102,6 @@ struct PasswordItemRow: View {
     }
 }
 
-// This only saves the passwordItem when the page is dismissed
-private struct PasswordInfoModifier: View {
-    @State var passwordItem: PasswordItem
-    let password: String?
-    let onSave: (PasswordItem) -> Void
-    private let initialNumRenewals: Int
-
-    init(passwordItem: PasswordItem, password: String?, onSave: @escaping (PasswordItem) -> Void) {
-        self._passwordItem = State(wrappedValue: passwordItem)
-        self.password = password
-        self.onSave = onSave
-        self.initialNumRenewals = passwordItem.numRenewals
-    }
-
-    var body: some View {
-        return PasswordInfoView(passwordItem: $passwordItem, password: self.password).onDisappear {
-            if self.initialNumRenewals != passwordItem.numRenewals {
-                self.onSave(self.passwordItem)
-            }
-        }
-    }
-}
 
 struct PasswordsView_Previews: PreviewProvider {
     static var previews: some View {

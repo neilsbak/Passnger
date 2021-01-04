@@ -12,6 +12,7 @@ struct ContentView: View {
     @ObservedObject var model: Model
     @ObservedObject var toolbar: ToolbarObservable
     @State private var errorMessage: String? = nil
+    @State private var addPasswordResult: Result<Void, Error>? = nil
 
     private var showGetMasterPassword: Binding<Bool> {
         Binding<Bool>(
@@ -22,20 +23,6 @@ struct ContentView: View {
                 }
             }
         )
-    }
-
-    // handles any error that can happen when generating password
-    // return true if there were no errors
-    private func tryAddPassword(block: () throws -> Void) -> Bool {
-        do {
-            try block()
-            return true
-        } catch PasswordGenerator.PasswordGeneratorError.passwordError(_) {
-            self.errorMessage = "Try incrementing the Renewal Number, or try a different password configuration."
-        } catch {
-            self.errorMessage = "There was an unexpected error."
-        }
-        return false
     }
 
     var body: some View {
@@ -69,9 +56,15 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .macSafeSheet(isPresented: $toolbar.showCreatePassword) {
-            CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem, hashedMasterPassword in
-                return self.tryAddPassword {
-                    try self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword)
+            CreatePasswordView(model: self.model, presentedAsModal: self.$toolbar.showCreatePassword) { passwordItem, hashedMasterPassword, onComplete in
+                self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword) { result in
+                    self.addPasswordResult = result
+                    switch result {
+                    case .failure(_):
+                        onComplete(false)
+                    case .success(_):
+                        onComplete(true)
+                    }
                 }
             }
         }.macSafeSheet(isPresented: self.showGetMasterPassword) {
@@ -83,18 +76,12 @@ struct ContentView: View {
                 self.toolbar.gotHashedMasterPassword(MasterPassword.hashPassword(passwordText))
             }
         }.macSafeSheet(isPresented: self.toolbar.showInfo) {
-            PasswordItemSheet(
-                passwordItem: self.toolbar.selectedPassword!,
-                password: try? self.toolbar.selectedPassword!.getPassword(keychainService: self.model.keychainService).password,
-                onCancel: {
-                    self.toolbar.showInfo.wrappedValue.toggle()
-                }) { passwordItem in
-                let success = self.tryAddPassword {
-                    try self.toolbar.changeInfoForPasswordItem(passwordItem)
-                }
-                if success {
-                    self.toolbar.showInfo.wrappedValue.toggle()
-                }
+            SheetView(onCancel: { self.toolbar.showInfo.wrappedValue.toggle() } ) {
+                PasswordInfoView(
+                    passwordItem: Binding<PasswordItem>(get: {self.toolbar.selectedPassword!}, set: {self.toolbar.selectedPassword = $0}),
+                    hashedMasterPassword: self.toolbar.selectedPassword!.masterPassword.getHashedPassword(keychainService: self.model.keychainService).password,
+                    model: self.model
+                )
             }
         }
         .alert(isPresented: self.$toolbar.confirmDelete) { () -> Alert in
@@ -102,33 +89,9 @@ struct ContentView: View {
                 self.toolbar.deleteSelectedPassword()
             }, secondaryButton: Alert.Button.cancel())
         }
-        .alert(isPresented: Binding<Bool>(get: { self.errorMessage != nil }, set: { p in self.errorMessage = p ? self.errorMessage : nil })) { () -> Alert in
-            Alert(title: Text("Could Not Generate Password"), message: Text(self.errorMessage ?? "Error"), dismissButton: Alert.Button.cancel() {
-                self.errorMessage = nil
-            })
-        }
+        .passwordGeneratorAlert(result: self.$addPasswordResult)
     }
 }
-
-// Separate state for editing password item so that
-// it only changes on submit
-private struct PasswordItemSheet: View {
-    @State var passwordItem: PasswordItem
-    let password: String?
-    let onCancel: () -> Void
-    let onSave: (PasswordItem) -> Void
-
-    var body: some View {
-        SheetView(onCancel: {
-            self.onCancel()
-        }, onSave: {
-            self.onSave(self.passwordItem)
-        }) {
-            PasswordInfoView(passwordItem: self.$passwordItem, password: self.password)
-        }
-    }
-}
-
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {

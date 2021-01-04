@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct CreatePasswordView: View {
-    typealias OnSave = (_ passwordItem: PasswordItem, _ hashedMasterPassword: String) -> Bool
+    typealias OnSave = (_ passwordItem: PasswordItem, _ hashedMasterPassword: String, _ onComplete: @escaping (Bool) -> Void) -> Void
     @ObservedObject var model: Model
     @Binding var presentedAsModal: Bool
     @State var formModel = PasswordFormModel()
@@ -30,20 +30,23 @@ struct CreatePasswordView: View {
 
 
     var body: some View {
-        SheetScaffoldView(title: "Create Password", onCancel: { self.presentedAsModal = false },  onSave: {
+        SheetScaffoldView(title: "Create Password", onCancel: { self.presentedAsModal = false },  onSaveComplete: { onComplete in
             self.formModel.hasSubmitted = true
             if self.formModel.validate()  {
                 guard let selectedMasterPassword = self.formModel.selectedMasterPassword else {
+                    onComplete()
                     return
                 }
                 switch selectedMasterPassword.getHashedPassword(keychainService: self.model.keychainService) {
                 case .cancelled:
+                    onComplete()
                     return
                 case.value(let hashedMasterPassword):
                     if let hashedMasterPassword = hashedMasterPassword {
                         let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
-                        if self.onSave(passwordItem, hashedMasterPassword) {
-                            self.presentedAsModal = false
+                        self.onSave(passwordItem, hashedMasterPassword) { success in
+                            self.presentedAsModal = !success
+                            onComplete()
                         }
                     } else {
                         self.showGetMasterPassword = true
@@ -63,8 +66,8 @@ struct CreatePasswordView: View {
         .getMasterPassword(masterPassword: self.formModel.selectedMasterPassword, isPresented: self.$showGetMasterPassword) { (masterPassword, passwordText) in
                 self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
-                if self.onSave(passwordItem, MasterPassword.hashPassword(passwordText)) {
-                    self.presentedAsModal = false
+                self.onSave(passwordItem, MasterPassword.hashPassword(passwordText)) { success in
+                    self.presentedAsModal = !success
                 }
         }
     }
@@ -72,6 +75,6 @@ struct CreatePasswordView: View {
 
 struct CreatePasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding.constant(true), onSave: { _, _ in true})
+        CreatePasswordView(model: Model.testModel(), presentedAsModal: Binding.constant(true), onSave: {_,_,_ in })
     }
 }

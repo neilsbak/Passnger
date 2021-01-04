@@ -9,18 +9,24 @@
 import SwiftUI
 
 struct SheetScaffoldView<Content: View>: View {
+    typealias OnComplete = () -> Void
     typealias OnSave = () -> Void
+    typealias OnSaveComplete = (@escaping OnComplete) -> Void
     typealias OnCancel = () -> Void
 
     let title: String?
     let onCancel: OnCancel?
     let onSave: OnSave?
+    let onSaveComplete: OnSaveComplete?
     let content: Content
 
-    init(title: String? = nil, onCancel: OnCancel?, onSave: OnSave? = nil, @ViewBuilder content: () -> Content) {
+    @State private var isSaving = false
+
+    init(title: String? = nil, onCancel: OnCancel?, onSave: OnSave? = nil, onSaveComplete: OnSaveComplete? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
         self.onCancel = onCancel
         self.onSave = onSave
+        self.onSaveComplete = onSaveComplete
         self.content = content()
     }
 
@@ -38,12 +44,21 @@ struct SheetScaffoldView<Content: View>: View {
                 .navigationBarTitle(Text(self.title ?? ""), displayMode: .inline)
                 .navigationBarItems(
                     leading: onCancel.map { Button(action: $0) { Text("Cancel")}.padding([.trailing, .top, .bottom]) },
-                    trailing: onSave.map { Button(action: $0) { Text("Save")}.padding([.leading, .top, .bottom]) }
+                    trailing: onSave.map { Button(action: $0) { Text("Save") } } ?? onSaveComplete.map { onSaveComplete in
+                        Button(action: {
+                            self.isSaving = true
+                            onSaveComplete {
+                                self.isSaving = false
+                            }
+                        }) {
+                            Text("Save")
+                        }
+                    }.padding([.leading, .top, .bottom])
                 )
             }
         }.navigationViewStyle(StackNavigationViewStyle())
         #else
-        SheetView(title: title, onCancel: onCancel ?? {}, onSave: onSave, content: { content })
+        SheetView(title: title, onCancel: onCancel ?? {}, onSave: onSave, onSaveComplete: onSaveComplete, content: { content })
         #endif
     }
 }

@@ -9,18 +9,24 @@
 import SwiftUI
 
 struct SheetView<Content: View>: View {
+    typealias OnComplete = () -> Void
     typealias OnSave = () -> Void
+    typealias OnSaveComplete = (@escaping OnComplete) -> Void
     typealias OnCancel = () -> Void
 
     let title: String?
     let onCancel: OnCancel
     let onSave: OnSave?
+    let onSaveComplete: OnSaveComplete?
     let content: Content
 
-    init(title: String? = nil, onCancel: @escaping OnCancel, onSave: OnSave? = nil, @ViewBuilder content: () -> Content) {
+    @State private var isSaving = false
+
+    init(title: String? = nil, onCancel: @escaping OnCancel, onSave: OnSave? = nil, onSaveComplete: OnSaveComplete? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
         self.onCancel = onCancel
         self.onSave = onSave
+        self.onSaveComplete = onSaveComplete
         self.content = content()
     }
 
@@ -31,18 +37,35 @@ struct SheetView<Content: View>: View {
             Spacer()
             HStack {
                 Button(action: onCancel) {
-                    Text(self.onSave == nil ? "Dismiss" : "Cancel")
+                    Text(self.onSave == nil && self.onSaveComplete == nil ? "Dismiss" : "Cancel")
                 }
                 onSave.map { sv in
-                    Group {
-                        Spacer()
-                        Button(action: sv) {
-                            Text("Save")
+                    onSaveButton(action: sv)
+                } ?? onSaveComplete.map { sv in
+                    onSaveButton() {
+                        print("IS SAVING")
+                        self.isSaving = true
+                        sv {
+                            print("DONE SAVING")
+                            self.isSaving = false
                         }
                     }
                 }
             }.padding(.top)
             }.frame(minWidth: 400, minHeight: 300).padding()
+    }
+
+    private func onSaveButton(action: @escaping () -> Void) -> some View {
+        Group {
+            Spacer()
+            if self.isSaving {
+                ActivityIndicator(isAnimating: true)
+            } else {
+                Button(action: action) {
+                    Text("Save")
+                }
+            }
+        }
     }
 }
 

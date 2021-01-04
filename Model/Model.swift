@@ -50,15 +50,24 @@ public class Model: ObservableObject {
         self.shownPasswordItemsCancellable = shownPasswordItemsPublisher.assign(to: \.shownPasswordItems, on: self)
     }
 
-    func addPasswordItem(_ passwordItem: PasswordItem, hashedMasterPassword: String) throws {
+    func addPasswordItem(_ passwordItem: PasswordItem, hashedMasterPassword: String, onComplete: @escaping (Result<Void, Error>) -> Void) {
         assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == passwordItem.masterPassword.doubleHashedPassword)
-        try passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword, keychainService: self.keychainService)
-        if let index = passwordItems.firstIndex(where: { $0.id == passwordItem.id }) {
-            passwordItems[index] = passwordItem
-        } else {
-            passwordItems.append(passwordItem)
+        DispatchQueue.global(qos: .background).async {
+            let result = Result { try passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword, keychainService: self.keychainService) }
+            DispatchQueue.main.async {
+                switch result {
+                case .success(()):
+                    if let index = self.passwordItems.firstIndex(where: { $0.id == passwordItem.id }) {
+                        self.passwordItems[index] = passwordItem
+                    } else {
+                        self.passwordItems.append(passwordItem)
+                    }
+                    self.saveModel()
+                case .failure(_): break
+                }
+                onComplete(result)
+            }
         }
-        saveModel()
     }
 
     func addMasterPassword(_ masterPassword: MasterPassword, passwordText: String) {

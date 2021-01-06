@@ -35,6 +35,16 @@ extension View {
     }
 }
 
+extension View {
+    func systemButtonStyle() -> some View {
+        #if os(macOS)
+            return self.buttonStyle(DefaultButtonStyle())
+        #else
+            return self.buttonStyle(PlainButtonStyle()).foregroundColor(.accentColor)
+        #endif
+    }
+}
+
 #if os(macOS)
 extension NSColor {
     static var label: NSColor { .labelColor }

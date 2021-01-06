@@ -18,7 +18,7 @@ struct ContentView: View {
     @State private var passwordItemWithoutMasterPassword: PasswordItem?
     @State private var showGetMasterPassword = false
     @State private var showCopied = false
-    @State private var createErrorMessage: String? = nil
+    @State private var addPasswordResult: Result<Void, Error>? = nil
 
     lazy var blah = model.$passwordItems
 
@@ -76,21 +76,17 @@ struct ContentView: View {
                     Image(systemName: "plus").imageScale(.large).padding()
                 }
             }.sheet(isPresented: $showCreatePassword) {
-                CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { (passwordItem, hashedPassword) in
-                    do {
-                        try self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedPassword)
-                        return true
-                    } catch PasswordGenerator.PasswordGeneratorError.passwordError(let message) {
-                        self.createErrorMessage = message
-                    } catch {
-                        self.createErrorMessage = "There was an unexpected error."
+                CreatePasswordView(model: self.model, presentedAsModal: self.$showCreatePassword) { passwordItem, hashedMasterPassword, onComplete in
+                    self.model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword) { result in
+                        self.addPasswordResult = result
+                        switch result {
+                        case .failure(_):
+                            onComplete(false)
+                        case .success(_):
+                            onComplete(true)
+                        }
                     }
-                    return false
-                }.alert(isPresented: Binding<Bool>(get: { self.createErrorMessage != nil }, set: { p in self.createErrorMessage = p ? self.createErrorMessage : nil })) { () -> Alert in
-                    Alert(title: Text("Could Not Generate Password"), message: Text(self.createErrorMessage ?? "Error"), dismissButton: Alert.Button.cancel(Text("Ok")) {
-                        self.createErrorMessage = nil
-                    })
-                }
+                }.passwordGeneratorAlert(result: self.$addPasswordResult)
             })
         }.navigationViewStyle(StackNavigationViewStyle())
     }

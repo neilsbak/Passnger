@@ -11,7 +11,6 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var model: Model
     @ObservedObject var toolbar: ToolbarObservable
-    @State private var errorMessage: String? = nil
     @State private var addPasswordResult: Result<Void, Error>? = nil
 
     private var showGetMasterPassword: Binding<Bool> {
@@ -78,7 +77,7 @@ struct ContentView: View {
         }.macSafeSheet(isPresented: self.toolbar.showInfo) {
             SheetView(onCancel: { self.toolbar.showInfo.wrappedValue.toggle() } ) {
                 PasswordInfoView(
-                    passwordItem: Binding<PasswordItem>(get: {self.toolbar.selectedPassword!}, set: {self.toolbar.selectedPassword = $0}),
+                    passwordItem: self.toolbar.selectedPassword!,
                     hashedMasterPassword: self.toolbar.selectedPassword!.masterPassword.getHashedPassword(keychainService: self.model.keychainService).password,
                     model: self.model
                 )

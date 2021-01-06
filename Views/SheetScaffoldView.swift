@@ -44,22 +44,36 @@ struct SheetScaffoldView<Content: View>: View {
                 .navigationBarTitle(Text(self.title ?? ""), displayMode: .inline)
                 .navigationBarItems(
                     leading: onCancel.map { Button(action: $0) { Text("Cancel")}.padding([.trailing, .top, .bottom]) },
-                    trailing: onSave.map { Button(action: $0) { Text("Save") } } ?? onSaveComplete.map { onSaveComplete in
-                        Button(action: {
-                            self.isSaving = true
-                            onSaveComplete {
-                                self.isSaving = false
-                            }
-                        }) {
-                            Text("Save")
-                        }
-                    }.padding([.leading, .top, .bottom])
+                    trailing: trailingButton.padding([.leading, .top, .bottom])
                 )
             }
         }.navigationViewStyle(StackNavigationViewStyle())
         #else
         SheetView(title: title, onCancel: onCancel ?? {}, onSave: onSave, onSaveComplete: onSaveComplete, content: { content })
         #endif
+    }
+
+    @ViewBuilder
+    private var trailingButton: some View {
+        onSave.map { onSaveButton(action: $0) } ?? onSaveComplete.map { sv in
+            onSaveButton {
+                self.isSaving = true
+                sv { self.isSaving = false }
+            }
+        }
+    }
+
+    private func onSaveButton(action: @escaping () -> Void) -> some View {
+        Group {
+            Spacer()
+            if self.isSaving {
+                ActivityIndicator(isAnimating: true)
+            } else {
+                Button(action: action) {
+                    Text("Save")
+                }
+            }
+        }
     }
 }
 

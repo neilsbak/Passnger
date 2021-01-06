@@ -82,7 +82,8 @@ struct PasswordItemRow: View {
                     NavigationLink(
                         destination: PasswordInfoView(
                             passwordItem: passwordItem,
-                            hashedMasterPassword: hashedMasterPassword)
+                            hashedMasterPassword: hashedMasterPassword,
+                            model: model)
                         .navigationBarTitle("Password Info", displayMode: .inline),
                         isActive: self.$linkIsActive
                     ) {

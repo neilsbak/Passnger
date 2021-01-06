@@ -10,22 +10,30 @@ import SwiftUI
 
 struct PasswordInfoView: View {
 
-    @Binding var passwordItem: PasswordItem
-    @State private var isUpdatingPassword: Bool = false
-    @State private var result: Result<Void, Error>? = nil
+    let passwordItem: PasswordItem
     let hashedMasterPassword: String?
     private var password: String? {
         self.hashedMasterPassword.flatMap { try? passwordItem.getPassword(hashedMasterPassword: $0, keychainService: self.model.keychainService) }
     }
     let model: Model
 
+    @State private var updatedPasswordItem: PasswordItem
+    @State private var isUpdatingPassword: Bool = false
+    @State private var result: Result<Void, Error>? = nil
     @State private var showPassword: Bool = false
+
+    init(passwordItem: PasswordItem, hashedMasterPassword: String?, model: Model) {
+        self.passwordItem = passwordItem
+        self.hashedMasterPassword = hashedMasterPassword
+        self.model = model
+        self._updatedPasswordItem = State(initialValue: passwordItem)
+    }
 
     var textFieldBinding: Binding<String> {
         Binding<String>(
-            get: { String(self.passwordItem.numRenewals) },
+            get: { String(self.updatedPasswordItem.numRenewals) },
             set: { text in
-                self.passwordItem.numRenewals = Int(text) ?? self.passwordItem.numRenewals
+                self.updatedPasswordItem.numRenewals = Int(text) ?? self.updatedPasswordItem.numRenewals
             }
         )
     }
@@ -44,12 +52,12 @@ struct PasswordInfoView: View {
                 }
             }
         }
+        PasswordInfoViewCell(width: width, title: "Renewal Number") { self.renewalColumn }
         PasswordInfoViewCell(width: width, title: "Website URL", valueText: self.passwordItem.url)
         PasswordInfoViewCell(width: width, title: "Description", valueText: self.passwordItem.resourceDescription)
         PasswordInfoViewCell(width: width, title: "Username", valueText: self.passwordItem.userName)
         PasswordInfoViewCell(width: width, title: "Date Created", valueText: DateFormatter.localizedString(from: self.passwordItem.created, dateStyle: .medium, timeStyle: .none))
         PasswordInfoViewCell(width: width, title: "Master Password", valueText: String(self.passwordItem.masterPassword.name))
-        PasswordInfoViewCell(width: width, title: "Renewal Number") { self.renewalColumn }
         Group {
             PasswordInfoViewCell(width: width, title: "Password Length", valueText: String(self.passwordItem.passwordLength))
             PasswordInfoViewCell(width: width, title: "Symbols", valueText: self.passwordItem.symbols)
@@ -62,15 +70,13 @@ struct PasswordInfoView: View {
 
     @ViewBuilder
     var passwordButton: some View {
+        Button(action: { self.showPassword.toggle() }) {
         #if os(macOS)
-            Button(action: { self.showPassword.toggle() }) {
-                Text(self.showPassword ? "Hide": "Show")
-            }.buttonStyle(DefaultButtonStyle())
+            Text(self.showPassword ? "Hide": "Show")
         #else
-            Button(action: { self.showPassword.toggle() }) {
-                Image(systemName: self.showPassword ? "eye.slash": "eye").foregroundColor(.accentColor)
-            }.buttonStyle(PlainButtonStyle())
+            Image(systemName: self.showPassword ? "eye.slash": "eye").foregroundColor(.accentColor)
         #endif
+        }.systemButtonStyle()
     }
 
     @ViewBuilder
@@ -79,20 +85,21 @@ struct PasswordInfoView: View {
             if let hashedMasterPassword = self.hashedMasterPassword {
                 TextField("0", text: self.textFieldBinding)
                     .keyboardNumeric()
-                    .frame(width: 50)
+                    .frame(width: 60)
                     .multilineTextAlignment(.trailing)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
-                if self.isUpdatingPassword {
-                    ActivityIndicator(isAnimating: true)
-                } else {
+                Spacer().frame(width: 10)
+                ZStack {
                     Button(action: {
                         self.isUpdatingPassword = true
-                        self.model.addPasswordItem(self.passwordItem, hashedMasterPassword: hashedMasterPassword) { result in
+                        self.model.addPasswordItem(self.updatedPasswordItem, hashedMasterPassword: hashedMasterPassword) { result in
+                            self.isUpdatingPassword = false
                             self.result = result
                         }
                     }) {
                         Text("Regen Password")
-                    }
+                    }.systemButtonStyle().opacity(isUpdatingPassword ? 0 : 1)
+                    ActivityIndicator(isAnimating: isUpdatingPassword)
                 }
             } else {
                 Text(String(passwordItem.numRenewals))
@@ -145,6 +152,6 @@ extension PasswordInfoViewCell where Content == Text {
 
 struct PasswordInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordInfoView(passwordItem: Binding.constant(Model.testModel().passwordItems[0]), hashedMasterPassword: nil, model: Model.testModel())
+        PasswordInfoView(passwordItem: Model.testModel().passwordItems[0], hashedMasterPassword: nil, model: Model.testModel())
     }
 }

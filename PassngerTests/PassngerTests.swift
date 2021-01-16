@@ -55,40 +55,56 @@ class PassngerTests: XCTestCase {
     func testAddPassword() throws {
         let passwordItem = getPasswordItem(securityLevel: .noSave)
         let passwordItem2 = getPasswordItem2(securityLevel: .noSave)
-        try! model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword)
-        XCTAssert(model.passwordItems[0].userName == "tester")
-        try! model.addPasswordItem(passwordItem2, hashedMasterPassword: PassngerTests.hashedMasterPassword)
-        XCTAssert(model.passwordItems[0].userName == "tester" && model.passwordItems[1].userName == "tester2" && model.passwordItems.count == 2)
-        model.saveModel()
-        XCTAssert(model.passwordItems[0].userName == "tester" && model.passwordItems.count == 2)
-        let loadedModel = Model.loadModel(keychainService: PassngerTests.keychainService)
-        XCTAssert(loadedModel.passwordItems[0].userName == "tester")
+        let expectation = XCTestExpectation(description: "Generating password")
+        model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
+            XCTAssert(model.passwordItems[0].userName == "tester")
+            model.addPasswordItem(passwordItem2, hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
+                XCTAssert(model.passwordItems[0].userName == "tester" && model.passwordItems[1].userName == "tester2" && model.passwordItems.count == 2)
+                model.saveModel()
+                XCTAssert(model.passwordItems[0].userName == "tester" && model.passwordItems.count == 2)
+                let loadedModel = Model.loadModel(keychainService: PassngerTests.keychainService)
+                XCTAssert(loadedModel.passwordItems[0].userName == "tester")
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 10.0)
     }
 
     func testUpdatePassword() throws {
-        try! model.addPasswordItem(getPasswordItem(securityLevel: .noSave), hashedMasterPassword: PassngerTests.hashedMasterPassword)
-        var passwordItem = getPasswordItem2(securityLevel: .noSave)
-        XCTAssert(passwordItem.numRenewals == 0)
-        try! model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword)
-        passwordItem.numRenewals = 1
-        try! model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword)
-        XCTAssert(model.passwordItems.count == 2)
-        XCTAssert(model.passwordItems[1].numRenewals == 1)
+        let expectation = XCTestExpectation(description: "Generating password")
+        model.addPasswordItem(getPasswordItem(securityLevel: .noSave), hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
+            var passwordItem = getPasswordItem2(securityLevel: .noSave)
+            XCTAssert(passwordItem.numRenewals == 0)
+            model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword){ [self] _ in
+                passwordItem.numRenewals = 1
+                model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword){ [self] _ in
+                    XCTAssert(model.passwordItems.count == 2)
+                    XCTAssert(model.passwordItems[1].numRenewals == 1)
+                    expectation.fulfill()
+                }
+            }
+        }
+        wait(for: [expectation], timeout: 10.0)
     }
 
     func testRemovePassword() throws {
         let passwordItem = getPasswordItem(securityLevel: .noSave)
         let passwordItem2 = getPasswordItem2(securityLevel: .noSave)
-        try! model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword)
-        try! model.addPasswordItem(passwordItem2, hashedMasterPassword: PassngerTests.hashedMasterPassword)
-        model.removePasswordItem(passwordItem2)
-        XCTAssert(model.passwordItems.count == 1 && model.passwordItems[0].userName == "tester")
-        model.removePasswordItem(passwordItem)
-        XCTAssert(model.passwordItems.count == 0)
-        model.saveModel()
-        XCTAssert(model.passwordItems.count == 0)
-        let loadedModel = Model.loadModel(keychainService: PassngerTests.keychainService)
-        XCTAssert(loadedModel.passwordItems.count == 0)
+        let expectation = XCTestExpectation(description: "Generating password")
+        model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
+            model.addPasswordItem(passwordItem2, hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
+                model.removePasswordItem(passwordItem2)
+                XCTAssert(model.passwordItems.count == 1 && model.passwordItems[0].userName == "tester")
+                model.removePasswordItem(passwordItem)
+                XCTAssert(model.passwordItems.count == 0)
+                model.saveModel()
+                XCTAssert(model.passwordItems.count == 0)
+                let loadedModel = Model.loadModel(keychainService: PassngerTests.keychainService)
+                XCTAssert(loadedModel.passwordItems.count == 0)
+                expectation.fulfill()
+            }
+        }
+        wait(for: [expectation], timeout: 10.0)
     }
 
     func testAddMasterPassword() throws {

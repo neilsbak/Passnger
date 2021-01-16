@@ -34,7 +34,7 @@ struct GetMasterPasswordView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .validatedField(errorText: passwordError)
             }
-        }
+        }.frame(width: 300, height: 140)
     }
 }
 

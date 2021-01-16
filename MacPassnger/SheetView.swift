@@ -48,7 +48,7 @@ struct SheetView<Content: View>: View {
                     }
                 }
             }.padding(.top)
-            }.frame(minWidth: 400, minHeight: 300).padding()
+            }.frame(idealWidth: 400, idealHeight: 300).padding()
     }
 
     private func onSaveButton(action: @escaping () -> Void) -> some View {

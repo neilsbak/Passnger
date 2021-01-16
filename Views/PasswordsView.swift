@@ -22,13 +22,20 @@ struct PasswordsView: View {
     private let rowHeight: CGFloat = 44
 
     private func rowBody(passwordItem: PasswordItem) -> some View {
-        PasswordItemRow(passwordItem: passwordItem, model: self.model)
+        #if os(macOS)
+            // have padding on mac so it looks better for selected cell
+            let padding = EdgeInsets(top: 0, leading: 10, bottom: 0, trailing: 0)
+        #else
+            let padding = EdgeInsets()
+        #endif
+        return PasswordItemRow(passwordItem: passwordItem, model: self.model)
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: self.rowHeight)
+            .padding(padding)
             .contentShape(Rectangle())
             .onTapGesture {
                 self.onSelected?(passwordItem)
-        }.listRowBackground((self.selectedPassword == passwordItem ? Color.blue : Color.clear).frame(height: self.rowHeight))
+            }.listRowBackground((self.selectedPassword == passwordItem ? Color.blue : Color.clear).frame(height: self.rowHeight))
     }
 
     var body: some View {
@@ -38,7 +45,7 @@ struct PasswordsView: View {
             }.onDelete() { indexSet in
                 self.model.removePasswordItems(atOffsets: indexSet)
             }
-        }
+        }.listStyle(PlainListStyle())
     }
 }
 

@@ -65,7 +65,7 @@ struct ContentView: View {
                         onComplete(true)
                     }
                 }
-            }
+            }.passwordGeneratorAlert(result: self.$addPasswordResult)
         }.macSafeSheet(isPresented: self.showGetMasterPassword) {
             GetMasterPasswordView(
                 masterPassword: self.toolbar.selectedPassword?.masterPassword,
@@ -78,17 +78,17 @@ struct ContentView: View {
             SheetView(onCancel: { self.toolbar.showInfo.wrappedValue.toggle() } ) {
                 PasswordInfoView(
                     passwordItem: self.toolbar.selectedPassword!,
-                    hashedMasterPassword: self.toolbar.selectedPassword!.masterPassword.getHashedPassword(keychainService: self.model.keychainService).password,
+                    hashedMasterPassword: self.toolbar.selectedPassword!.masterPassword.getHashedPassword(keychainService: self.model.keychainService).password ?? self.toolbar.showInfoHashedMasterPassword,
                     model: self.model
                 )
             }
         }
-        .alert(isPresented: self.$toolbar.confirmDelete) { () -> Alert in
+        //mac workaround using .background for stacking alerts, similar to macSafeSheet stacking sheets
+        .background(EmptyView().alert(isPresented: self.$toolbar.confirmDelete) { () -> Alert in
             Alert(title: Text("Delete Password?"), primaryButton: Alert.Button.destructive(Text("Delete")) {
                 self.toolbar.deleteSelectedPassword()
             }, secondaryButton: Alert.Button.cancel())
-        }
-        .passwordGeneratorAlert(result: self.$addPasswordResult)
+        })
     }
 }
 

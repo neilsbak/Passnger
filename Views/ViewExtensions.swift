@@ -65,7 +65,7 @@ extension View {
         #if os(iOS)
         return self.masterPasswordAlert(masterPassword: masterPassword, isPresented: isPresented, onGotPassword: onGotPassword)
         #else
-        return self.sheet(isPresented: isPresented) {
+        return self.macSafeSheet(isPresented: isPresented) {
             GetMasterPasswordView(masterPassword: masterPassword, isPresented: isPresented, onGotPassword: onGotPassword)
         }
         #endif

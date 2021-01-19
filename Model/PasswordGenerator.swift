@@ -129,12 +129,10 @@ class PasswordGenerator {
             let symbolizedHashString = Data(hashed).base64EncodedString().prefix(scheme.passwordLength).reduce("") { $0 + (symbolMap[$1] ?? String($1)) }
             if scheme.isValidPassword(symbolizedHashString) {
                 password = symbolizedHashString
-                debugPrint("generated password in \(i) tries")
                 break
             }
         }
         guard let generatedPassword = password else {
-            debugPrint("Could not generate a password for the given configuration")
             throw PasswordGeneratorError.passwordError("Could not generate a password for the given configuration")
         }
         return generatedPassword
@@ -142,12 +140,16 @@ class PasswordGenerator {
 
     static func genPasswordForDuration(phrase: String, scheme: PasswordScheme, maxTimeInterval: TimeInterval) throws -> String {
         let currentDate = Date()
+        let numTriesPerInterval = Int(1000)
+        var totalTries = Int(0)
         while currentDate.distance(to: Date()) < maxTimeInterval {
             do {
-                 return try genPassword(phrase: phrase, scheme: scheme, numTries: 1000)
+                return try genPassword(phrase: phrase, scheme: scheme, numTries: numTriesPerInterval)
             } catch PasswordGeneratorError.passwordError(_) {
+                totalTries += numTriesPerInterval
             }
         }
+        debugPrint("Failed after \(totalTries) tries.")
         throw PasswordGeneratorError.passwordError("Could not generate a password for the given configuration")
     }
 

@@ -145,6 +145,7 @@ extension AppDelegate: NSUserInterfaceValidations {
     }
 
     func validateUserInterfaceItem(_ item: NSValidatedUserInterfaceItem) -> Bool {
+        // enable/disable menu items
         if item.action == #selector(openWindow(_:)) {
             return true
         }
@@ -282,7 +283,7 @@ class ToolbarObservable: ObservableObject {
     @Published
     var confirmDelete = false
 
-    @Published fileprivate var showInfoHashedMasterPassword: String? = nil
+    @Published var showInfoHashedMasterPassword: String? = nil
 
     var showInfo: Binding<Bool> {
         Binding<Bool>(
@@ -321,8 +322,4 @@ class ToolbarObservable: ObservableObject {
         confirmDelete = false
     }
 
-    func changeInfoForPasswordItem(_ passwordItem: PasswordItem, onComplete: @escaping (Result<Void, Error>) ->Void) throws {
-        guard let hashedMasterPassword = showInfoHashedMasterPassword else { return }
-        model.addPasswordItem(passwordItem, hashedMasterPassword: hashedMasterPassword, onComplete: onComplete)
-    }
 }

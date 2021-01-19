@@ -45,7 +45,7 @@ struct PasswordsView: View {
             }.onDelete() { indexSet in
                 self.model.removePasswordItems(atOffsets: indexSet)
             }
-        }.listStyle(PlainListStyle())
+        }.listStyle(PlainListStyle()).onCommand(#selector(AppDelegate.info(_:))) { print("INFO") }
     }
 }
 

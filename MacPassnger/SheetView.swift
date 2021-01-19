@@ -44,7 +44,7 @@ struct SheetView<Content: View>: View {
                 } ?? onSaveComplete.map { sv in
                     onSaveButton() {
                         self.isSaving = true
-                        sv { self.isSaving = false }
+                        sv() { self.isSaving = false }
                     }
                 }
             }.padding(.top)

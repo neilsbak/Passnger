@@ -15,6 +15,8 @@ struct CreatePasswordView: View {
     @State var formModel = PasswordFormModel()
     @State private var masterPasswordFormModel =  MasterPasswordFormModel()
     @State private var showGetMasterPassword = false
+    // need to store this to tell save button spinner to stop after getting master password
+    @State private var onSaveComplete: (() -> Void)? = nil
     let onSave: OnSave
 
     init(model: Model, presentedAsModal: Binding<Bool>, onSave: @escaping OnSave) {
@@ -49,6 +51,9 @@ struct CreatePasswordView: View {
                             onComplete()
                         }
                     } else {
+                        // need to get master password in separate dialog, so save the onComplete
+                        // until after we get that and call onSave
+                        self.onSaveComplete = onComplete
                         self.showGetMasterPassword = true
                     }
                 }
@@ -67,6 +72,9 @@ struct CreatePasswordView: View {
                 self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
                 self.onSave(passwordItem, MasterPassword.hashPassword(passwordText)) { success in
+                    self.onSaveComplete?()
+                    self.onSaveComplete = nil
+                    print("success: \(success)")
                     self.presentedAsModal = !success
                 }
         }

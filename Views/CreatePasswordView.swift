@@ -57,6 +57,8 @@ struct CreatePasswordView: View {
                         self.showGetMasterPassword = true
                     }
                 }
+            } else {
+                onComplete()
             }
         }) {
             PasswordFormView(
@@ -74,7 +76,6 @@ struct CreatePasswordView: View {
                 self.onSave(passwordItem, MasterPassword.hashPassword(passwordText)) { success in
                     self.onSaveComplete?()
                     self.onSaveComplete = nil
-                    print("success: \(success)")
                     self.presentedAsModal = !success
                 }
         }

@@ -39,7 +39,8 @@ struct PasswordFormView: View {
     }
 
     var body: some View {
-        AlignedForm {
+        let labelWidth: CGFloat = 200
+        return AlignedForm {
             AlignedSection(header: masterPasswordHeaderView) {
                 Picker(selection: self.$formModel.selectedMasterPassword, label: Text("Master Password")) {
                     ForEach(self.masterPasswords) {
@@ -65,13 +66,13 @@ struct PasswordFormView: View {
             }
             AlignedSection(header: passwordComponentsHeaderView) {
                 if showPasswordComponents {
-                    Picker(selection: self.$formModel.passwordLength, label: Text("Password Length")) {
+                    Picker(selection: self.$formModel.passwordLength, label: Text("Password Length").frame(minWidth: labelWidth, alignment: .leading)) {
                         ForEach(1..<50, id: \.self) {
                             Text(String($0))
                         }
                     }.validatedField(errorText: formModel.passwordLengthError)
                     HStack {
-                        Text("Symbols")
+                        Text("Symbols").frame(minWidth: labelWidth, alignment: .leading)
                         TextField("", text: $formModel.symbols)
                             .multilineTextAlignment(.trailing)
                             .autoCapitalizationOff()
@@ -79,22 +80,22 @@ struct PasswordFormView: View {
                             .frame(maxWidth: .infinity)
                             .validatedField(errorText: formModel.symbolsError)
                     }
-                    Picker(selection: self.$formModel.minSymbols, label: Text("Minimum Symbols")) {
+                    Picker(selection: self.$formModel.minSymbols, label: Text("Minimum Symbols").frame(minWidth: labelWidth, alignment: .leading)) {
                         ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }
                     }
-                    Picker(selection: self.$formModel.minNumeric, label: Text("Minimum Numbers")) {
+                    Picker(selection: self.$formModel.minNumeric, label: Text("Minimum Numbers").frame(minWidth: labelWidth, alignment: .leading)) {
                         ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }
                     }
-                    Picker(selection: self.$formModel.minUpperCase, label: Text("Minimum Upper Case")) {
+                    Picker(selection: self.$formModel.minUpperCase, label: Text("Minimum Upper Case").frame(minWidth: labelWidth, alignment: .leading)) {
                         ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }
                     }
-                    Picker(selection: self.$formModel.minLowerCase, label: Text("Minimum Lower Case")) {
+                    Picker(selection: self.$formModel.minLowerCase, label: Text("Minimum Lower Case").frame(minWidth: labelWidth, alignment: .leading)) {
                         ForEach(0..<10, id: \.self) {
                             Text(String($0))
                         }

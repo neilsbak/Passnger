@@ -35,7 +35,9 @@ struct PasswordsView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 self.onSelected?(passwordItem)
-            }.listRowBackground((self.selectedPassword == passwordItem ? Color.blue : Color.clear).frame(height: self.rowHeight))
+            }
+            .listRowBackground((self.selectedPassword == passwordItem ? Color.blue : Color.clear).frame(height: self.rowHeight))
+            .rowColorScheme(isSelected: self.selectedPassword == passwordItem)
     }
 
     var body: some View {
@@ -110,6 +112,16 @@ struct PasswordItemRow: View {
     }
 }
 
+fileprivate extension View {
+    @ViewBuilder
+    func rowColorScheme(isSelected: Bool) -> some View {
+        if isSelected {
+            self.colorScheme(.dark)
+        } else {
+            self
+        }
+    }
+}
 
 struct PasswordsView_Previews: PreviewProvider {
     static var previews: some View {

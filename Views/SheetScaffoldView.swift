@@ -65,7 +65,6 @@ struct SheetScaffoldView<Content: View>: View {
 
     private func onSaveButton(action: @escaping () -> Void) -> some View {
         Group {
-            Spacer()
             if self.isSaving {
                 ActivityIndicator(isAnimating: true)
             } else {

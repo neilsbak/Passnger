@@ -53,7 +53,7 @@ struct ContentView: View {
                                     return
                                 }
                                 self.showCopiedNotifier()
-                                UIPasteboard.general.string = password
+                                UIPasteboard.general.setItems([["password": password]], options: [.localOnly: true, .expirationDate: Date(timeIntervalSinceNow: 60)]);
                             }
                         }
                     }

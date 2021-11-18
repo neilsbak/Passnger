@@ -20,14 +20,12 @@ struct ContentView: View {
     @State private var showCopied = false
     @State private var addPasswordResult: Result<Void, Error>? = nil
 
-    lazy var blah = model.$passwordItems
-
     var body: some View {
-        NavigationView {
+        return NavigationView {
             Group {
                 if model.passwordItems.count == 0 && self.model.masterPasswords.count == 0 {
                     IntroSetupView() { masterPasswordFormModel in
-                        let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
+                        let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, keychainService: model.keychainService)
                         self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
                     }
                 } else if model.passwordItems.count == 0 {
@@ -53,7 +51,7 @@ struct ContentView: View {
                                     return
                                 }
                                 self.showCopiedNotifier()
-                                UIPasteboard.general.setItems([["password": password]], options: [.localOnly: true, .expirationDate: Date(timeIntervalSinceNow: 60)]);
+                                UIPasteboard.general.setItems([[UIPasteboard.typeAutomatic: password]], options: [.localOnly: true, .expirationDate: Date(timeIntervalSinceNow: 60)]);
                             }
                         }
                     }
@@ -61,10 +59,12 @@ struct ContentView: View {
                     .squareNotifier(text: "Copied to\nClipboard", showNotifier: self.showCopied)
                 }
             }
-            .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { masterPassword, passwordText in
+            .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { masterPassword, passwordText, saveMasterPassword in
                 let hashedPassword = MasterPassword.hashPassword(passwordText)
-                self.model.addMasterPassword(masterPassword, passwordText: passwordText)
-                UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword, keychainService: self.model.keychainService)
+                if (saveMasterPassword) {
+                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
+                }
+                UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
                 self.passwordItemWithoutMasterPassword = nil
                 self.showCopiedNotifier()
             }

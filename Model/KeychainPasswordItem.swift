@@ -167,7 +167,32 @@ struct KeychainPasswordItem {
 
         return passwordItems
     }
+    
+    func exists() throws -> Bool {
+        var query = KeychainPasswordItem.keychainQuery(withService: service, account: account, sync: sync, passcodeProtected: passcodeProtected, accessGroup: accessGroup)
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+        query[kSecReturnAttributes as String] = kCFBooleanTrue
+        query[kSecReturnData as String] = kCFBooleanFalse
+        // makes keychain to return errSecInteractionNotAllowed if the item exists
+        query[kSecUseAuthenticationUI as String] = kSecUseAuthenticationUIFail
+        
+        // Try to fetch the existing keychain item that matches the query.
+        var queryResult: AnyObject?
+        let status = withUnsafeMutablePointer(to: &queryResult) {
+            SecItemCopyMatching(query as CFDictionary, UnsafeMutablePointer($0))
+        }
 
+        // Check the return status and throw an error if appropriate.
+        if status == errSecItemNotFound {
+            return false
+        }
+        if (status == errSecInteractionNotAllowed) {
+            return true
+        }
+        guard status == noErr else { throw KeychainError.unhandledError(status: status) }
+        return true
+    }
+    
     // MARK: Convenience
 
     private static func keychainQuery(withService service: String?, account: String? = nil, sync: Bool?, passcodeProtected: Bool, accessGroup: String? = nil) -> [String : AnyObject] {

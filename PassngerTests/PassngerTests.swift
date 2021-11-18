@@ -31,30 +31,30 @@ class PassngerTests: XCTestCase {
         }
     }
 
-    func getMasterPassword(securityLevel: MasterPassword.SecurityLevel) -> MasterPassword {
-        return MasterPassword(name: "TestPassword", password: PassngerTests.masterPassword, securityLevel: securityLevel)
+    func getMasterPassword() -> MasterPassword {
+        return MasterPassword(name: "TestPassword", password: PassngerTests.masterPassword, keychainService: model.keychainService)
     }
 
-    func getPasswordItem(securityLevel: MasterPassword.SecurityLevel) -> PasswordItem {
-        let masterPassword = getMasterPassword(securityLevel: securityLevel)
-        let passwordItem = PasswordItem(userName: "tester", masterPassword: masterPassword, url: "test.com", resourceDescription: "Test Service", passwordScheme: PasswordScheme())
+    func getPasswordItem() -> PasswordItem {
+        let masterPassword = getMasterPassword()
+        let passwordItem = PasswordItem(userName: "tester", masterPassword: masterPassword, url: "test.com", resourceDescription: "Test Service", passwordScheme: PasswordScheme(), keychainService: model.keychainService)
         return passwordItem
     }
 
-    func getMasterPassword2(securityLevel: MasterPassword.SecurityLevel) -> MasterPassword {
-        return MasterPassword(name: "TestPassword2", password: PassngerTests.masterPassword, securityLevel: securityLevel)
+    func getMasterPassword2() -> MasterPassword {
+        return MasterPassword(name: "TestPassword2", password: PassngerTests.masterPassword, keychainService: model.keychainService)
     }
 
-    func getPasswordItem2(securityLevel: MasterPassword.SecurityLevel) -> PasswordItem {
-        let masterPassword = getMasterPassword(securityLevel: securityLevel)
-        let passwordItem = PasswordItem(userName: "tester2", masterPassword: masterPassword, url: "test.com", resourceDescription: "Test Service", passwordScheme: PasswordScheme())
+    func getPasswordItem2() -> PasswordItem {
+        let masterPassword = getMasterPassword()
+        let passwordItem = PasswordItem(userName: "tester2", masterPassword: masterPassword, url: "test.com", resourceDescription: "Test Service", passwordScheme: PasswordScheme(), keychainService: model.keychainService)
         return passwordItem
     }
 
 
     func testAddPassword() throws {
-        let passwordItem = getPasswordItem(securityLevel: .noSave)
-        let passwordItem2 = getPasswordItem2(securityLevel: .noSave)
+        let passwordItem = getPasswordItem()
+        let passwordItem2 = getPasswordItem2()
         let expectation = XCTestExpectation(description: "Generating password")
         model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
             XCTAssert(model.passwordItems[0].userName == "tester")
@@ -72,8 +72,8 @@ class PassngerTests: XCTestCase {
 
     func testUpdatePassword() throws {
         let expectation = XCTestExpectation(description: "Generating password")
-        model.addPasswordItem(getPasswordItem(securityLevel: .noSave), hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
-            var passwordItem = getPasswordItem2(securityLevel: .noSave)
+        model.addPasswordItem(getPasswordItem(), hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
+            var passwordItem = getPasswordItem2()
             XCTAssert(passwordItem.numRenewals == 0)
             model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword){ [self] _ in
                 passwordItem.numRenewals = 1
@@ -88,8 +88,8 @@ class PassngerTests: XCTestCase {
     }
 
     func testRemovePassword() throws {
-        let passwordItem = getPasswordItem(securityLevel: .noSave)
-        let passwordItem2 = getPasswordItem2(securityLevel: .noSave)
+        let passwordItem = getPasswordItem()
+        let passwordItem2 = getPasswordItem2()
         let expectation = XCTestExpectation(description: "Generating password")
         model.addPasswordItem(passwordItem, hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
             model.addPasswordItem(passwordItem2, hashedMasterPassword: PassngerTests.hashedMasterPassword) { [self] _ in
@@ -108,8 +108,8 @@ class PassngerTests: XCTestCase {
     }
 
     func testAddMasterPassword() throws {
-        let masterPassword = getMasterPassword(securityLevel: .noSave)
-        let masterPassword2 = getMasterPassword2(securityLevel: .noSave)
+        let masterPassword = getMasterPassword()
+        let masterPassword2 = getMasterPassword2()
         model.addMasterPassword(masterPassword, passwordText: PassngerTests.masterPassword)
         XCTAssert(model.masterPasswords[0].name == "TestPassword")
         model.addMasterPassword(masterPassword2, passwordText: PassngerTests.masterPassword)
@@ -121,8 +121,8 @@ class PassngerTests: XCTestCase {
     }
 
     func testRemoveMasterPassword() throws {
-        let masterPassword = getMasterPassword(securityLevel: .noSave)
-        let masterPassword2 = getMasterPassword2(securityLevel: .noSave)
+        let masterPassword = getMasterPassword()
+        let masterPassword2 = getMasterPassword2()
         model.addMasterPassword(masterPassword, passwordText: PassngerTests.masterPassword)
         model.addMasterPassword(masterPassword2, passwordText: PassngerTests.masterPassword)
         model.removeMasterPassword(masterPassword2)
@@ -136,7 +136,7 @@ class PassngerTests: XCTestCase {
     }
 
     func testMasterPasswordDoubleHashing() throws {
-        let masterPassword = getMasterPassword(securityLevel: .noSave)
+        let masterPassword = getMasterPassword()
         XCTAssert(masterPassword.doubleHashedPassword == "ilRa7Wjelqioy9Yuiay7cn6wUvp8eNT0Z7m2KpuKgqw=")
     }
 
@@ -148,16 +148,16 @@ class PassngerTests: XCTestCase {
     func testGetSavedPasswordItem() throws {
         let masterPasswordText = PassngerTests.masterPassword
         let hashedMasterPassword = MasterPassword.hashPassword(masterPasswordText)
-        let passwordItem = getPasswordItem(securityLevel: .save)
+        let passwordItem = getPasswordItem()
         var masterPasswordItem = passwordItem.masterPassword
         // simulate the user entering master password and the system saving it
-        try! masterPasswordItem.savePassword(PassngerTests.masterPassword, keychainService: PassngerTests.keychainService)
-        try! passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword, keychainService: PassngerTests.keychainService)
+        try! masterPasswordItem.savePassword(PassngerTests.masterPassword)
+        try! passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword)
         // this will load the master password from memory
         print(try! passwordItem.getPassword(keychainService: PassngerTests.keychainService))
         XCTAssert(try! passwordItem.getPassword(keychainService: PassngerTests.keychainService) == .value(genPassword(passwordItem: passwordItem, masterPassword: masterPasswordText)))
         // simulate loading passwordItem from disk when restarting app
-        let passwordItemCopy = getPasswordItem(securityLevel: .save)
+        let passwordItemCopy = getPasswordItem()
         // this will load the master password from keychain
         XCTAssert(try! passwordItemCopy.getPassword(keychainService: PassngerTests.keychainService) == .value(genPassword(passwordItem: passwordItemCopy, masterPassword: masterPasswordText)))
     }
@@ -165,12 +165,12 @@ class PassngerTests: XCTestCase {
     func testGetUnsavedPasswordItem() throws {
         let masterPasswordText = PassngerTests.masterPassword
         let hashedMasterPassword = MasterPassword.hashPassword(masterPasswordText)
-        let passwordItem = getPasswordItem(securityLevel: .noSave)
-        try! passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword, keychainService: PassngerTests.keychainService)
+        let passwordItem = getPasswordItem()
+        try! passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword)
         // this will try to load the master password from memory but it can't
         XCTAssert(try! passwordItem.getPassword(keychainService: PassngerTests.keychainService) == .value(nil))
         // simulate loading passwordItem from disk when restarting app
-        let passwordItemCopy = getPasswordItem(securityLevel: .noSave)
+        let passwordItemCopy = getPasswordItem()
         // this will load the master password from keychain
         XCTAssert(try! passwordItemCopy.getPassword(keychainService: PassngerTests.keychainService) == .value(nil))
     }

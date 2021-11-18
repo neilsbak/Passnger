@@ -54,6 +54,7 @@ struct AlignedSection<Header: View, Content: View>: View {
         HStack {
             VStack(alignment: .leading) {
                 header
+                Spacer().frame(height: 8)
                 content
             }
             Spacer()

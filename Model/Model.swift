@@ -53,7 +53,7 @@ public class Model: ObservableObject {
     func addPasswordItem(_ passwordItem: PasswordItem, hashedMasterPassword: String, onComplete: @escaping (Result<Void, Error>) -> Void) {
         assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == passwordItem.masterPassword.doubleHashedPassword)
         DispatchQueue.global(qos: .background).async {
-            let result = Result { try passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword, keychainService: self.keychainService) }
+            let result = Result { try passwordItem.storePasswordFromHashedMasterPassword(hashedMasterPassword) }
             DispatchQueue.main.async {
                 switch result {
                 case .success(()):
@@ -76,10 +76,10 @@ public class Model: ObservableObject {
         } else {
             masterPasswords.append(masterPassword)
         }
-        try! masterPasswords[masterPasswords.firstIndex(of: masterPassword)!].savePassword(passwordText, keychainService: self.keychainService)
+        try! masterPasswords[masterPasswords.firstIndex(of: masterPassword)!].savePassword(passwordText)
         saveModel()
     }
-
+    
     func removePasswordItem(_ passwordItem: PasswordItem) {
         guard let index = passwordItems.firstIndex(where: { $0.id == passwordItem.id }) else { return }
         removePasswordItems(atOffsets: IndexSet(integer: index))
@@ -87,22 +87,33 @@ public class Model: ObservableObject {
 
     func removeMasterPassword(_ masterPassword: MasterPassword) {
         guard let index = masterPasswords.firstIndex(where: { $0.id == masterPassword.id }) else { return }
+        removeMasterPasswordKeychainItems(atOffsets: IndexSet(integer: index))
         removeMasterPasswords(atOffsets: IndexSet(integer: index))
+    }
+    
+    func removeMasterPasswordKeychainItem(_ masterPassword: MasterPassword) {
+        guard let index = masterPasswords.firstIndex(where: { $0.id == masterPassword.id }) else { return }
+        removeMasterPasswordKeychainItems(atOffsets: IndexSet(integer: index))
+
     }
 
     func removePasswordItems(atOffsets indexSet: IndexSet) {
         for index in indexSet {
-            do { try passwordItems[index].deletePassword(keychainService: self.keychainService) } catch {}
+            do { try passwordItems[index].deletePassword() } catch {}
         }
         passwordItems.remove(atOffsets: indexSet)
         saveModel()
     }
 
     func removeMasterPasswords(atOffsets indexSet: IndexSet) {
-        for index in indexSet {
-            do { try masterPasswords[index].deletePassword(keychainService: self.keychainService) } catch {}
-        }
         masterPasswords.remove(atOffsets: indexSet)
+        saveModel()
+    }
+    
+    func removeMasterPasswordKeychainItems(atOffsets indexSet: IndexSet) {
+        for index in indexSet {
+            do { try masterPasswords[index].deletePassword() } catch {}
+        }
         saveModel()
     }
 
@@ -117,12 +128,17 @@ public class Model: ObservableObject {
     }
 
     func loadModel() {
+        let decoder = JSONDecoder()
+        decoder.userInfo = [
+            MasterPassword.keychainServiceUserInfoKey: keychainService,
+            PasswordItem.keychainServiceUserInfoKey: keychainService
+        ]
         if let masterPasswordsJson = try? masterKeychainItem.readPassword(),
-           let masterPasswords = try? JSONDecoder().decode([MasterPassword].self, from: masterPasswordsJson.data(using: .utf8)!) {
+           let masterPasswords = try? decoder.decode([MasterPassword].self, from: masterPasswordsJson.data(using: .utf8)!) {
             self.masterPasswords = masterPasswords
         }
         if let passwordItemsJson = try? passwordKeychainItem.readPassword(),
-           let passwordItems = try? JSONDecoder().decode([PasswordItem].self, from: passwordItemsJson.data(using: .utf8)!) {
+           let passwordItems = try? decoder.decode([PasswordItem].self, from: passwordItemsJson.data(using: .utf8)!) {
             self.passwordItems = passwordItems
         }
     }
@@ -134,32 +150,35 @@ public class Model: ObservableObject {
     }
 
     static func testModel() -> Model {
-        let model = Model(keychainService: "PassengerTest")
+        let keychainService = "PassengerTest"
+        let model = Model(keychainService: keychainService)
         let masterPasswords = [
             "Regular Password": "regular",
             "Secure Password": "secure"
         ]
+        
         model.masterPasswords = masterPasswords.keys.map {
-            MasterPassword(name: $0, password: masterPasswords[$0]!, securityLevel: .noSave)
+            MasterPassword(name: $0, password: masterPasswords[$0]!, keychainService: keychainService, securityLevel: .save)
         }
         model.passwordItems = [
-            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[0], url: "gmail.com", resourceDescription: "Gmail", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith.to", masterPassword: model.masterPasswords[1], url: "amazon.com", resourceDescription: "Amazon", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[0], url: "sunbank.com", resourceDescription: "Sun Bank", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "apple.com", resourceDescription: "Apple", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "github.com", resourceDescription: "GitHub", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pwsmithto@hotmail.com", masterPassword: model.masterPasswords[0], url: "facebook.com", resourceDescription: "Facebook", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[0], url: "turbotax.com", resourceDescription: "Turbo Tax", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pwsmithto", masterPassword: model.masterPasswords[1], url: "hotmail.com", resourceDescription: "Hotmail", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "jencarford", masterPassword: model.masterPasswords[1], url: "gmail.com", resourceDescription: "Jen Gmail", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pwsmithto@hotmail.com", masterPassword: model.masterPasswords[0], url: "twitter.com", resourceDescription: "Twitter", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "starbucks.com", resourceDescription: "Starbucks", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[1], url: "yahoo.com", resourceDescription: "Yahoo", passwordScheme: PasswordScheme()),
-            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[0], url: "slack.com", resourceDescription: "Slack", passwordScheme: PasswordScheme()),
+            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[0], url: "gmail.com", resourceDescription: "Gmail", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith.to", masterPassword: model.masterPasswords[1], url: "amazon.com", resourceDescription: "Amazon", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[0], url: "sunbank.com", resourceDescription: "Sun Bank", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "apple.com", resourceDescription: "Apple", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "github.com", resourceDescription: "GitHub", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pwsmithto@hotmail.com", masterPassword: model.masterPasswords[0], url: "facebook.com", resourceDescription: "Facebook", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[0], url: "turbotax.com", resourceDescription: "Turbo Tax", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pwsmithto", masterPassword: model.masterPasswords[1], url: "hotmail.com", resourceDescription: "Hotmail", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "jencarford", masterPassword: model.masterPasswords[1], url: "gmail.com", resourceDescription: "Jen Gmail", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pwsmithto@hotmail.com", masterPassword: model.masterPasswords[0], url: "twitter.com", resourceDescription: "Twitter", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[1], url: "starbucks.com", resourceDescription: "Starbucks", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith", masterPassword: model.masterPasswords[1], url: "yahoo.com", resourceDescription: "Yahoo", passwordScheme: PasswordScheme(), keychainService: keychainService),
+            PasswordItem(userName: "pw_smith@gmail.com", masterPassword: model.masterPasswords[0], url: "slack.com", resourceDescription: "Slack", passwordScheme: PasswordScheme(), keychainService: keychainService),
         ]
+        try! model.masterPasswords[0].savePassword(masterPasswords[model.masterPasswords[0].name]!)
         for p in model.passwordItems {
             let hashedMasterPassword = MasterPassword.hashPassword(masterPasswords[p.masterPassword.name]!)
-            try! p.storePasswordFromHashedMasterPassword(hashedMasterPassword, keychainService: model.keychainService)
+            try! p.storePasswordFromHashedMasterPassword(hashedMasterPassword)
         }
         return model
     }

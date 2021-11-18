@@ -30,7 +30,7 @@ struct ContentView: View {
                 VStack {
                     Text("Your Master Password").font(.title).padding(.top)
                     IntroSetupView() { masterPasswordFormModel in
-                        let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, securityLevel: .protectedSave)
+                        let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, keychainService: model.keychainService)
                         self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
                     }
                 }
@@ -70,15 +70,17 @@ struct ContentView: View {
             GetMasterPasswordView(
                 masterPassword: self.toolbar.selectedPassword?.masterPassword,
                 isPresented: self.showGetMasterPassword
-            ) { (masterPassword, passwordText) in
-                self.model.addMasterPassword(masterPassword, passwordText: passwordText)
+            ) { (masterPassword, passwordText, savePassword) in
+                if (savePassword) {
+                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
+                }
                 self.toolbar.gotHashedMasterPassword(MasterPassword.hashPassword(passwordText))
             }
         }.macSafeSheet(isPresented: self.toolbar.showInfo) {
             SheetView(onCancel: { self.toolbar.showInfo.wrappedValue.toggle() } ) {
                 PasswordInfoView(
                     passwordItem: self.toolbar.selectedPassword!,
-                    hashedMasterPassword: self.toolbar.selectedPassword!.masterPassword.getHashedPassword(keychainService: self.model.keychainService).password ?? self.toolbar.showInfoHashedMasterPassword,
+                    hashedMasterPassword: self.toolbar.selectedPassword!.masterPassword.getHashedPassword().password ?? self.toolbar.showInfoHashedMasterPassword,
                     model: self.model
                 )
             }

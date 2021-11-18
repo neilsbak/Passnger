@@ -61,7 +61,7 @@ extension View {
 
 
 extension View {
-    func getMasterPassword(masterPassword: MasterPassword?, isPresented: Binding<Bool>, onGotPassword: @escaping (MasterPassword, String) -> Void) -> some View {
+    func getMasterPassword(masterPassword: MasterPassword?, isPresented: Binding<Bool>, onGotPassword: @escaping (MasterPassword, String, Bool) -> Void) -> some View {
         #if os(iOS)
         return self.masterPasswordAlert(masterPassword: masterPassword, isPresented: isPresented, onGotPassword: onGotPassword)
         #else

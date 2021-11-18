@@ -12,10 +12,8 @@ struct PasswordFormView: View {
     static private let numberFormatter = NumberFormatter()
 
     @Binding var formModel: PasswordFormModel
-    let masterPasswords: [MasterPassword]
+    @ObservedObject var model: Model
     let includePadding: Bool
-    let removeMasterPasswords: (IndexSet) -> Void
-    let createMasterPassword: (MasterPassword, String) -> Void
 
     @State private var showPasswordComponents = false
     @State private var showManageMasterPasswords = false
@@ -43,7 +41,7 @@ struct PasswordFormView: View {
         return AlignedForm {
             AlignedSection(header: masterPasswordHeaderView) {
                 Picker(selection: self.$formModel.selectedMasterPassword, label: Text("Master Password")) {
-                    ForEach(self.masterPasswords) {
+                    ForEach(model.masterPasswords) {
                         Text($0.name).tag($0 as MasterPassword?)
                     }
                 }.validatedField(errorText: formModel.masterPasswordError)
@@ -102,7 +100,7 @@ struct PasswordFormView: View {
                     }
                 }
             }.macSafeSheet(isPresented: self.$showManageMasterPasswords) {
-                ManageMasterPasswordsView(masterPasswords: self.masterPasswords, onCancel: { self.showManageMasterPasswords = false }, onDelete: self.removeMasterPasswords, onCreate: self.createMasterPassword)
+                ManageMasterPasswordsView(model: model, onCancel: { self.showManageMasterPasswords = false })
             }
         }
         .keyboardObserving()
@@ -112,6 +110,6 @@ struct PasswordFormView: View {
 
 struct PasswordForm_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordFormView(formModel: Binding.constant(PasswordFormModel()), masterPasswords: Model.testModel().masterPasswords, includePadding: true, removeMasterPasswords: {_ in}, createMasterPassword: {_,_ in })
+        PasswordFormView(formModel: Binding.constant(PasswordFormModel()), model: Model.testModel(), includePadding: true)
     }
 }

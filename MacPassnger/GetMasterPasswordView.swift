@@ -11,9 +11,10 @@ import SwiftUI
 struct GetMasterPasswordView: View {
     let masterPassword: MasterPassword?
     @Binding var isPresented: Bool
-    let onGotPassword: (MasterPassword, String) -> ()
+    let onGotPassword: (MasterPassword, String, Bool) -> ()
     @State private var passwordText: String = ""
     @State private var passwordError: String?
+    @State private var saveOnDevice: Bool = true
 
     var body: some View {
         SheetView(onCancel: { self.isPresented = false }, onSave: {
@@ -22,7 +23,7 @@ struct GetMasterPasswordView: View {
                 self.passwordError = "Incorrect Password"
                 return
             }
-            self.onGotPassword(self.masterPassword!, self.passwordText)
+            self.onGotPassword(self.masterPassword!, self.passwordText, saveOnDevice)
             self.isPresented = false
 
         }) {
@@ -33,6 +34,7 @@ struct GetMasterPasswordView: View {
                     .disableAutocorrection(true)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .validatedField(errorText: passwordError)
+                Toggle("Save on device", isOn: $saveOnDevice)
             }
         }.frame(width: 300, height: 140)
     }
@@ -40,6 +42,6 @@ struct GetMasterPasswordView: View {
 
 struct GetMasterPasswordView_Previews: PreviewProvider {
     static var previews: some View {
-        GetMasterPasswordView(masterPassword: Model.testModel().masterPasswords[0], isPresented: Binding(get: { true }, set: { _ in }), onGotPassword: {_,_ in })
+        GetMasterPasswordView(masterPassword: Model.testModel().masterPasswords[0], isPresented: Binding(get: { true }, set: { _ in }), onGotPassword: {_,_,_ in })
     }
 }

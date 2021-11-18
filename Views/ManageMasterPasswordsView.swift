@@ -9,69 +9,54 @@
 import SwiftUI
 
 struct ManageMasterPasswordsView: View {
-    let masterPasswords: [MasterPassword]
+    @ObservedObject var model: Model
     let onCancel: () -> Void
-    let onDelete: (IndexSet) -> Void
-    let onCreate: (MasterPassword, String) -> Void
 
     @State private var showCreateMasterPassword = false
     @State private var masterPasswordFormModel = MasterPasswordFormModel()
-    @State private var selectedMasterPassword: MasterPassword? = nil
-
-    private func mainBody(onTap: ((MasterPassword) -> Void)? = nil) -> some View {
-        List {
-            ForEach(self.masterPasswords) { masterPassword in
-                Text(masterPassword.name)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .contentShape(Rectangle())
-                    .onTapGesture { onTap?(masterPassword) }
-                    .listRowBackground(self.selectedMasterPassword == masterPassword ? Color.blue : Color.clear)
+    
+    private func mainBody() -> some View {
+        List(model.masterPasswords) { masterPassword in
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(masterPassword.name).bold()
+                    Text(masterPassword.passwordIsSaved ? "Saved on device" : "Not saved on device").font(.caption).foregroundColor(.secondary)
+                }
+                Spacer()
+                if masterPassword.passwordIsSaved {
+                    Button(action: { model.removeMasterPasswordKeychainItem(masterPassword) }) {
+                        Text("Forget")
+                    }.buttonStyle(BorderlessButtonStyle())
+                }
             }
-            .onDelete(perform: onDelete)
-        }
+        }.listStyle(.plain)
     }
-
+    
     private var sheetScaffoldView: some View {
-        #if os(iOS)
+#if os(iOS)
         return SheetScaffoldView(title: "Master Passwords", onCancel: nil, onSave: nil) {
             mainBody()
-            .navigationBarItems(
-                leading: Button(action: self.onCancel) { Text("Cancel").padding([.trailing, .top, .bottom]) },
-                trailing: HStack {
-                    Button(action: {self.showCreateMasterPassword = true }) {
-                        Image(systemName: "plus").imageScale(.large).padding()
+                .navigationBarItems(
+                    leading: Button(action: self.onCancel) { Text("Cancel").padding([.trailing, .top, .bottom]) },
+                    trailing: HStack {
+                        Button(action: {self.showCreateMasterPassword = true }) {
+                            Image(systemName: "plus").imageScale(.large).padding()
+                        }
                     }
-                }
-            ).environment(\.editMode, Binding.constant(EditMode.active))
+                )
         }
-        #else
+#else
         return SheetScaffoldView(title: "Master Passwords", onCancel: onCancel, onSave: nil) {
-            VStack {
-                mainBody {
-                    if self.selectedMasterPassword == $0 {
-                        self.selectedMasterPassword = nil
-                    } else {
-                        self.selectedMasterPassword = $0
-                    }
-                }
-                HStack(spacing: 0) {
-                    ListButton(imageName: NSImage.addTemplateName) {
-                        self.showCreateMasterPassword = true
-                    }
-                    Divider()
-                    ListButton(imageName: NSImage.removeTemplateName) {
-                        guard let masterPassword = self.selectedMasterPassword else { return }
-                        guard let index = self.masterPasswords.firstIndex(of: masterPassword) else { return }
-                        self.onDelete(IndexSet(integer: index))
-                    }.disabled(self.selectedMasterPassword == nil)
-                    Divider()
-                    Spacer()
+            VStack(alignment: .leading) {
+                mainBody()
+                Button(action: { self.showCreateMasterPassword = true }) {
+                    Text("Add Master Password")
                 }.frame(height: 20)
             }
         }
-        #endif
+#endif
     }
-
+    
     var body: some View {
         self.sheetScaffoldView.sheet(isPresented: self.$showCreateMasterPassword, title: "Create Master Password", onCancel: { self.showCreateMasterPassword = false }, onSave: submitMasterPassword) {
             ScrollView {
@@ -79,23 +64,23 @@ struct ManageMasterPasswordsView: View {
             }
         }
     }
-
+    
     private func submitMasterPassword() {
         self.masterPasswordFormModel.hasSubmitted = true
         if (self.masterPasswordFormModel.validate()) {
-            let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, securityLevel: .protectedSave)
-            self.onCreate(masterPassword, self.masterPasswordFormModel.password)
+            let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, keychainService: model.keychainService)
+            model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
             self.showCreateMasterPassword = false
         }
     }
-
+    
 }
 
 #if os(macOS)
 struct ListButton: View {
     let imageName: String
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             Image(nsImage: NSImage(named: imageName)!)
@@ -109,6 +94,6 @@ struct ListButton: View {
 
 struct ManageMasterPasswordsView_Previews: PreviewProvider {
     static var previews: some View {
-        ManageMasterPasswordsView(masterPasswords: Model.testModel().masterPasswords, onCancel: {}, onDelete: {_ in}, onCreate: {_,_ in })
+        ManageMasterPasswordsView(model: Model.testModel(), onCancel: {})
     }
 }

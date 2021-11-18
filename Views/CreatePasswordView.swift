@@ -13,7 +13,7 @@ struct CreatePasswordView: View {
     @ObservedObject var model: Model
     @Binding var presentedAsModal: Bool
     @State var formModel = PasswordFormModel()
-    @State private var masterPasswordFormModel =  MasterPasswordFormModel()
+    @State private var masterPasswordFormModel = MasterPasswordFormModel()
     @State private var showGetMasterPassword = false
     // need to store this to tell save button spinner to stop after getting master password
     @State private var onSaveComplete: (() -> Void)? = nil
@@ -32,20 +32,20 @@ struct CreatePasswordView: View {
 
 
     var body: some View {
-        SheetScaffoldView(title: "Create Password", onCancel: { self.presentedAsModal = false },  onSaveComplete: { onComplete in
+        return SheetScaffoldView(title: "Create Password", onCancel: { self.presentedAsModal = false },  onSaveComplete: { onComplete in
             self.formModel.hasSubmitted = true
             if self.formModel.validate()  {
                 guard let selectedMasterPassword = self.formModel.selectedMasterPassword else {
                     onComplete()
                     return
                 }
-                switch selectedMasterPassword.getHashedPassword(keychainService: self.model.keychainService) {
+                switch selectedMasterPassword.getHashedPassword() {
                 case .cancelled:
                     onComplete()
                     return
                 case.value(let hashedMasterPassword):
                     if let hashedMasterPassword = hashedMasterPassword {
-                        let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
+                        let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme(), keychainService: model.keychainService)
                         self.onSave(passwordItem, hashedMasterPassword) { success in
                             self.presentedAsModal = !success
                             onComplete()
@@ -63,16 +63,14 @@ struct CreatePasswordView: View {
         }) {
             PasswordFormView(
                 formModel: $formModel,
-                masterPasswords: self.model.masterPasswords,
-                includePadding: false,
-                removeMasterPasswords: { self.model.removeMasterPasswords(atOffsets: $0) },
-                createMasterPassword: { masterPassword, passwordText in
+                model: model,
+                includePadding: false
+            )}
+        .getMasterPassword(masterPassword: self.formModel.selectedMasterPassword, isPresented: self.$showGetMasterPassword) { (masterPassword, passwordText, saveMasterPassword) in
+                if (saveMasterPassword) {
                     self.model.addMasterPassword(masterPassword, passwordText: passwordText)
                 }
-            )}
-        .getMasterPassword(masterPassword: self.formModel.selectedMasterPassword, isPresented: self.$showGetMasterPassword) { (masterPassword, passwordText) in
-                self.model.addMasterPassword(masterPassword, passwordText: passwordText)
-                let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme())
+            let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme(), keychainService: model.keychainService)
                 self.onSave(passwordItem, MasterPassword.hashPassword(passwordText)) { success in
                     self.onSaveComplete?()
                     self.onSaveComplete = nil

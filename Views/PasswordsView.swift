@@ -72,7 +72,7 @@ struct PasswordItemRow: View {
             Spacer()
             #if os(iOS)
             Button(action: {
-                switch self.passwordItem.masterPassword.getHashedPassword(keychainService: self.model.keychainService) {
+                switch self.passwordItem.masterPassword.getHashedPassword() {
                 case .cancelled:
                     return
                 case .value(let hashedMasterPassword):
@@ -82,8 +82,10 @@ struct PasswordItemRow: View {
                 }
             }) {
                 ZStack {
-                    EmptyView().masterPasswordAlert(masterPassword: self.passwordItem.masterPassword, isPresented: $showGetMasterPassword) { (masterPassword, passwordText) in
-                        self.model.addMasterPassword(masterPassword, passwordText: passwordText)
+                    EmptyView().masterPasswordAlert(masterPassword: self.passwordItem.masterPassword, isPresented: $showGetMasterPassword) { (masterPassword, passwordText, saveMasterPassword) in
+                        if (saveMasterPassword) {
+                            self.model.addMasterPassword(masterPassword, passwordText: passwordText)
+                        }
                         self.hashedMasterPassword = MasterPassword.hashPassword(passwordText)
                         self.showGetMasterPassword = false
                         self.linkIsActive = true

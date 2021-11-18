@@ -244,7 +244,7 @@ extension AppDelegate: NSToolbarDelegate {
 
     @objc func showInfo() {
         guard let item = toolbarObservable.selectedPassword else { return }
-        switch item.masterPassword.getHashedPassword(keychainService: model.keychainService) {
+        switch item.masterPassword.getHashedPassword() {
         case .cancelled:
             return
         case .value(let password):
@@ -309,7 +309,7 @@ class ToolbarObservable: ObservableObject {
 
     private func copyPassword(hashedMasterPassword: String) {
         guard let item = selectedPassword else { return }
-        let password = try! item.getPassword(hashedMasterPassword: hashedMasterPassword, keychainService: model.keychainService)
+        let password = try! item.getPassword(hashedMasterPassword: hashedMasterPassword)
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(password, forType: .string)
     }

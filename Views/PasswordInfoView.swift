@@ -13,7 +13,7 @@ struct PasswordInfoView: View {
     let passwordItem: PasswordItem
     let hashedMasterPassword: String?
     private var password: String? {
-        self.hashedMasterPassword.flatMap { try? passwordItem.getPassword(hashedMasterPassword: $0, keychainService: self.model.keychainService) }
+        self.hashedMasterPassword.flatMap { try? passwordItem.getPassword(hashedMasterPassword: $0) }
     }
     let model: Model
 
@@ -43,10 +43,9 @@ struct PasswordInfoView: View {
         self.password.map { password in
             PasswordInfoViewCell(width: width, title: "Password") {
                 HStack {
-                    if showPassword {
-                        SelectableLabel(text: password).frame(alignment: .trailing)
-                    } else {
-                        Text(String(repeating: "*", count: password.count)).minimumScaleFactor(0.7).lineLimit(1)
+                    ZStack {
+                        SelectableLabel(text: password).frame(alignment: .trailing).opacity(self.showPassword ? 1 : 0)
+                        Text(String(repeating: "*", count: password.count)).minimumScaleFactor(0.7).lineLimit(1).opacity(self.showPassword ? 0 : 1)
                     }
                     passwordButton
                 }
@@ -111,7 +110,7 @@ struct PasswordInfoView: View {
         GeometryReader { metrics in
         #if os(iOS)
         List {
-            self.contentRows(width: metrics.size.width)
+            self.contentRows(width: metrics.size.width - 80)
         }.keyboardObserving()
         #else
         ScrollView {
@@ -152,6 +151,13 @@ extension PasswordInfoViewCell where Content == Text {
 
 struct PasswordInfoView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordInfoView(passwordItem: Model.testModel().passwordItems[0], hashedMasterPassword: nil, model: Model.testModel())
+        let passwordItem = Model.testModel().passwordItems[0]
+        let hashedMasterPassword: String? = {
+            if case .value(let value) = passwordItem.masterPassword.getHashedPassword() {
+                return value
+            }
+            return nil
+        }()
+        PasswordInfoView(passwordItem: Model.testModel().passwordItems[0], hashedMasterPassword: hashedMasterPassword, model: Model.testModel())
     }
 }

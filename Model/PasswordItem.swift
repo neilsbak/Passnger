@@ -25,7 +25,11 @@ enum CancellablePasswordText: Equatable {
 
 struct PasswordItem: Identifiable, Equatable {
 
-    init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, created: Date = Date(), numRenewals: Int = 0, passwordScheme: PasswordScheme) {
+    static var keychainServiceUserInfoKey: CodingUserInfoKey {
+        return CodingUserInfoKey(rawValue: "paswordItemKeychainService")!
+    }
+
+    init(userName: String, masterPassword: MasterPassword, url: String, resourceDescription: String, created: Date = Date(), numRenewals: Int = 0, passwordScheme: PasswordScheme, keychainService: String) {
         self.userName = userName
         self.masterPassword = masterPassword
         self.url = url
@@ -38,8 +42,26 @@ struct PasswordItem: Identifiable, Equatable {
         self.minNumeric = passwordScheme.minNumeric
         self.minUpperCase = passwordScheme.minUpperCase
         self.minLowerCase = passwordScheme.minLowerCase
+        self.keychainService = keychainService
     }
 
+    init(from decoder: Decoder) throws {
+        keychainService = decoder.userInfo[PasswordItem.keychainServiceUserInfoKey] as! String
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        userName = try container.decode(String.self, forKey: .userName)
+        url = try container.decode(String.self, forKey: .url)
+        resourceDescription = try container.decode(String.self, forKey: .resourceDescription)
+        created = try container.decode(Date.self, forKey: .created)
+        numRenewals = try container.decode(Int.self, forKey: .numRenewals)
+        passwordLength = try container.decode(Int.self, forKey: .passwordLength)
+        symbols = try container.decode(String.self, forKey: .symbols)
+        minSymbols = try container.decode(Int.self, forKey: .minSymbols)
+        minNumeric = try container.decode(Int.self, forKey: .minNumeric)
+        minUpperCase = try container.decode(Int.self, forKey: .minUpperCase)
+        minLowerCase = try container.decode(Int.self, forKey: .minLowerCase)
+        masterPassword = try container.decode(MasterPassword.self, forKey: .masterPassword)
+    }
+    
     var id: String { userName + url }
     let userName: String
     let url: String
@@ -53,8 +75,9 @@ struct PasswordItem: Identifiable, Equatable {
     let minUpperCase: Int
     let minLowerCase: Int
     let masterPassword: MasterPassword
+    let keychainService: String
 
-    private func passwordKeychainItem(keychainService: String) -> PassngerKeychainItem {
+    private func passwordKeychainItem() -> PassngerKeychainItem {
         PassngerKeychainItem(name: url + "::" + userName, type: .account, passcodeProtected: false, keychainService: keychainService)
     }
 
@@ -62,38 +85,38 @@ struct PasswordItem: Identifiable, Equatable {
         try PasswordScheme(passwordLength: passwordLength, symbols: symbols, minSymbols: minSymbols, minLowerCase: minLowerCase, minUpperCase: minUpperCase, minNumeric: minNumeric)
     }
 
-    func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String, keychainService: String) throws {
+    func storePasswordFromHashedMasterPassword(_ hashedMasterPassword: String) throws {
         assert(MasterPassword.hashPasswordData(Data(base64Encoded: hashedMasterPassword)!) == masterPassword.doubleHashedPassword)
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
         let password = try PasswordGenerator.genPasswordForDuration(phrase: hashedMasterPassword + userName + url + String(numRenewals), scheme: passwordScheme(), maxTimeInterval: 5)
         let sealBox = try! AES.GCM.seal(Data((password).utf8), using: key)
         let combined = sealBox.combined!
-        try! passwordKeychainItem(keychainService: keychainService).savePassword(combined.base64EncodedString())
+        try! passwordKeychainItem().savePassword(combined.base64EncodedString())
     }
 
     /// Assumes the masterPassword is obtainable in from memory or disk
     /// or returns nil otherwise
     func getPassword(keychainService: String) throws -> CancellablePasswordText {
-        let mPassword = masterPassword.getHashedPassword(keychainService: keychainService)
+        let mPassword = masterPassword.getHashedPassword()
         switch mPassword {
         case .cancelled:
             return .cancelled
         case .value(let val):
             guard let val = val else { return .value(nil) }
-            return .value(try getPassword(hashedMasterPassword: val, keychainService: keychainService))
+            return .value(try getPassword(hashedMasterPassword: val))
         }
     }
 
-    func getPassword(hashedMasterPassword: String, keychainService: String) throws -> String {
-        let encryptedPassword = try! passwordKeychainItem(keychainService: keychainService).readPassword()
+    func getPassword(hashedMasterPassword: String) throws -> String {
+        let encryptedPassword = try! passwordKeychainItem().readPassword()
         let key = SymmetricKey(data: Data(base64Encoded: hashedMasterPassword)!)
         let sealBox = try! AES.GCM.SealedBox(combined: Data(base64Encoded: encryptedPassword)!)
         let textData = try AES.GCM.open(sealBox, using: key)
         return String(data: textData, encoding: .utf8)!
     }
 
-    func deletePassword(keychainService: String) throws {
-        try passwordKeychainItem(keychainService: keychainService).deletePassword()
+    func deletePassword() throws {
+        try passwordKeychainItem().deletePassword()
     }
 }
 
@@ -118,6 +141,10 @@ extension PasswordItem: Codable {
 struct MasterPassword: Identifiable, Equatable, Hashable {
 
     private static var cachedMasterPassword: CachedMasterPassword?
+    
+    static var keychainServiceUserInfoKey: CodingUserInfoKey {
+        return CodingUserInfoKey(rawValue: "masterPasswordKeychainService")!
+    }
 
     private static func getCachedPassword(forMasterPassword masterPassword: MasterPassword) -> String? {
         guard let cachedMasterPassword = cachedMasterPassword else {
@@ -143,39 +170,50 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
         case noSave
     }
 
-    init(name: String, securityLevel: SecurityLevel, doubleHashedPassword: String) {
+    init(name: String, doubleHashedPassword: String, keychainService: String, securityLevel: SecurityLevel = .protectedSave) {
         self.name = name
-        self.securityLevel = securityLevel
         self.doubleHashedPassword = doubleHashedPassword
+        self.keychainService = keychainService
+        self.securityLevel = securityLevel
+        self.passwordIsSaved = isPasswordSaved()
     }
 
-    init(name: String, password: String, securityLevel: SecurityLevel) {
+    init(name: String, password: String, keychainService: String, securityLevel: SecurityLevel = .protectedSave) {
         let doubleHashed = MasterPassword.doubleHashPassword(password)
-        self.init(name: name, securityLevel: securityLevel, doubleHashedPassword: doubleHashed)
+        self.init(name: name, doubleHashedPassword: doubleHashed, keychainService: keychainService, securityLevel: securityLevel)
+    }
+    
+    init(from decoder: Decoder) throws {
+        keychainService = decoder.userInfo[MasterPassword.keychainServiceUserInfoKey] as! String
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        doubleHashedPassword = try container.decode(String.self, forKey: .doubleHashedPassword)
+        securityLevel = SecurityLevel(rawValue: try container.decode(String.self, forKey: .securityLevel)) ?? .protectedSave
+        self.passwordIsSaved = isPasswordSaved()
     }
 
     var id: String { name }
     let name: String
     let securityLevel: SecurityLevel
     let doubleHashedPassword: String
+    let keychainService: String
+    var passwordIsSaved: Bool = false
 
-    private func passwordKeychainItem(keychainService: String) -> PassngerKeychainItem {
+    private func passwordKeychainItem() -> PassngerKeychainItem {
         PassngerKeychainItem(name: name, type: .master, passcodeProtected: securityLevel == .protectedSave, keychainService: keychainService)
-        }
+    }
 
     /// Master Passwords may not have the password saved in the keychain if was created on another device.
     /// If this function returns nil, then it is up to the UI to get the master password from the user.
-    func getHashedPassword(keychainService: String) -> CancellablePasswordText {
-        if let inMemoryHashedPassword = MasterPassword.getCachedPassword(forMasterPassword: self), securityLevel != .noSave{
+    func getHashedPassword() -> CancellablePasswordText {
+        if let inMemoryHashedPassword = MasterPassword.getCachedPassword(forMasterPassword: self) {
             return .value(inMemoryHashedPassword)
         }
         let hashedPassword: CancellablePasswordText
         do {
-            let password = try passwordKeychainItem(keychainService: keychainService).readPassword()
+            let password = try passwordKeychainItem().readPassword()
             hashedPassword = .value(password)
-            if securityLevel != .noSave {
-                MasterPassword.cachedMasterPassword = CachedMasterPassword(masterPassword: self, hashedPassword: password)
-            }
+            MasterPassword.cachedMasterPassword = CachedMasterPassword(masterPassword: self, hashedPassword: password)
         } catch KeychainPasswordItem.KeychainError.noPassword {
             hashedPassword = .value(nil)
         } catch KeychainPasswordItem.KeychainError.cancelled {
@@ -188,27 +226,30 @@ struct MasterPassword: Identifiable, Equatable, Hashable {
         return hashedPassword
     }
 
-    mutating func savePassword(_ password: String, keychainService: String) throws {
+    mutating func savePassword(_ password: String) throws {
         let doubleHashedPassword = MasterPassword.doubleHashPassword(password)
         if doubleHashedPassword != self.doubleHashedPassword {
             throw MasterPasswordError.PassowordDoesNotMatch
         }
         let hashedPassword = MasterPassword.hashPassword(password)
-        if securityLevel != .noSave {
-            MasterPassword.cachedMasterPassword = CachedMasterPassword(masterPassword: self, hashedPassword: hashedPassword)
-        }
-        if (securityLevel != .noSave) {
-            do {
-                try passwordKeychainItem(keychainService: keychainService).savePassword(hashedPassword)
-            } catch _ {
-                // Device probably doesn't have a passcode, which means the user will have
-                // to enter their master password every time
-            }
+        MasterPassword.cachedMasterPassword = CachedMasterPassword(masterPassword: self, hashedPassword: hashedPassword)
+        do {
+            try passwordKeychainItem().savePassword(hashedPassword)
+            self.passwordIsSaved = true
+        } catch _ {
+            // Device probably doesn't have a passcode, which means the user will have
+            // to enter their master password every time
         }
     }
-
-    mutating func deletePassword(keychainService: String) throws {
-        try passwordKeychainItem(keychainService: keychainService).deletePassword()
+    
+    private func isPasswordSaved() -> Bool {
+        return (try? passwordKeychainItem().isPasswordSaved()) ?? false
+    }
+    
+    mutating func deletePassword() throws {
+        MasterPassword.cachedMasterPassword = nil
+        try passwordKeychainItem().deletePassword()
+        self.passwordIsSaved = false
         if let _ = MasterPassword.getCachedPassword(forMasterPassword: self) {
             MasterPassword.cachedMasterPassword = nil
         }

@@ -48,7 +48,11 @@ struct PassngerKeychainItem {
     func savePassword(_ password: String) throws {
         try keychainPasswordItem.savePassword(password)
     }
-
+    
+    func isPasswordSaved() throws -> Bool {
+        return try keychainPasswordItem.exists()
+    }
+    
     func deletePassword() throws {
         try keychainPasswordItem.deleteItem()
     }

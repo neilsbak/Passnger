@@ -34,7 +34,7 @@ struct GetMasterPasswordView: View {
                     .disableAutocorrection(true)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .validatedField(errorText: passwordError)
-                Toggle("Save on device", isOn: $saveOnDevice)
+                Toggle("Remember on this device", isOn: $saveOnDevice)
             }
         }.frame(width: 300, height: 140)
     }

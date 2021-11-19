@@ -100,7 +100,7 @@ extension View {
     // unless password text for a master password is requested
     func masterPasswordAlert(masterPassword: MasterPassword?, isPresented: Binding<Bool>, onGotPassword: @escaping (MasterPassword, String, Bool) -> Void) -> some View {
         let submitTitle = "Submit"
-        let submitAndSaveTitle = "Submit and Save to Device"
+        let submitAndSaveTitle = "Submit and remember on device"
         return self.alert(isPresented: isPresented, TextAlert(title: "Enter Master Password", placeholder: masterPassword?.name ?? "", isSecure: true, accept: [submitTitle, submitAndSaveTitle]) { buttonTitle, passwordText in
                 guard let passwordText = passwordText else {
                     return false

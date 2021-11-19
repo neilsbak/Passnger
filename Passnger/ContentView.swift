@@ -26,7 +26,7 @@ struct ContentView: View {
                 if model.passwordItems.count == 0 && self.model.masterPasswords.count == 0 {
                     IntroSetupView() { masterPasswordFormModel in
                         let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, keychainService: model.keychainService)
-                        self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
+                        self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password, saveOnDevice: masterPasswordFormModel.saveOnDevice)
                     }
                 } else if model.passwordItems.count == 0 {
                     VStack {
@@ -61,9 +61,7 @@ struct ContentView: View {
             }
             .masterPasswordAlert(masterPassword: self.passwordItemWithoutMasterPassword?.masterPassword, isPresented: $showGetMasterPassword) { masterPassword, passwordText, saveMasterPassword in
                 let hashedPassword = MasterPassword.hashPassword(passwordText)
-                if (saveMasterPassword) {
-                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
-                }
+                self.model.addMasterPassword(masterPassword, passwordText: passwordText, saveOnDevice: saveMasterPassword)
                 UIPasteboard.general.string = try! self.passwordItemWithoutMasterPassword?.getPassword(hashedMasterPassword: hashedPassword)
                 self.passwordItemWithoutMasterPassword = nil
                 self.showCopiedNotifier()
@@ -106,6 +104,9 @@ struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             ContentView(model: Model.testModel())
+        }
+        NavigationView {
+            ContentView(model: Model(keychainService: "emptyService"))
         }
     }
 }

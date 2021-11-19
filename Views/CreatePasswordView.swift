@@ -67,9 +67,7 @@ struct CreatePasswordView: View {
                 includePadding: false
             )}
         .getMasterPassword(masterPassword: self.formModel.selectedMasterPassword, isPresented: self.$showGetMasterPassword) { (masterPassword, passwordText, saveMasterPassword) in
-                if (saveMasterPassword) {
-                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
-                }
+                self.model.addMasterPassword(masterPassword, passwordText: passwordText, saveOnDevice: saveMasterPassword)
             let passwordItem = PasswordItem(userName: self.formModel.username, masterPassword: self.formModel.selectedMasterPassword!, url: self.formModel.websiteUrl, resourceDescription: self.formModel.websiteName, passwordScheme: try! self.formModel.passwordScheme(), keychainService: model.keychainService)
                 self.onSave(passwordItem, MasterPassword.hashPassword(passwordText)) { success in
                     self.onSaveComplete?()

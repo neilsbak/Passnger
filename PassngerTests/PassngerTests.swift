@@ -32,7 +32,7 @@ class PassngerTests: XCTestCase {
     }
 
     func getMasterPassword() -> MasterPassword {
-        return MasterPassword(name: "TestPassword", password: PassngerTests.masterPassword, keychainService: model.keychainService)
+        return MasterPassword(name: "TestPassword", password: PassngerTests.masterPassword, keychainService: model.keychainService, securityLevel: .save)
     }
 
     func getPasswordItem() -> PasswordItem {
@@ -42,7 +42,7 @@ class PassngerTests: XCTestCase {
     }
 
     func getMasterPassword2() -> MasterPassword {
-        return MasterPassword(name: "TestPassword2", password: PassngerTests.masterPassword, keychainService: model.keychainService)
+        return MasterPassword(name: "TestPassword2", password: PassngerTests.masterPassword, keychainService: model.keychainService, securityLevel: .save)
     }
 
     func getPasswordItem2() -> PasswordItem {
@@ -110,9 +110,9 @@ class PassngerTests: XCTestCase {
     func testAddMasterPassword() throws {
         let masterPassword = getMasterPassword()
         let masterPassword2 = getMasterPassword2()
-        model.addMasterPassword(masterPassword, passwordText: PassngerTests.masterPassword)
+        model.addMasterPassword(masterPassword, passwordText: PassngerTests.masterPassword, saveOnDevice: true)
         XCTAssert(model.masterPasswords[0].name == "TestPassword")
-        model.addMasterPassword(masterPassword2, passwordText: PassngerTests.masterPassword)
+        model.addMasterPassword(masterPassword2, passwordText: PassngerTests.masterPassword, saveOnDevice: true)
         XCTAssert(model.masterPasswords[0].name == "TestPassword" && model.masterPasswords[1].name == "TestPassword2" && model.masterPasswords.count == 2)
         model.saveModel()
         XCTAssert(model.masterPasswords[0].name == "TestPassword")
@@ -123,8 +123,8 @@ class PassngerTests: XCTestCase {
     func testRemoveMasterPassword() throws {
         let masterPassword = getMasterPassword()
         let masterPassword2 = getMasterPassword2()
-        model.addMasterPassword(masterPassword, passwordText: PassngerTests.masterPassword)
-        model.addMasterPassword(masterPassword2, passwordText: PassngerTests.masterPassword)
+        model.addMasterPassword(masterPassword, passwordText: PassngerTests.masterPassword, saveOnDevice: true)
+        model.addMasterPassword(masterPassword2, passwordText: PassngerTests.masterPassword, saveOnDevice: true)
         model.removeMasterPassword(masterPassword2)
         XCTAssert(model.masterPasswords.count == 1 && model.masterPasswords[0].name == "TestPassword")
         model.removeMasterPassword(masterPassword)

@@ -13,7 +13,8 @@ struct MasterPasswordFormModel {
     var password: String = ""
     var confirmPassword: String = ""
     var hint: String = ""
-    var hasSubmitted = false;
+    var saveOnDevice = true
+    var hasSubmitted = false
 
     func validate() -> Bool {
         return (passwordError == nil && confirmedPasswordError == nil && hintError == nil)

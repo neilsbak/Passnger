@@ -16,7 +16,8 @@ struct ManageMasterPasswordsView: View {
     @State private var masterPasswordFormModel = MasterPasswordFormModel()
     
     private func mainBody() -> some View {
-        List(model.masterPasswords) { masterPassword in
+        List {
+        ForEach(model.masterPasswords) { masterPassword in
             HStack {
                 VStack(alignment: .leading) {
                     Text(masterPassword.name).bold()
@@ -29,7 +30,10 @@ struct ManageMasterPasswordsView: View {
                     }.buttonStyle(BorderlessButtonStyle())
                 }
             }
-        }.listStyle(.plain)
+        }.onDelete(perform: {indexSet in
+            model.removeMasterPasswords(atOffsets: indexSet)
+        })
+    }.listStyle(.plain)
     }
     
     private var sheetScaffoldView: some View {
@@ -69,7 +73,7 @@ struct ManageMasterPasswordsView: View {
         self.masterPasswordFormModel.hasSubmitted = true
         if (self.masterPasswordFormModel.validate()) {
             let masterPassword = MasterPassword(name: self.masterPasswordFormModel.hint, password: self.masterPasswordFormModel.password, keychainService: model.keychainService)
-            model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password)
+            model.addMasterPassword(masterPassword, passwordText: self.masterPasswordFormModel.password, saveOnDevice: self.masterPasswordFormModel.saveOnDevice)
             self.showCreateMasterPassword = false
         }
     }

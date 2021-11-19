@@ -27,6 +27,8 @@ struct MasterPasswordFormView: View {
                 .disableAutocorrection(true)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .validatedField(errorText: formModel.hintError)
+            Toggle("Remember your Master Password on this device", isOn: $formModel.saveOnDevice)
+
         }
     }
 

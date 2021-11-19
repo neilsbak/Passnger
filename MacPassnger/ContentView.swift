@@ -31,7 +31,7 @@ struct ContentView: View {
                     Text("Your Master Password").font(.title).padding(.top)
                     IntroSetupView() { masterPasswordFormModel in
                         let masterPassword = MasterPassword(name: masterPasswordFormModel.hint, password: masterPasswordFormModel.password, keychainService: model.keychainService)
-                        self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password)
+                        self.model.addMasterPassword(masterPassword, passwordText: masterPasswordFormModel.password, saveOnDevice: masterPasswordFormModel.saveOnDevice)
                     }
                 }
             } else if model.passwordItems.count == 0 {
@@ -71,9 +71,7 @@ struct ContentView: View {
                 masterPassword: self.toolbar.selectedPassword?.masterPassword,
                 isPresented: self.showGetMasterPassword
             ) { (masterPassword, passwordText, savePassword) in
-                if (savePassword) {
-                    self.model.addMasterPassword(masterPassword, passwordText: passwordText)
-                }
+                self.model.addMasterPassword(masterPassword, passwordText: passwordText, saveOnDevice: savePassword)
                 self.toolbar.gotHashedMasterPassword(MasterPassword.hashPassword(passwordText))
             }
         }.macSafeSheet(isPresented: self.toolbar.showInfo) {
@@ -96,6 +94,9 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(model: Model.testModel(), toolbar: ToolbarObservable(model: Model.testModel()))
+        let testModel = Model.testModel()
+        ContentView(model: testModel, toolbar: ToolbarObservable(model: testModel))
+        let emptyModel = Model(keychainService: "emptyService")
+        ContentView(model: emptyModel, toolbar: ToolbarObservable(model:  emptyModel))
     }
 }

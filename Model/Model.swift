@@ -70,13 +70,15 @@ public class Model: ObservableObject {
         }
     }
 
-    func addMasterPassword(_ masterPassword: MasterPassword, passwordText: String) {
+    func addMasterPassword(_ masterPassword: MasterPassword, passwordText: String, saveOnDevice: Bool) {
         if let index = masterPasswords.firstIndex(where: { $0.id == masterPassword.id }) {
             masterPasswords[index] = masterPassword
         } else {
             masterPasswords.append(masterPassword)
         }
-        try! masterPasswords[masterPasswords.firstIndex(of: masterPassword)!].savePassword(passwordText)
+        if (saveOnDevice) {
+            try! masterPasswords[masterPasswords.firstIndex(of: masterPassword)!].savePassword(passwordText)
+        }
         saveModel()
     }
     
@@ -143,7 +145,7 @@ public class Model: ObservableObject {
         }
     }
 
-    static func loadModel(keychainService: String =  PassngerKeychainItem.service) -> Model {
+    static func loadModel(keychainService: String = PassngerKeychainItem.service) -> Model {
         let model = Model(keychainService: keychainService)
         model.loadModel()
         return model
@@ -180,6 +182,9 @@ public class Model: ObservableObject {
             let hashedMasterPassword = MasterPassword.hashPassword(masterPasswords[p.masterPassword.name]!)
             try! p.storePasswordFromHashedMasterPassword(hashedMasterPassword)
         }
+        // manually set shownPasswordItems for previews, since combine debounce publisher
+        // won't work in a regular preview
+        model.shownPasswordItems = model.passwordItems
         return model
     }
 }

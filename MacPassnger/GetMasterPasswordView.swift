@@ -14,7 +14,7 @@ struct GetMasterPasswordView: View {
     let onGotPassword: (MasterPassword, String, Bool) -> ()
     @State private var passwordText: String = ""
     @State private var passwordError: String?
-    @State private var saveOnDevice: Bool = true
+    @State private var saveOnDevice: Bool = false
 
     var body: some View {
         SheetView(onCancel: { self.isPresented = false }, onSave: {
